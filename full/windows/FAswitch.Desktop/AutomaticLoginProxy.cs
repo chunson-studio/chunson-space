@@ -58,7 +58,7 @@ public sealed class AutomaticLoginProxy(Func<string?> systemProxy, IReadOnlyList
         if (distinct.Length > 1) throw new AccountException(AccountError.ExitUnavailable, "检测到多个正在运行的代理软件。请只保留本次要用的一个，再点重试；不会自动切换出口。");
         throw new AccountException(AccountError.ExitUnavailable, authentication
             ? "当前代理端口需要密码，暂不能自动登录。请在代理软件提供无需密码的本地端口后重试；不会直连。"
-            : "没有找到可用的本地代理入口。请打开 FlClash 或 Clash Verge 并连接节点，再点重试。TUN 可以保持开启，无需开启 Windows 系统代理；不会直连。");
+            : "没有找到可用的本地代理入口。请打开 " + string.Join(" 或 ", configurations.Select(item => item.Client)) + " 并连接节点，再点重试。TUN 可以保持开启，但需保留主 HTTP / mixed 端口；不会直连。");
     }
 
     private static string RequireProxy(string value)

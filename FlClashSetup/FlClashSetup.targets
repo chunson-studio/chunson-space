@@ -1,0 +1,7 @@
+<Project>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)FlClashSetupService.cs" Link="Setup/FlClashSetupService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FlClashSetupWindow.cs" Link="Setup/FlClashSetupWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FlClashSetupChecks.cs" Link="Verification/FlClashSetupChecks.cs" />
+  </ItemGroup>
+</Project>

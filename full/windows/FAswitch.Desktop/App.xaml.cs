@@ -44,6 +44,12 @@ public partial class App : System.Windows.Application
                 instance = new SingleInstanceLease();
                 if (!instance.IsPrimary) { instance.RequestActivation(); instance.Dispose(); Shutdown(); return; }
             }
+            if (workspace is { IsFixture: false })
+            {
+                ShutdownMode = ShutdownMode.OnExplicitShutdown;
+                if (!await Chunson.Setup.FlClashSetupWindow.EnsureAsync(async token => { await workspace.Accounts!.ResolveLoginProxyAsync(token); }, stopped.Token))
+                { instance?.Dispose(); Shutdown(); return; }
+            }
             var model = new ShellViewModel(workspace);
             MainWindow = new MainWindow { DataContext = model };
             if (workspace?.Ownership is not null)

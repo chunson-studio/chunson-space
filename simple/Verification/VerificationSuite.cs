@@ -23,6 +23,7 @@ internal static class VerificationSuite
         await NetworkChecks.RunAsync(Path.Combine(output, "network-fixtures"), Check);
         RegionChecks.Run(Check);
         Chunson.Widgets.ClockLauncherChecks.Run(Check);
+        await Chunson.Setup.FlClashSetupChecks.RunAsync(Path.Combine(output, "flclash-setup"), Check);
         await CheckCoordinatorAsync(Check);
 
         var trace = new BindingErrors();

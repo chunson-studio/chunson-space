@@ -45,11 +45,18 @@ public partial class App : Application
         }
         var preview = e.Args is ["--preview"];
         if (e.Args.Length > 0 && !preview) { Shutdown(2); return; }
+        if (!preview)
+        {
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            if (!await Chunson.Setup.FlClashSetupWindow.EnsureAsync(async token => { await new FlClashNetwork().ResolveAsync(token); }))
+            { Shutdown(); return; }
+        }
         var model = preview ? LoginViewModel.Preview() : new LoginViewModel(
             new EnvironmentCoordinator(new FlClashNetwork(), new EgressProbe(), new SystemTimezone(), new SystemRegion()),
             new DedicatedBrowser(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ChunsonLogin")),
             BrowserLocator.Find());
         MainWindow = new MainWindow(model);
+        ShutdownMode = ShutdownMode.OnMainWindowClose;
         MainWindow.Show();
         if (!preview) model.ShowClock();
     }

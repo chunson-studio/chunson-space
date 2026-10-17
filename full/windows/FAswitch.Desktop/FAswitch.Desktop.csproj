@@ -30,4 +30,6 @@
     <Content Include="../ThirdParty/Mihomo/**" Link="ThirdParty/Mihomo/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Import Project="../../../taskbar-clock/Clock.targets" />
+  <PropertyGroup><Version>1.4.0</Version></PropertyGroup>
+  <Import Project="../../../FlClashSetup/FlClashSetup.targets" />
 </Project>

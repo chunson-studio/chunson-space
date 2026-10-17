@@ -53,6 +53,7 @@ internal static class StorageUiVerification
             if (!passed) throw new InvalidOperationException("Storage UI assertion failed: " + name);
         }
         void Flush() => layout.Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+        await Chunson.Setup.FlClashSetupChecks.RunAsync(Path.Combine(directory, "flclash-setup"), (passed, name) => Check(name, passed));
         var fixtureIcon = Path.Combine(root, "native-taskbar.ico"); File.WriteAllBytes(fixtureIcon, BrandIcon.CreateIco());
         Check("native taskbar identity and icon properties round trip on the isolated fixture window", new NativeWindowTaskbarProperties().Apply(
             new WindowInteropHelper(window).EnsureHandle(), new("Chunson.Space.IconFixture." + Guid.NewGuid().ToString("N"), fixtureIcon + ",0", "\"" + Environment.ProcessPath + "\"", "隔离图标检查")));
