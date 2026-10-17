@@ -96,13 +96,13 @@
     },
     {
       "file": "FlClashSetup/FlClashSetupWindow.cs",
-      "sha256": "ff359e359c67d693e6ad109f6cdf6b555871273e81a68d1e4a20b8e7b1226820",
-      "bytes": 5527
+      "sha256": "2d225ae7c050448ad9706fec3c8e0eaee0260f26e5a89e60d5d089618b18cfd9",
+      "bytes": 5524
     },
     {
       "file": "FlClashSetup/README.md",
-      "sha256": "24134de1d63631fe3445e9a527547676404746a826b3b52fb8790e080033e9eb",
-      "bytes": 1669
+      "sha256": "cd0652975314b4d2b68efb2d2c19208a85624019d5dcdac582dac86a2bb9a48b",
+      "bytes": 1628
     },
     {
       "file": "full/scripts/proxy/FlClash-AllSubscriptions.ps1",

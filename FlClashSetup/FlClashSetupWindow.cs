@@ -27,13 +27,13 @@ internal sealed class FlClashSetupWindow : Window
         FontFamily = new FontFamily("Microsoft YaHei UI"); FontSize = 15;
         var stack = new StackPanel { Margin = new Thickness(28) };
         stack.Children.Add(new TextBlock { Text = "先准备好 FlClash", FontSize = 27, FontWeight = FontWeights.SemiBold });
-        stack.Children.Add(new TextBlock { Text = "完整版和简洁版均需要 FlClash。", Margin = new Thickness(0, 12, 0, 8) });
+        stack.Children.Add(new TextBlock { Text = "本工具目前只适配 FlClash。", Margin = new Thickness(0, 12, 0, 8) });
         stack.Children.Add(new TextBlock { Text = "1. 安装并打开 FlClash\n2. 在 FlClash 中添加自己的订阅，选择节点\n3. 保留主 HTTP / mixed 端口，然后检查并继续\n\n支持只开 TUN，但仍需要主端口。安装程序不包含订阅。", TextWrapping = TextWrapping.Wrap, LineHeight = 25 });
         stack.Children.Add(status);
         var actions = new WrapPanel();
         foreach (var button in new[] { install, open, choose, check })
         {
-            // Isolate from either edition's application-level button templates.
+            // Keep setup controls independent of the main application's templates.
             button.Style = new Style(typeof(Button));
             button.Padding = new Thickness(13, 9, 13, 9); button.Margin = new Thickness(0, 0, 8, 9);
             actions.Children.Add(button);
