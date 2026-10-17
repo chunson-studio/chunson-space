@@ -1,7 +1,7 @@
 {
   "passed": true,
   "license": "MIT",
-  "files": 302,
+  "files": 305,
   "sanitizedFiles": [
     "full/windows/FAswitch.Accounts.Checks/DefaultLoginBrowserChecks.cs",
     "full/windows/FAswitch.Accounts.Checks/LocalAccountImportChecks.cs",
@@ -38,6 +38,21 @@
       "file": "build.ps1",
       "sha256": "8e40fe0f69bc140f2875570f1f20a0066804af639674fd62355f3eed980f7cf2",
       "bytes": 5388
+    },
+    {
+      "file": "docs/assets/download-full.svg",
+      "sha256": "859ceff56a10156cc44ad8724fcc0be5dceb97d5dd9b0396008006a35af981e1",
+      "bytes": 749
+    },
+    {
+      "file": "docs/assets/download-simple.svg",
+      "sha256": "cc02f53a0b784e35e73de8916a22db6a3b1997b809d112ccdad48f5700c79e12",
+      "bytes": 792
+    },
+    {
+      "file": "docs/assets/readme-cover.svg",
+      "sha256": "666677fca8ea94f6420257217c768335fc1fedc046538e8e648ae75fe5272df5",
+      "bytes": 2555
     },
     {
       "file": "full/scripts/proxy/FlClash-AllSubscriptions.ps1",
@@ -1396,8 +1411,8 @@
     },
     {
       "file": "README.md",
-      "sha256": "1160db700a65e680e860df42bc04365470db580752c5b1c36064a968116c55a9",
-      "bytes": 3211
+      "sha256": "ae2ac15eaf5bd4e67b41619cb67e4ad607c474aa0cca20b507f44f56efbd2cfa",
+      "bytes": 8040
     },
     {
       "file": "simple/App.xaml",

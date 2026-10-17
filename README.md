@@ -1,39 +1,149 @@
-# Chunson Space
+<p align="center">
+  <img src="docs/assets/readme-cover.svg" alt="Chunson Space · 椿生：账号管理、英文浏览器、地区与时区同步" width="100%">
+</p>
 
-Windows 桌面工具，包含完整版、简洁版和共享的北京时间小组件。
+<p align="center">Windows 10 / 11 · 64 位 · 中文界面 · MIT 开源</p>
 
-| 版本 | 内容 |
-| --- | --- |
-| `full` 完整版 | 自有账号档案、独立浏览器、代理与 IP 管理、模型测试、受管 Codex 分身 |
-| `simple` 简洁版 | FlClash 出口检测、Windows 国家/地区与时区同步、英文 Chrome/Edge 登录浏览器 |
-| `taskbar-clock` | 两版内置的北京时间任务栏小组件，固定 UTC+8，与系统时区无关 |
+<p align="center">
+  <a href="https://github.com/chunson-studio/chunson-space/releases/latest/download/Chunson-Full-Windows-x64.zip"><img src="docs/assets/download-full.svg" alt="下载完整版 ZIP" width="300"></a>
+  &nbsp;
+  <a href="https://github.com/chunson-studio/chunson-space/releases/latest/download/Chunson-Simple-Windows-x64.zip"><img src="docs/assets/download-simple.svg" alt="下载简洁版 ZIP" width="300"></a>
+</p>
 
-两个版本都提供“同步地区与时区”。同步需要主动点击；保留 Windows 显示语言、地区格式和输入法，退出不恢复旧时区。小组件随软件启动，两版同时打开只保留一个；右键可以退出，软件里的“北京时间”按钮可以重新打开。关闭主软件不会关闭时钟。
+<p align="center">
+  <a href="https://github.com/chunson-studio/chunson-space/releases/latest">全部下载与更新说明</a> ·
+  <a href="#版本怎么选">版本怎么选</a> ·
+  <a href="#快速开始">快速开始</a> ·
+  <a href="#从源码构建">源码构建</a>
+</p>
 
-完整版首页的“导入本机账号”可复制本机 Codex 已保存的 ChatGPT 授权，无需再次登录。新档案默认跟随本机网络和时区；重复导入只更新同账号授权，保留已有独立 IP 与时区。导入后可自行开始模型测试；导入本身不会发送测试请求，也不修改本机 Codex 的授权或运行状态。
+## 版本怎么选
 
-简洁版使用本机 Chrome 或 Edge，独立保存英文浏览器资料，打开 ChatGPT 与 `https://ippure.com/claude`。FlClash 仅开 TUN 也支持，但主 HTTP/mixed 入口须开启。相同入口不保证所有域名被 FlClash 分配到相同出口。
+**需要管理多个账号、比较模型输出，选完整版。只想打开英文登录浏览器、同步地区与时区，选简洁版。**
 
-## 运行与构建
+| | 完整版 | 简洁版 |
+| :--- | :--- | :--- |
+| 主要用途 | 账号管理、独立 IP、模型测试 | 英文登录浏览器、环境同步 |
+| 账号管理 | 保存账号档案，支持导入本机 Codex 已有授权 | 不管理账号库，在浏览器里直接登录 |
+| 网络方式 | 跟随 FlClash，或为账号配置独立 IP 与端口 | 跟随 FlClash 当前网络 |
+| 英文浏览器 | 不同账号分别保存浏览器资料 | 使用一套独立的浏览器资料 |
+| 地区与时区 | 检测出口，手动同步 Windows 地区与时区 | 同样支持 |
+| 模型测试 | Ciallo、鹈鹕绘图、换题绘图、检查与改进 | 不包含 |
+| Codex 分身 | 管理一个受管分身，保留本体独立 | 不包含 |
+| 北京时间小组件 | 内置 | 内置 |
+| **下载** | **[下载完整版 ZIP](https://github.com/chunson-studio/chunson-space/releases/latest/download/Chunson-Full-Windows-x64.zip)** | **[下载简洁版 ZIP](https://github.com/chunson-studio/chunson-space/releases/latest/download/Chunson-Simple-Windows-x64.zip)** |
 
-运行发布包：Windows 10/11 x64，解压完整目录后打开 EXE。包内包含 .NET 运行时；时钟使用 Windows 自带 .NET Framework/WPF。专用浏览器仍需本机已有 Chrome 或 Edge，网络功能需要 FlClash。
+## 完整版 · 账号与测试工作台
 
-从源码构建：Windows x64、.NET 10 SDK、Windows PowerShell。根目录执行：
+把账号资料、浏览器和测试结果放在一起管理。
+
+- **账号档案**：保存授权与配置；首页“导入本机账号”可读取本机 Codex 已保存的 ChatGPT 授权，无需重新登录。
+- **独立网络**：筛选和管理订阅 IP，在“跟随本机”和“独立 IP”之间切换，也可更换已分配的 IP。
+- **账号浏览器**：分别保存浏览器资料；独立模式使用对应出口与时区，跟随模式沿用本机环境。
+- **模型测试**：Ciallo 回复对比、鹈鹕静态 SVG / HTML 动画、换题绘图，以及“生成 → 检查 → 修改”。
+- **结果与缓存**：查看历史回复、作品、耗时和返回的缓存 token 数据。测试可收起到后台，账号之间并行，同一账号内依次执行。
+- **受管分身**：管理一个 Codex 分身，在其中切换账号；本机 Codex 保持独立，分身不继承本体 Skills、MCP 或工具配置。
+
+导入本机账号只复制已有授权，不修改本体的授权或运行状态，也不会自动开始测试。重复导入同一账号时更新授权，保留已有网络配置。
+
+## 简洁版 · 英文登录浏览器
+
+保留日常登录需要的几个动作，打开就能看懂。
+
+1. **检查网络**：识别 FlClash 当前入口，检测出口 IP、国家/地区和时区。
+2. **同步环境**：点击“同步地区与时区”，让 Windows 对应当前出口。
+3. **打开浏览器**：使用本机 Chrome 或 Edge，单独保存英文浏览器资料。
+4. **进入网站**：同时打开 [ChatGPT](https://chatgpt.com/) 和 [IPPure Claude 页面](https://ippure.com/claude)。
+
+只有 Edge 也可以使用，无需专门安装 Chrome。这里使用的是本机浏览器的独立资料目录。
+
+## 两版共有 · 北京时间小组件
+
+任务栏上的时间卡片，固定显示 **北京时间 UTC+8**。
+
+- 随软件启动；两版同时打开，也只保留一个小组件。
+- 主软件关闭后，时钟继续显示；右键可退出。
+- 点击软件里的“北京时间”按钮，可以重新打开。
+- **只显示时间，不改变 Windows 系统时区。**
+
+## 快速开始
+
+### 1. 下载并完整解压
+
+选择上方任一版本，解压整个 ZIP 文件，再打开对应程序：
+
+| 版本 | 启动文件 |
+| :--- | :--- |
+| 完整版 | `ChunsonSwitch.exe` |
+| 简洁版 | `ChunsonLogin.exe` |
+
+不要直接在压缩包里运行，也不要只取出一个 EXE。发布包已包含 .NET 运行时，普通使用无需安装开发工具。
+
+### 2. 准备浏览器与网络
+
+- 系统：**Windows 10 / 11 x64**。
+- 浏览器：本机已安装 **Chrome 或 Edge**。
+- 网络：使用 **FlClash**；支持只开 TUN，但仍需开启主 HTTP / mixed 入口，供工具和独立浏览器连接。
+
+### 3. 检查后按需同步
+
+先查看出口和环境状态。需要修改时，主动点击“同步地区与时区”；之后再打开浏览器，或在完整版中导入、添加账号。
+
+同步保留 Windows 显示语言、地区格式和输入法；退出软件不会恢复旧时区。FlClash 的分流规则仍会影响各网站的实际出口。
+
+## 常见问题
+
+<details>
+<summary><strong>数据保存在哪里？</strong></summary>
+
+账号授权、浏览器资料、订阅和个人配置保存在本机用户目录，不包含在本仓库和公开发布包中。时钟位置保存在 `%LOCALAPPDATA%/ChunsonWidgets`。请不要将自己的运行资料提交到公开仓库。
+
+</details>
+
+<details>
+<summary><strong>缓存 token 能代表“智力”吗？</strong></summary>
+
+不能。测试用于观察回复、绘图和修改能力的差异，不提供整体智力结论。缓存 token 是服务返回的使用数据，不作为能力分数；缺少数据与数值为 0 会分开显示。
+
+</details>
+
+<details>
+<summary><strong>同步环境后，网站一定能登录成功吗？</strong></summary>
+
+环境同步、网络连通和网站登录是不同的环节。本工具不保证网站登录成功，也不据此判断账号是否受到风控。
+
+</details>
+
+## 从源码构建
+
+需要 **Windows x64、.NET 10 SDK、Windows PowerShell**。在仓库根目录执行：
 
 ```powershell
 ./build.ps1 -Edition All -Verify -Package -Output ./out/release
 ```
 
-`-Edition Full` 或 `Simple` 可单独构建。`-DotnetPath` 可指定 SDK。首次构建从 NuGet 还原固定版本依赖；完整版从 Mihomo 官方发布地址下载固定版本并核对 SHA-256。构建只操作输出目录，不启动账号登录、修改代理或同步系统设置。离线检查包含界面渲染；测试窗口不占据桌面、不抢焦点。
+使用 `-Edition Full` 或 `-Edition Simple` 可单独构建；`-DotnetPath` 可指定 SDK。
 
-## 数据与边界
+```text
+chunson-space/
+├─ full/             完整版：账号、网络、测试与分身
+├─ simple/           简洁版：网络检测与英文浏览器
+├─ taskbar-clock/    两版共用的北京时间小组件
+└─ build.ps1         构建、离线验证与打包入口
+```
 
-账号授权、浏览器资料、订阅和个人配置只在本机用户目录保存，不包含在这个仓库。不要把自己的运行目录提交到 GitHub。北京时间位置保存在 `%LOCALAPPDATA%/ChunsonWidgets`。
-
-本工具不保证网站登录一定成功，也不判断账号风控状态。账号请求使用用户主动配置和授权的网络；系统同步、小组件显示、网站实际登录是不同的验收项目。
+首次构建从 NuGet 还原固定版本依赖；完整版从 Mihomo 官方发布地址下载固定版本并校验 SHA-256。构建不会启动账号登录、修改代理或同步系统设置；离线界面验证窗口不占据桌面、不抢焦点。离线验证不等于真实登录、模型请求或系统设置修改已通过验收。
 
 ## 许可
 
-原创部分采用 [MIT License](LICENSE)：允许使用、修改、分发及商用，须保留版权声明和许可文本。
+原创部分采用 **[MIT License](LICENSE)**，允许使用、修改、分发及商用，须保留版权声明和许可文本。
 
-第三方组件遵循其原许可证。Mihomo 是独立外部进程，适用 GPL-3.0；其版权、源码地址和许可证位于 `full/windows/ThirdParty/Mihomo`。YamlDotNet、GeoTimeZone、ModelTrace 及字体的声明分别保留在相应 `ThirdParty` 目录；本项目的 MIT 许可不替代它们的许可证。
+第三方组件遵循各自许可证。Mihomo 作为独立外部进程使用，适用 GPL-3.0，详情见 [Mihomo 声明](full/windows/ThirdParty/Mihomo)。YamlDotNet、GeoTimeZone、ModelTrace 及字体的声明保留在对应 `ThirdParty` 目录；本项目的 MIT 许可不替代它们的许可证。
+
+---
+
+<p align="center">
+  <strong>Chunson Space · 椿生</strong><br>
+  <a href="https://github.com/chunson-studio/chunson-space/releases/latest">下载软件</a> ·
+  <a href="https://github.com/chunson-studio/chunson-space/issues">反馈问题</a>
+</p>
