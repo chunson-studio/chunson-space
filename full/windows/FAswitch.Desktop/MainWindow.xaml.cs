@@ -9,6 +9,12 @@ namespace FAswitch.Desktop;
 
 public partial class MainWindow : Window
 {
+    private async void CopyErrorReport(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button || button.Tag is not string report || string.IsNullOrWhiteSpace(report)) return;
+        if (SupportReport.TryCopy(report, Clipboard.SetText)) { button.Content = "已复制"; await Task.Delay(1800); button.Content = "复制错误信息"; }
+        else MessageBox.Show(this, "剪贴板暂时不可用。可在此窗口按 Ctrl+C 复制后提交。\n\n" + report, "错误诊断", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
     private void DiagnosticResultChanged(object sender, TextChangedEventArgs e)
     {
         if (sender is TextBox result) result.ScrollToHome();

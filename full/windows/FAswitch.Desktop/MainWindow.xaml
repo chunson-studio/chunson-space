@@ -776,6 +776,8 @@
     </Grid>
     <Border Grid.Row="2" Grid.Column="1" Visibility="{Binding ShowOperationFeedback,Converter={StaticResource BoolVisibility}}" Background="{DynamicResource InfoSurfaceBrush}" BorderBrush="{Binding FeedbackAccent}" BorderThickness="3,0,0,0" Margin="20,0,20,10">
       <Grid>
+        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <Button x:Name="FeedbackCopyErrorButton" Grid.Column="1" Content="复制错误信息" Click="CopyErrorReport" Tag="{Binding FeedbackErrorReport}" Visibility="{Binding IsError,Converter={StaticResource BoolVisibility}}" FontSize="12" Padding="8,4" Margin="10,0,0,0" VerticalAlignment="Top" ToolTip="复制脱敏诊断后，可粘贴给维护者排查"/>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
           <StackPanel Visibility="{Binding IsExpandedFeedback,Converter={StaticResource BoolVisibility}}">
             <TextBlock Text="{Binding FeedbackTitle}" FontSize="12" FontWeight="SemiBold" />
@@ -1168,6 +1170,7 @@
               <Border x:Name="VisualTestQuickResult" Background="{DynamicResource InfoSurfaceBrush}" CornerRadius="10" Padding="12" Margin="0,0,0,10"><StackPanel>
                 <DockPanel><Button DockPanel.Dock="Right" Content="打开作品对比 ↗" Command="{Binding OpenGalleryCommand}" Padding="8,4" Margin="8,0,0,0"/><TextBlock Text="{Binding Summary}" FontWeight="SemiBold" VerticalAlignment="Center"/></DockPanel>
                 <TextBlock Text="{Binding Status}" TextWrapping="Wrap" MaxHeight="54" FontSize="12" Margin="0,5,0,0"/>
+                <Button x:Name="VisualTestCopyErrorButton" Content="复制错误信息" Click="CopyErrorReport" Tag="{Binding ErrorReport}" IsEnabled="{Binding CanEdit}" HorizontalAlignment="Right" Padding="8,4" FontSize="12" Margin="0,6,0,0" ToolTip="复制当前结果的版本、时间、模型与错误；不包含题目、作品或授权文件"/>
                 <TextBlock x:Name="VisualTestProgressText" Text="{Binding ProgressSummary}" TextWrapping="Wrap" FontSize="12" FontWeight="SemiBold" Margin="0,8,0,0"/>
                 <ProgressBar x:Name="VisualTestReplyProgress" Minimum="0" Maximum="{Binding ExpectedReplies,Mode=OneWay}" Value="{Binding CompletedReplies,Mode=OneWay}" Height="5" Margin="0,8,0,0" Visibility="{Binding IsBusy,Converter={StaticResource BoolVisibility}}" ToolTip="按已返回的回复计数；等待模型时不估算百分比"/>
               </StackPanel></Border>
@@ -1210,7 +1213,7 @@
               <ComboBox x:Name="CialloHistoryPicker" Grid.Column="1" ItemsSource="{Binding History}" SelectedItem="{Binding SelectedHistory}" DisplayMemberPath="Label" IsEnabled="{Binding CanSelectHistory}" ToolTip="{Binding HistoryHint}" MaxDropDownHeight="280"/>
             </Grid>
           </StackPanel>
-          <DockPanel Grid.Row="1"><TextBlock x:Name="CialloProgressText" DockPanel.Dock="Top" Text="{Binding ProgressSummary}" TextWrapping="Wrap" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,10"/>
+          <DockPanel Grid.Row="1"><DockPanel DockPanel.Dock="Top" Margin="0,0,0,10"><Button x:Name="CialloCopyErrorButton" DockPanel.Dock="Right" Content="复制错误信息" Click="CopyErrorReport" Tag="{Binding ErrorReport}" IsEnabled="{Binding CanEdit}" Padding="8,4" FontSize="12" Margin="8,0,0,0"/><TextBlock x:Name="CialloProgressText" Text="{Binding ProgressSummary}" TextWrapping="Wrap" FontSize="12" FontWeight="SemiBold"/></DockPanel>
           <ScrollViewer x:Name="CialloScroll" VerticalScrollBarVisibility="Auto"><ItemsControl ItemsSource="{Binding Rows}"><ItemsControl.ItemTemplate><DataTemplate>
             <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="12" Padding="14" Margin="0,0,0,10"><StackPanel>
               <DockPanel><TextBlock Text="{Binding State}" DockPanel.Dock="Right" Foreground="{DynamicResource MutedBrush}"/><TextBlock Text="{Binding Model}" FontWeight="SemiBold" FontSize="15"/></DockPanel>

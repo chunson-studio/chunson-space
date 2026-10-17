@@ -98,6 +98,12 @@
 
 [![简洁版网络与登录环境](docs/assets/screenshot-simple.png)](docs/assets/screenshot-simple.png)
 
+## 遇到错误怎么反馈
+
+完整版的图形测试、Ciallo 测试和主界面错误提示都有 **复制错误信息**。选择失败的历史记录也能复制，无需重测。
+
+诊断包含版本、时间、测试项目、模型和错误说明；常见令牌、邮箱、路径和 IP 会隐去，不读取授权文件或浏览器资料。复制后检查内容，再粘贴到 [GitHub Issues](https://github.com/chunson-studio/chunson-space/issues) 或发给维护者。工具不会自动上传。
+
 ## 两版共有 · 北京时间小组件
 
 任务栏上的时间卡片，固定显示 **北京时间 UTC+8**。

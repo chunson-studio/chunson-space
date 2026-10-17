@@ -1564,6 +1564,7 @@ internal static class StorageUiVerification
         await AccountIpChangeVerification.RunAsync(window, Path.Combine(fixtureContainer, "account-ip-change"), Check, name => Capture(name, 1040, 670));
         await VisualTestVerification.RunAsync(window, Path.Combine(fixtureContainer, "fingerprint-batch"), Check, name => Capture(name, 1040, 670));
         await AccountFreezeVerification.RunAsync(window, Path.Combine(fixtureContainer, "account-freeze"), Check, name => Capture(name, 1040, 670));
+        await SupportReportVerification.RunAsync(window, Path.Combine(fixtureContainer, "support-report"), Check, name => Capture(name, 1040, 670));
         await ResidentialExemptionVerification.RunAsync(window, Path.Combine(fixtureContainer, "residential-exemption"), Check, name => Capture(name, 1040, 670));
         window.DataContext = model;
         File.WriteAllText(Path.Combine(directory, "ui-verification.json"), JsonSerializer.Serialize(new { passed = true, mode = "real_storage_with_offline_runtime", actualAccountOperations = false, actualProxyChanges = false, actualFirewallChanges = false, actualOriginalCodexCleanup = false, actualFingerprintRequests = false, actualNodeProbes = false, fixtureContainer, checks, renders }, new JsonSerializerOptions { WriteIndented = true }));

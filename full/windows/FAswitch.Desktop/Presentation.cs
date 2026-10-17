@@ -129,6 +129,7 @@ public sealed partial class ShellViewModel : ObservableObject
     public IdentityState IdentityState => new(Selected?.Identity, Active?.Identity, runningIdentity);
     public string Feedback => feedback;
     public string FeedbackTitle => feedbackTitle;
+    public string FeedbackErrorReport => SupportReport.Create(feedbackTitle, feedback, privateValues: [Selected?.Name]);
     public bool IsError => feedbackKind == "Error";
     public string FeedbackAccent => IsError ? "#AE493C" : "#246B55";
     public bool IsolateSessions { get => isolateSessions; set { if (Set(ref isolateSessions, value)) Raise(nameof(EnvironmentSummary)); } }
@@ -158,6 +159,7 @@ public sealed partial class ShellViewModel : ObservableObject
     private void ShowFeedback(string title, string message, string kind)
     {
         feedbackTitle = title; feedback = message; feedbackKind = kind;
+        Raise(nameof(FeedbackErrorReport));
         foreach (var name in new[] { nameof(Feedback), nameof(FeedbackTitle), nameof(IsError), nameof(FeedbackAccent), nameof(ShowOperationFeedback), nameof(IsCompactFeedback), nameof(IsExpandedFeedback), nameof(CompactFeedbackText), nameof(FeedbackNextAction), nameof(HasFeedbackNextAction) }) Raise(name);
     }
     private void UpdateItems()

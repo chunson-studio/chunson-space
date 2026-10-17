@@ -110,6 +110,8 @@ public sealed class VisualTestPanelViewModel : ObservableObject
     public string RequestDescription => $"通用请求 · high · 不设请求总超时 · 每账号 {VisualTestCatalog.Requests(Kind)} 次请求；全部 {EligibleProfiles.Count * VisualTestCatalog.Requests(Kind)} 次。" + (Profiles.Count > EligibleProfiles.Count ? $" 冻结 {Profiles.Count - EligibleProfiles.Count} 个，自动跳过。" : "");
     public bool IsSelectedFrozen => profile is not null && services?.Repository.Profiles.AreTestsFrozen(profile) == true;
     public string Status => status;
+    public string ErrorReport => SupportReport.Create(Title,
+        $"模型：{result?.Model ?? model} / high\n调用方式：{VisualTestCatalog.TransportLabel(result?.Version ?? VisualTestCatalog.Version)}\n题目：{result?.Variant ?? variant.Id}\n状态：{Summary}\n{ProgressSummary}\n错误：{result?.Message ?? status}\n显示信息：{status}", result?.Started, profile);
     public string Summary => result is null ? (busy ? "测试准备中" : "尚无结果") : $"{(result.Completed ? "已完成" : result.Cancelled ? "已取消" : busy && runRows.Any(r => r.Profile == profile && !r.IsFinished) ? "进行中" : "未完成")} · {result.Steps.Count}/{VisualTestCatalog.Requests(Kind)} 次回复 · {result.Started.ToLocalTime():MM-dd HH:mm}";
     public int CompletedReplies => elapsed.Started ? runRows.Sum(r => r.Result?.Steps.Count ?? 0) : result?.Steps.Count ?? 0;
     public int ExpectedReplies => Math.Max(1, elapsed.Started ? runRows.Count : 1) * VisualTestCatalog.Requests(Kind);
@@ -165,7 +167,7 @@ public sealed class VisualTestPanelViewModel : ObservableObject
         steps = value.Steps.Select((step, index) => new VisualTestStepViewModel(value, step, index, SetStatus)).ToArray();
         status = value.Message; Refresh();
     }
-    private void SetStatus(string value) { status = value; Raise(nameof(Status)); }
+    private void SetStatus(string value) { status = value; Raise(nameof(Status)); Raise(nameof(ErrorReport)); }
     private void RefreshProgress()
     {
         foreach (var row in runRows) row.Tick();
@@ -225,6 +227,7 @@ public sealed class VisualTestPanelViewModel : ObservableObject
     }
     private void Refresh()
     {
+        Raise(nameof(ErrorReport));
         RefreshProgress();
         foreach (var property in new[] { nameof(SelectedProfile), nameof(Steps), nameof(Result), nameof(Summary), nameof(Status), nameof(CanEdit), nameof(IsBusy), nameof(Prompt), nameof(BatchRows), nameof(HasBatchResults), nameof(History), nameof(SelectedHistory), nameof(HistoryHint), nameof(CanSelectHistory), nameof(Model), nameof(Variant), nameof(Animated), nameof(Title), nameof(IsPelican), nameof(IsVariation), nameof(RequestDescription), nameof(DurationHint) }) Raise(property);
         foreach (var command in new[] { StartCommand, StartAllCommand, CloseCommand, CancelCommand, ShowBatchCommand, OpenGalleryCommand }) command.Refresh();
