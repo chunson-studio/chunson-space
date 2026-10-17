@@ -339,7 +339,8 @@ internal static class UiVerification
             var rowPassed = FullyVisible(row, root) && FullyVisible(frame, root) && Within(row, list) && Within(frame, row)
                 && row.ActualHeight >= 40 && cells.All(cell => cell is not null && FullyVisible(cell, root) && Within(cell, frame))
                 && port is { Visibility: Visibility.Collapsed }
-                && actions.Length == 1 && actions.Single().Command == model.OpenDetailsCommand
+                && actions.Length == 2 && actions.Count(button => button.Command == model.OpenDetailsCommand) == 1
+                && actions.Count(button => button.Command == model.ToggleTestFreezeCommand && Equals(button.CommandParameter, item)) == 1
                 && actions.All(button => FullyVisible(button, root) && button.ActualHeight >= 28 && button.ActualWidth >= 30
                     && button.IsHitTestVisible && Within(button, frame) && Within(button, list)
                     && cells[3] is { } actionCell && Within(button, actionCell));
@@ -362,7 +363,7 @@ internal static class UiVerification
         return passed;
     }
 
-    private static IEnumerable<DependencyObject> VisualDescendants(DependencyObject root)
+    internal static IEnumerable<DependencyObject> VisualDescendants(DependencyObject root)
     {
         yield return root;
         for (var index = 0; index < VisualTreeHelper.GetChildrenCount(root); index++)

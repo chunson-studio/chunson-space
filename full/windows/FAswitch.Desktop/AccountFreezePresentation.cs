@@ -9,12 +9,12 @@ public sealed partial class ShellViewModel
     public string TestFreezeLabel => Selected?.TestsFrozen == true ? "解冻账号" : "冻结账号";
     private void InitializeTestFreeze()
     {
-        ToggleTestFreezeCommand = new(_ => ToggleTestFreeze(), _ => workspace is not null && Selected?.Kind == "Account" && !busy && !exitDraining);
+        ToggleTestFreezeCommand = new(value => ToggleTestFreeze(value as IdentityItem ?? Selected), value => workspace is not null && (value as IdentityItem ?? Selected)?.Kind == "Account" && !busy && !exitDraining);
     }
-    private void ToggleTestFreeze()
+    private void ToggleTestFreeze(IdentityItem? account)
     {
-        if (workspace is null || Selected?.Kind != "Account" || busy) return;
-        var name = Selected.Name;
+        if (workspace is null || account?.Kind != "Account" || busy || exitDraining) return;
+        var name = account.Name;
         try
         {
             var frozen = !workspace.Profiles.AreTestsFrozen(name);

@@ -18,7 +18,20 @@ internal static class AccountFreezeVerification
         model.OpenVisualTestsCommand.Execute(null); var oldPanel = model.VisualTests!; oldPanel.CloseCommand.Execute(null);
         model.OpenCialloCommand.Execute(null); var oldCiallo = model.Ciallo!; oldCiallo.CloseCommand.Execute(null);
         check("existing accounts are testable until explicitly frozen", !workspace.Profiles.AreTestsFrozen("A") && oldPanel.StartCommand.CanExecute(null));
-        model.ToggleTestFreezeCommand.Execute(null);
+        model.Selected = model.FilteredItems.Single(item => item.Name == "B");
+        window.UpdateLayout();
+        var list = (ListBox)window.FindName("ProfileList");
+        var accountA = model.FilteredItems.Single(item => item.Name == "A");
+        var row = (ListBoxItem)list.ItemContainerGenerator.ContainerFromItem(accountA);
+        var freezeButton = UiVerification.VisualDescendants(row).OfType<Button>().Single(button => button.Name == "RowTestFreezeButton");
+        check("freeze action is visible directly in each account row", UiVerification.FullyVisible(freezeButton, window.RenderRoot) && Equals(freezeButton.CommandParameter, accountA));
+        freezeButton.Command.Execute(freezeButton.CommandParameter);
+        window.UpdateLayout();
+        row = (ListBoxItem)list.ItemContainerGenerator.ContainerFromItem(model.Selected!);
+        check("row action freezes its own account rather than prior selection", !workspace.Profiles.AreTestsFrozen("B") && model.Selected!.Name == "A");
+        check("frozen row displays state and unfreeze action", UiVerification.VisualDescendants(row).OfType<TextBlock>().Any(text => text.Name == "RowAccountStatus" && text.Text == "已冻结")
+            && UiVerification.VisualDescendants(row).OfType<Button>().Any(button => button.Name == "RowTestFreezeButton" && Equals(button.Content, "解冻")));
+        capture("account-frozen-list");
         check("freeze persists across repository reload and shows in account list", new FileProfileStore(workspace.Root).AreTestsFrozen("A") && model.Selected!.TestsFrozen && model.Selected.SavedStateLabel == "已冻结" && model.TestFreezeLabel == "解冻账号");
         check("freeze leaves credentials and environment unchanged", File.ReadAllBytes(Path.Combine(services.Repository.AccountPath("A"), "auth.json")).SequenceEqual(auth) && workspace.Profiles.ReadEnvironment("A") == environment);
         oldPanel.StartCommand.Execute(null); oldCiallo.StartCommand.Execute(null);

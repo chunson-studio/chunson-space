@@ -16,7 +16,12 @@ public sealed class MaintenanceService(IRuntimeOperations runtime)
             return new(true, "受管分身已清理，账号库授权与配置已保留。", null, []);
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or StorageException)
-        { return new(false, "受管分身清理未完成，账号库保持保留：" + error.GetType().Name, null, [storage.ClonePaths.RecoveryRoot]); }
+        {
+            var detail = error.Message;
+            if (error is StorageException failure && failure.FilePath.Length > 0 && !detail.Contains(failure.FilePath, StringComparison.OrdinalIgnoreCase))
+                detail += " 位置：" + failure.FilePath;
+            return new(false, "受管分身清理未完成，账号库保持保留：" + detail, null, [storage.ClonePaths.RecoveryRoot]);
+        }
     }
 
     public async Task<MaintenanceResult> RestoreBackupAsync(BackupService backups, string name, CancellationToken cancellationToken = default)

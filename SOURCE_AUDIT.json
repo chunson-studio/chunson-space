@@ -1,7 +1,7 @@
 {
   "passed": true,
   "license": "MIT",
-  "files": 302,
+  "files": 305,
   "sanitizedFiles": [
     "full/windows/FAswitch.Accounts.Checks/DefaultLoginBrowserChecks.cs",
     "full/windows/FAswitch.Accounts.Checks/LocalAccountImportChecks.cs",
@@ -51,18 +51,23 @@
     },
     {
       "file": "docs/assets/screenshot-account-freeze.png",
-      "sha256": "03072316510f1d648c874e8ac2cf79a83e578a3cbd731de26e315f26a3b88c7d",
-      "bytes": 103105
+      "sha256": "3486bb51c7762c2d1043d63d8254f2117a25ee8840ce3e7ec559bc0ccd641187",
+      "bytes": 143897
+    },
+    {
+      "file": "docs/assets/screenshot-flclash-missing.png",
+      "sha256": "95832e932ba598df4b5cbaa7c0b707b031ee72d074ab219d071abfb3dc25fcac",
+      "bytes": 26902
     },
     {
       "file": "docs/assets/screenshot-full-home.png",
-      "sha256": "5de1a34bdc8436fe2e5bd003c75b3c2088efdbe476539ecb081ce0f6db317e54",
-      "bytes": 193160
+      "sha256": "d263d4eb850b86db519290537b3f2b8d7c404598e6f66f33fb9d6af9fd8968aa",
+      "bytes": 205046
     },
     {
       "file": "docs/assets/screenshot-model-tests.png",
-      "sha256": "cf33606118d4769fae9262b8591811a3adce781cb0dceb214ae5617c0db134c6",
-      "bytes": 97983
+      "sha256": "4d87df2d65de5b5e9927bfee75e524d4de3bc02335ea0ee244b3b82f11a617bb",
+      "bytes": 98723
     },
     {
       "file": "docs/assets/screenshot-network.png",
@@ -71,8 +76,8 @@
     },
     {
       "file": "docs/assets/screenshot-test-progress.png",
-      "sha256": "8f51898e5faefb47db15503a9d49ef6ad6e2678c0d98bcd148b768a6dd9e240c",
-      "bytes": 110107
+      "sha256": "11c192952d3574f634b450f7625721807277e77ed0f8c26c308e639cf5267115",
+      "bytes": 113518
     },
     {
       "file": "docs/assets/wechat-appreciation.jpg",
@@ -86,23 +91,23 @@
     },
     {
       "file": "FlClashSetup/FlClashSetupChecks.cs",
-      "sha256": "6f8832a33049399e5b44ac4426af3804a9e2f92b83e6843c5dbc52ae2696f8d0",
-      "bytes": 7736
+      "sha256": "ff688dfa56146ab86f9e5fb228c1b94e18f56a56d0c3dc731d24598857dd6d6e",
+      "bytes": 6499
     },
     {
       "file": "FlClashSetup/FlClashSetupService.cs",
-      "sha256": "d0fdfc1cfd0fac73c6bb4c32b3a7a7d75f13073a1d1758b8425700a408eb126b",
-      "bytes": 8514
+      "sha256": "698ef2227e8d72bb844b0a82d2dd4a20de6e012c8214cb8e4b61a55a44d18926",
+      "bytes": 4600
     },
     {
       "file": "FlClashSetup/FlClashSetupWindow.cs",
-      "sha256": "2d225ae7c050448ad9706fec3c8e0eaee0260f26e5a89e60d5d089618b18cfd9",
-      "bytes": 5524
+      "sha256": "9a1afd9b59c60626b0da7d0153d7ad252ae61171561ab282448ab88e6060f6b4",
+      "bytes": 5932
     },
     {
       "file": "FlClashSetup/README.md",
-      "sha256": "cd0652975314b4d2b68efb2d2c19208a85624019d5dcdac582dac86a2bb9a48b",
-      "bytes": 1628
+      "sha256": "bb0f85c844a4331f383244012b763a27bae2b9841e1d796b0ee1a0a033905ad3",
+      "bytes": 1554
     },
     {
       "file": "full/scripts/proxy/FlClash-AllSubscriptions.ps1",
@@ -126,8 +131,8 @@
     },
     {
       "file": "full/windows/CheckSupport/LinkFixtures.cs",
-      "sha256": "1ca32cbf42e39bd7e3337b43575821ecbb360180fb18924170dcf8f3ed7cf783",
-      "bytes": 4229
+      "sha256": "fcd7954e597635e77b66bf3d0a5c589c1ef8b78aa39064a843b778b264ec8aad",
+      "bytes": 4613
     },
     {
       "file": "full/windows/Directory.Build.props",
@@ -391,8 +396,8 @@
     },
     {
       "file": "full/windows/FAswitch.Application/MaintenanceService.cs",
-      "sha256": "fec2c53f23d1a2070b79907e37c2dcb8768c3c31829166a95352bb7abd8506b4",
-      "bytes": 5283
+      "sha256": "8adb5e7c4e7f35b8e711a62350870388084c5817f4388fe7ff563f7fd452fd41",
+      "bytes": 5549
     },
     {
       "file": "full/windows/FAswitch.Application/SwitchService.cs",
@@ -411,8 +416,8 @@
     },
     {
       "file": "full/windows/FAswitch.Application.Checks/ManagedCloneApplicationChecks.cs",
-      "sha256": "be6816967d772997d6def203ce3332629b3cb1f6079dc14724e801bb968fccbe",
-      "bytes": 10680
+      "sha256": "4e79469f84936a14beef9cf4a3fdc838a2c9fa8c0791581291b34d054bde6593",
+      "bytes": 11255
     },
     {
       "file": "full/windows/FAswitch.Application.Checks/Program.cs",
@@ -471,8 +476,13 @@
     },
     {
       "file": "full/windows/FAswitch.Core/ManagedCloneStorage.cs",
-      "sha256": "cab31da539daf23ec566ddcc3a568793c192729c8bba13a2090b1981d8d507ad",
-      "bytes": 18557
+      "sha256": "58476e72058cecac75b607260948114c794e60839e0c64843f7c190850bc509f",
+      "bytes": 18754
+    },
+    {
+      "file": "full/windows/FAswitch.Core/ManagedRuntimeLinks.cs",
+      "sha256": "28b8abe992c353b2dc3c643d088f17b09f97e93f5be71ee79ecf1ec0b6a04e65",
+      "bytes": 3516
     },
     {
       "file": "full/windows/FAswitch.Core/Models.cs",
@@ -516,8 +526,13 @@
     },
     {
       "file": "full/windows/FAswitch.Core.Checks/ManagedCloneChecks.cs",
-      "sha256": "80e230cd8f3049f59dc70ff5f552e3beaa2e55c9c853b09d0fbd2b8135c9269b",
-      "bytes": 17381
+      "sha256": "08ee1fdc71a94d6b146ec1aacb80de670158662727441a421e791474ee045bd7",
+      "bytes": 17472
+    },
+    {
+      "file": "full/windows/FAswitch.Core.Checks/ManagedRuntimeLinkChecks.cs",
+      "sha256": "69f270de8992c199655b04597bf920961f18078a9767b55af7422f518bb84acf",
+      "bytes": 4676
     },
     {
       "file": "full/windows/FAswitch.Core.Checks/ManagedToolIsolationChecks.cs",
@@ -546,13 +561,13 @@
     },
     {
       "file": "full/windows/FAswitch.Desktop/AccountFreezePresentation.cs",
-      "sha256": "7cbda1c63ee0a7ad554ffbb0d83b5b5be0226ae90f2f3fd65e6fa280ca243533",
-      "bytes": 1557
+      "sha256": "406045495c7fdf68e073ceb228d1d94a24685a6429407b68063dedd7bd7fc6a0",
+      "bytes": 1660
     },
     {
       "file": "full/windows/FAswitch.Desktop/AccountFreezeVerification.cs",
-      "sha256": "8f3bb0830f80aa5a90bd86b70c1ef40c9e200791e114100b48542a4e19d852aa",
-      "bytes": 6270
+      "sha256": "2fd5edeb4030ae74bccdada911cbb9cf0c516f421942c19a942a1164814e3998",
+      "bytes": 7626
     },
     {
       "file": "full/windows/FAswitch.Desktop/AccountIpChangeVerification.cs",
@@ -736,7 +751,7 @@
     },
     {
       "file": "full/windows/FAswitch.Desktop/FAswitch.Desktop.csproj",
-      "sha256": "27679f5984bd70b21b49ea19a0ad9663314044fe25a9f923cf307c4f64a91f98",
+      "sha256": "9ab41a123a7c59dded009532138157dca70f0375e987289c78aea2e03ccc1f78",
       "bytes": 2581
     },
     {
@@ -766,8 +781,8 @@
     },
     {
       "file": "full/windows/FAswitch.Desktop/MainWindow.xaml",
-      "sha256": "b32d31a9c0536f5c2ca11e14d6b3820a89ac8781fa3a2b8aa217e3d371bfc97b",
-      "bytes": 129495
+      "sha256": "f96e38eafcf713ca3a68244c020c0c536c5ff0ab5fabae62ed56a43575065061",
+      "bytes": 130340
     },
     {
       "file": "full/windows/FAswitch.Desktop/MainWindow.xaml.cs",
@@ -811,8 +826,8 @@
     },
     {
       "file": "full/windows/FAswitch.Desktop/Presentation.cs",
-      "sha256": "202c4bebebffe764bb12b6d92bd7e8091451e13d66a9d0085f7406e87401bd0f",
-      "bytes": 14031
+      "sha256": "93a20941ea2d7018bccbf8f17f332a61238b202689b5ace02053312acc715a6b",
+      "bytes": 14110
     },
     {
       "file": "full/windows/FAswitch.Desktop/ProfileEditorNetwork.cs",
@@ -851,8 +866,8 @@
     },
     {
       "file": "full/windows/FAswitch.Desktop/SimpleActionsPresentation.cs",
-      "sha256": "c648d10a46b7426623c823b3cae861847c99fbb544d73c7691ecda29515ddb47",
-      "bytes": 7267
+      "sha256": "96789c7463c7f19c9be2194c612f35b1c42e765b02f46e4628ddf8ffcc28a65e",
+      "bytes": 7613
     },
     {
       "file": "full/windows/FAswitch.Desktop/StoragePresentation.cs",
@@ -886,8 +901,8 @@
     },
     {
       "file": "full/windows/FAswitch.Desktop/UiVerification.cs",
-      "sha256": "d00b3c9cd0ed0a27a67964ff3ed4bb43e1d3810a0501f886188d96667e439f04",
-      "bytes": 31930
+      "sha256": "18181aeab54f3f79d181410d4913b50bea9d9d89fc1e4df4b4b42ecaa9e2c177",
+      "bytes": 32090
     },
     {
       "file": "full/windows/FAswitch.Desktop/VisualRuntimeVerification.cs",
@@ -1496,8 +1511,8 @@
     },
     {
       "file": "README.md",
-      "sha256": "e8262f1029fe4a67859b3ff270d085527ff23a639d10533b82cd96e8a9c700bf",
-      "bytes": 11885
+      "sha256": "49057d7818d77fd50843bdd7fdc107663fc1fa2e0df1f07a5dc7310d56a6c985",
+      "bytes": 13142
     },
     {
       "file": "taskbar-clock/Build-Clock.ps1",

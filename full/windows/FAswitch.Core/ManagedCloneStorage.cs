@@ -63,7 +63,7 @@ public sealed class ManagedCloneStorage : ISwitchStorage
                 throw new StorageException(StorageError.LoginRequired, source, "账号授权缺少 access_token，请重新登录。");
         }
         foreach (var name in KeptFiles) if (files.FileExists(Path.Combine(source, name))) _ = files.Hash(Path.Combine(source, name));
-        _ = files.Files(ClonePaths.RuntimeRoot, true); // Reject every linked or inaccessible descendant before deletion.
+        _ = ManagedRuntimeLinks.Inspect(ClonePaths, files); // Validate cache aliases without following or removing them.
     }
 
     public SwitchSnapshot Snapshot(string action, bool isolated)
@@ -156,6 +156,7 @@ public sealed class ManagedCloneStorage : ISwitchStorage
     public void ResetRuntime()
     {
         var current = ReadActiveIdentity();
+        _ = ManagedRuntimeLinks.Inspect(ClonePaths, files);
         var snapshot = Snapshot("reset", false);
         ArchiveCurrent(snapshot, current, false);
         RecreateRuntime();
@@ -174,6 +175,8 @@ public sealed class ManagedCloneStorage : ISwitchStorage
     private void RecreateRuntime()
     {
         ValidateOwnership();
+        var aliases = ManagedRuntimeLinks.Inspect(ClonePaths, files);
+        ManagedRuntimeLinks.RemoveAliases(ClonePaths, aliases);
         _ = files.Files(ClonePaths.RuntimeRoot, true);
         // Keep the verified root marker throughout cleanup. Delete caches before credentials/identity.
         foreach (var path in files.Files(ClonePaths.RuntimeRoot, false))

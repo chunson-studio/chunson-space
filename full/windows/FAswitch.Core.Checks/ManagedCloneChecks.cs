@@ -76,6 +76,7 @@ internal static class ManagedCloneChecks
         Check(File.ReadAllText(Path.Combine(originalSibling, "auth.json")) == "original-fixture", "linked user project remains unaffected");
         Directory.Delete(Path.Combine(linked.RuntimeRoot, "project-link"));
         count += RecoveryRegressionChecks(Path.Combine(root, "review-regressions"));
+        count += ManagedRuntimeLinkChecks.Run(Path.Combine(root, "runtime-cache-links"));
         return count;
     }
 

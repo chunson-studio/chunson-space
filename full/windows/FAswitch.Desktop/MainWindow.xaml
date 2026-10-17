@@ -250,12 +250,12 @@
               </Border>
               <Border Grid.Row="2" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,1,0,1" Background="{DynamicResource ElevatedBrush}" Padding="10,0">
                 <Grid x:Name="AccountTableHeader" VerticalAlignment="Center">
-                  <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="0.8*" /><ColumnDefinition Width="0" /><ColumnDefinition Width="80" /><ColumnDefinition Width="68" /></Grid.ColumnDefinitions>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="0.8*" /><ColumnDefinition Width="0" /><ColumnDefinition Width="80" /><ColumnDefinition Width="108" /></Grid.ColumnDefinitions>
                   <TextBlock Text="账号" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="10,0,0,0" />
                   <TextBlock Grid.Column="1" Text="出口" Foreground="{DynamicResource MutedBrush}" FontSize="12" />
                   <TextBlock Grid.Column="2" Text="端口" Visibility="Collapsed" />
                   <TextBlock Grid.Column="3" Text="状态" Foreground="{DynamicResource MutedBrush}" FontSize="12" />
-                  <TextBlock Grid.Column="4" Text="高级" Foreground="{DynamicResource MutedBrush}" FontSize="12" HorizontalAlignment="Center" />
+                  <TextBlock Grid.Column="4" Text="操作" Foreground="{DynamicResource MutedBrush}" FontSize="12" HorizontalAlignment="Center" />
                 </Grid>
               </Border>
               <ListBox Grid.Row="3" x:Name="ProfileList" Height="{Binding HomeListHeight}" Style="{StaticResource ThemedListBox}" IsEnabled="{Binding CanSelectIdentity}" ItemsSource="{Binding IdentityPageItems}" SelectedItem="{Binding Selected,Mode=TwoWay}" ItemContainerStyle="{StaticResource AccountRowStyle}" Background="Transparent" BorderThickness="0" Padding="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" AutomationProperties.Name="档案列表">
@@ -263,7 +263,7 @@
                 <ListBox.ItemTemplate>
                   <DataTemplate>
                     <Grid Height="43">
-                      <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="0.8*" /><ColumnDefinition Width="0" /><ColumnDefinition Width="80" /><ColumnDefinition Width="68" /></Grid.ColumnDefinitions>
+                      <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="0.8*" /><ColumnDefinition Width="0" /><ColumnDefinition Width="80" /><ColumnDefinition Width="108" /></Grid.ColumnDefinitions>
                       <Grid x:Name="RowAccountCell" Margin="8,0,8,0">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="36" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                         <Border Width="30" Height="30" Background="{Binding Color}" CornerRadius="15" HorizontalAlignment="Left" VerticalAlignment="Center"><TextBlock Text="{Binding Initials}" Foreground="#FFFFFF" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center" /></Border>
@@ -275,10 +275,12 @@
                         <Ellipse Width="7" Height="7" Margin="0,0,6,0">
                           <Ellipse.Style><Style TargetType="Ellipse"><Setter Property="Fill" Value="{DynamicResource MutedBrush}" /><Style.Triggers><DataTrigger Value="当前使用"><DataTrigger.Binding><MultiBinding Converter="{StaticResource IdentityStatus}"><Binding Path="Key" /><Binding Path="DataContext.Active.Key" RelativeSource="{RelativeSource AncestorType=Window}" /><Binding Path="Subtitle" /></MultiBinding></DataTrigger.Binding><Setter Property="Fill" Value="{DynamicResource AccentBrush}" /></DataTrigger></Style.Triggers></Style></Ellipse.Style>
                         </Ellipse>
-                        <TextBlock FontSize="11" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center"><TextBlock.Text><MultiBinding Converter="{StaticResource IdentityStatus}"><Binding Path="Key" /><Binding Path="DataContext.Active.Key" RelativeSource="{RelativeSource AncestorType=Window}" /><Binding Path="Subtitle" /></MultiBinding></TextBlock.Text></TextBlock>
+                        <TextBlock x:Name="RowAccountStatus" FontSize="11" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Text"><Setter.Value><MultiBinding Converter="{StaticResource IdentityStatus}"><Binding Path="Key" /><Binding Path="DataContext.Active.Key" RelativeSource="{RelativeSource AncestorType=Window}" /><Binding Path="Subtitle" /></MultiBinding></Setter.Value></Setter><Style.Triggers><DataTrigger Binding="{Binding TestsFrozen}" Value="True"><Setter Property="Text" Value="已冻结" /></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
                       </StackPanel>
                       <Grid x:Name="RowActionCell" Grid.Column="4" Margin="6,0,0,0">
-                        <Button Content="管理" Command="{Binding DataContext.OpenDetailsCommand,RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Padding="5,3" FontSize="11" MinHeight="28" Height="28" />
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="4" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Button x:Name="RowTestFreezeButton" Content="{Binding TestFreezeActionLabel}" Command="{Binding DataContext.ToggleTestFreezeCommand,RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Padding="5,3" FontSize="11" MinHeight="28" Height="28" ToolTip="冻结后保留账号，所有模型测试都会跳过；解冻后恢复。" />
+                        <Button Grid.Column="2" Content="管理" Command="{Binding DataContext.OpenDetailsCommand,RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Padding="5,3" FontSize="11" MinHeight="28" Height="28" />
                       </Grid>
                     </Grid>
                   </DataTemplate>

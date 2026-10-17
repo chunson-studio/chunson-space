@@ -83,6 +83,11 @@ internal static class ManagedCloneApplicationChecks
         Check(!reset.Success && storage.ReadActiveIdentity() == b, "managed maintenance confirms stop before reset");
         reset = await new MaintenanceService(new FakeRuntime([])).ResetManagedRuntimeAsync(storage);
         Check(reset.Success && storage.ReadActiveIdentity() is null && profiles.ListAccounts().Count == 2 && profiles.ReadAccountCredentials("B")["tokens"]?["account_id"]?.GetValue<string>() == "fixture-B", "managed reset leaves account library available");
+        var marker = Path.Combine(paths.RuntimeRoot, ManagedCloneStorage.RuntimeMarker);
+        File.WriteAllText(marker, "{}");
+        reset = await new MaintenanceService(new FakeRuntime([])).ResetManagedRuntimeAsync(storage);
+        Check(!reset.Success && reset.Message.Contains("归属标记不一致", StringComparison.Ordinal) && reset.Message.Contains(marker, StringComparison.Ordinal)
+            && !reset.Message.Contains("StorageException", StringComparison.Ordinal), "managed reset reports actionable storage reason and path instead of exception type");
         return count;
     }
     private sealed class FixtureEgressProbe : ILaunchEgressProbe

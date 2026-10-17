@@ -6,23 +6,36 @@ internal static class LinkFixtures
     private static int directorySymbols, directoryJunctions, fileSymbols;
     private static readonly List<string> skipped = [];
 
-    public static void CreateDirectory(string fixtureRoot, string link, string target, string label)
+    public static void CreateDirectory(string fixtureRoot, string link, string target, string label, bool junction = false)
     {
         ValidatePaths(fixtureRoot, link, target);
+        if (junction)
+        {
+            CreateJunction(link, target);
+            VerifyLink(new DirectoryInfo(link), target);
+            Console.WriteLine("FIXTURE " + label + ": NTFS directory junction");
+            return;
+        }
         string kind;
         try { Directory.CreateSymbolicLink(link, target); directorySymbols++; kind = "directory symbolic link"; }
         catch (IOException error) when (MissingSymbolicLinkPrivilege(error))
         {
-            var command = new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe"))
-            { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-            foreach (var argument in new[] { "/d", "/c", "mklink", "/J", link, target }) command.ArgumentList.Add(argument);
-            using var process = Process.Start(command) ?? throw new IOException("Isolated junction fixture command did not start.");
-            if (!process.WaitForExit(10000)) throw new IOException("Isolated junction fixture creation did not complete.");
-            if (process.ExitCode != 0) throw new IOException("Isolated junction fixture creation failed: " + process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd());
-            directoryJunctions++; kind = "NTFS directory junction (symbolic-link privilege 1314 unavailable)";
+            CreateJunction(link, target);
+            kind = "NTFS directory junction (symbolic-link privilege 1314 unavailable)";
         }
         VerifyLink(new DirectoryInfo(link), target);
         Console.WriteLine("FIXTURE " + label + ": " + kind);
+    }
+
+    private static void CreateJunction(string link, string target)
+    {
+        var command = new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe"))
+        { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (var argument in new[] { "/d", "/c", "mklink", "/J", link, target }) command.ArgumentList.Add(argument);
+        using var process = Process.Start(command) ?? throw new IOException("Isolated junction fixture command did not start.");
+        if (!process.WaitForExit(10000)) throw new IOException("Isolated junction fixture creation did not complete.");
+        if (process.ExitCode != 0) throw new IOException("Isolated junction fixture creation failed: " + process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd());
+        directoryJunctions++;
     }
 
     public static bool TryCreateFile(string fixtureRoot, string link, string target, string label)

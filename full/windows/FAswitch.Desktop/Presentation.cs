@@ -33,6 +33,7 @@ public sealed record IdentityItem(string Name, string Kind, string Subtitle, str
     public string ExitSummary => FollowSystemProxy ? "跟随本机" : Proxy.Length > 0 ? "独立 IP" : "未配置";
     public string PortLabel => FollowSystemProxy ? "系统端口" : Uri.TryCreate(Proxy, UriKind.Absolute, out var uri) && uri.Port > 0 ? uri.Port.ToString(System.Globalization.CultureInfo.InvariantCulture) : "—";
     public string SavedStateLabel => TestsFrozen ? "已冻结" : Subtitle == "待登录" ? "待登录" : "已保存";
+    public string TestFreezeActionLabel => TestsFrozen ? "解冻" : "冻结";
     public string KindLabel => Kind == "Account" ? "账号档案" : "历史档案";
 }
 

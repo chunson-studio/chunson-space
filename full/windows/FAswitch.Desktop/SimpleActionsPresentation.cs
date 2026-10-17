@@ -18,6 +18,7 @@ public sealed partial class ShellViewModel
     public string FeedbackNextAction => !IsError && !FeedbackTitle.Contains("启动待确认", StringComparison.Ordinal) ? ""
         : FeedbackTitle == "地区与时区同步未完成" ? "下一步：根据上方原因核对 FlClash 当前网络，再点击「同步地区与时区」；此操作与账号独立 IP 配置无关。"
         : Feedback.Contains("上次专用登录浏览器", StringComparison.Ordinal) ? "下一步：关闭本次授权浏览器后重试；软件会重新核对退出状态，已有账号资料保留。"
+        : Feedback.Contains("目录链接", StringComparison.Ordinal) || Feedback.Contains("缓存链接", StringComparison.Ordinal) || Feedback.Contains("符号链接", StringComparison.Ordinal) || Feedback.Contains("目录联接", StringComparison.Ordinal) ? "下一步：复制错误信息反馈；保留提示中的目录与恢复材料。"
         : ResumeSelectedLogin && FeedbackTitle.Contains("目标档案需要登录", StringComparison.Ordinal) ? "下一步：点击「继续登录并启动」，完成该账号授权后自动继续。"
         : Feedback.Contains("代理", StringComparison.Ordinal) || Feedback.Contains("出口", StringComparison.Ordinal) ? "下一步：到「网络与 IP」检查客户端与出口，再重试；账号出口可在高级管理中修改。"
         : Feedback.Contains("时区", StringComparison.Ordinal) || Feedback.Contains("地区", StringComparison.Ordinal) ? "下一步：检查代理出口，或到「环境设置」重新配置地区与时区。"
