@@ -6,33 +6,23 @@
 
 <p align="center">
   <a href="https://github.com/chunson-studio/chunson-space/releases/latest/download/Chunson-Full-Windows-x64.zip"><img src="docs/assets/download-full.svg" alt="下载完整版 ZIP" width="300"></a>
-  &nbsp;
-  <a href="https://github.com/chunson-studio/chunson-space/releases/latest/download/Chunson-Simple-Windows-x64.zip"><img src="docs/assets/download-simple.svg" alt="下载简洁版 ZIP" width="300"></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/chunson-studio/chunson-space/releases/latest">全部下载与更新说明</a> ·
-  <a href="#版本怎么选">版本怎么选</a> ·
+  <a href="#一个版本覆盖日常使用">能做什么</a> ·
   <a href="#界面预览">界面预览</a> ·
   <a href="#快速开始">快速开始</a> ·
   <a href="#从源码构建">源码构建</a>
 </p>
 
-## 版本怎么选
+## 一个版本，覆盖日常使用
 
-**需要管理多个账号、比较模型输出，选完整版。只想打开英文登录浏览器、同步地区与时区，选简洁版。**
+**账号管理、英文浏览器、IP 检测、地区与时区同步、模型测试和时钟，都放在一个工具里。** 只需要其中几项功能，直接使用对应入口即可。
 
-| | 完整版 | 简洁版 |
-| :--- | :--- | :--- |
-| 主要用途 | 账号管理、独立 IP、模型测试 | 英文登录浏览器、环境同步 |
-| 账号管理 | 保存账号档案，支持导入本机 Codex 已有授权 | 不管理账号库，在浏览器里直接登录 |
-| 网络方式 | 跟随 FlClash，或为账号配置独立 IP 与端口 | 跟随 FlClash 当前网络 |
-| 英文浏览器 | 不同账号分别保存浏览器资料 | 使用一套独立的浏览器资料 |
-| 地区与时区 | 检测出口，手动同步 Windows 地区与时区 | 同样支持 |
-| 模型测试 | Ciallo、鹈鹕绘图、换题绘图、检查与改进 | 不包含 |
-| Codex 分身 | 管理一个受管分身，保留本体独立 | 不包含 |
-| 北京时间小组件 | 内置 | 内置 |
-| **下载** | **[下载完整版 ZIP](https://github.com/chunson-studio/chunson-space/releases/latest/download/Chunson-Full-Windows-x64.zip)** | **[下载简洁版 ZIP](https://github.com/chunson-studio/chunson-space/releases/latest/download/Chunson-Simple-Windows-x64.zip)** |
+**[下载 Windows 完整版 ZIP](https://github.com/chunson-studio/chunson-space/releases/latest/download/Chunson-Full-Windows-x64.zip)**
+
+从本次发布起只维护完整版。原简洁版停止更新，旧源码和下载包保留在历史版本中。
 
 ## 完整版 · 账号与测试工作台
 
@@ -48,15 +38,6 @@
 - **受管分身**：管理一个 Codex 分身，在其中切换账号；本机 Codex 保持独立，分身不继承本体 Skills、MCP 或工具配置。
 
 导入本机账号只复制已有授权，不修改本体的授权或运行状态，也不会自动开始测试。重复导入同一账号时更新授权，保留已有网络配置。
-
-## 简洁版 · 英文登录浏览器
-
-保留日常登录需要的几个动作，打开就能看懂。
-
-1. **检查网络**：识别 FlClash 当前入口，检测出口 IP、国家/地区和时区。
-2. **同步环境**：点击“同步地区与时区”，让 Windows 对应当前出口。
-3. **打开浏览器**：使用本机 Chrome 或 Edge，单独保存英文浏览器资料。
-4. **进入网站**：同时打开 [ChatGPT](https://chatgpt.com/) 和 [IPPure Claude 页面](https://ippure.com/claude)。
 
 只有 Edge 也可以使用，无需专门安装 Chrome。这里使用的是本机浏览器的独立资料目录。
 
@@ -92,23 +73,17 @@
 
 [![冻结账号](docs/assets/screenshot-account-freeze.png)](docs/assets/screenshot-account-freeze.png)
 
-### 简洁版
-
-检测当前出口，手动同步地区与时区，打开英文专用浏览器。
-
-[![简洁版网络与登录环境](docs/assets/screenshot-simple.png)](docs/assets/screenshot-simple.png)
-
 ## 遇到错误怎么反馈
 
 完整版的图形测试、Ciallo 测试和主界面错误提示都有 **复制错误信息**。选择失败的历史记录也能复制，无需重测。
 
 诊断包含版本、时间、测试项目、模型和错误说明；常见令牌、邮箱、路径和 IP 会隐去，不读取授权文件或浏览器资料。复制后检查内容，再粘贴到 [GitHub Issues](https://github.com/chunson-studio/chunson-space/issues) 或发给维护者。工具不会自动上传。
 
-## 两版共有 · 北京时间小组件
+## 内置北京时间小组件
 
 任务栏上的时间卡片，固定显示 **北京时间 UTC+8**。
 
-- 随软件启动；两版同时打开，也只保留一个小组件。
+- 随软件启动；重复打开只保留一个小组件。
 - 主软件关闭后，时钟继续显示；右键可退出。
 - 点击软件里的“北京时间”按钮，可以重新打开。
 - **只显示时间，不改变 Windows 系统时区。**
@@ -117,12 +92,7 @@
 
 ### 1. 下载并完整解压
 
-选择上方任一版本，解压整个 ZIP 文件，再打开对应程序：
-
-| 版本 | 启动文件 |
-| :--- | :--- |
-| 完整版 | `ChunsonSwitch.exe` |
-| 简洁版 | `ChunsonLogin.exe` |
+下载上方压缩包，完整解压后打开 `Full/ChunsonSwitch.exe`。
 
 不要直接在压缩包里运行，也不要只取出一个 EXE。发布包已包含 .NET 运行时，普通使用无需安装开发工具。
 
@@ -130,7 +100,7 @@
 
 - 系统：**Windows 10 / 11 x64**。
 - 浏览器：本机已安装 **Chrome 或 Edge**。
-- 网络：**必须使用 FlClash，两版均只适配这个客户端。** 启动时会检查；没有安装时，点击“下载并安装 FlClash”即可下载、校验并打开官方安装向导。已有安装会直接复用，也可选择已有便携版。
+- 网络：**必须使用 FlClash，目前只适配这个客户端。** 启动时会检查；没有安装时，点击“下载并安装 FlClash”即可下载、校验并打开官方安装向导。已有安装会直接复用，也可选择已有便携版。
 - 安装后在 FlClash 中添加自己的订阅、选择节点，再返回“检查并继续”。安装程序不附送订阅。支持只开 TUN，但仍需开启主 HTTP / mixed 入口，供工具和独立浏览器连接。
 
 下载失败时可从 [FlClash 官方发布页](https://github.com/chen08209/FlClash/releases)手动安装，再回到准备页检查。工具不会把其他代理软件当作 FlClash，也不会替你修改节点或系统代理设置。
@@ -182,17 +152,16 @@
 需要 **Windows x64、.NET 10 SDK、Windows PowerShell**。在仓库根目录执行：
 
 ```powershell
-./build.ps1 -Edition All -Verify -Package -Output ./out/release
+./build.ps1 -Verify -Package -Output ./out/release
 ```
 
-使用 `-Edition Full` 或 `-Edition Simple` 可单独构建；`-DotnetPath` 可指定 SDK。
+构建入口只生成完整版；`-DotnetPath` 可指定 SDK。
 
 ```text
 chunson-space/
 ├─ full/             完整版：账号、网络、测试与分身
-├─ simple/           简洁版：网络检测与英文浏览器
-├─ taskbar-clock/    两版共用的北京时间小组件
-├─ FlClashSetup/     两版共用的 FlClash 检查与安装引导
+├─ taskbar-clock/    内置北京时间小组件
+├─ FlClashSetup/     FlClash 检查与安装引导
 └─ build.ps1         构建、离线验证与打包入口
 ```
 

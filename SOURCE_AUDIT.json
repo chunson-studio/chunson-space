@@ -1,7 +1,7 @@
 {
   "passed": true,
   "license": "MIT",
-  "files": 324,
+  "files": 302,
   "sanitizedFiles": [
     "full/windows/FAswitch.Accounts.Checks/DefaultLoginBrowserChecks.cs",
     "full/windows/FAswitch.Accounts.Checks/LocalAccountImportChecks.cs",
@@ -14,9 +14,7 @@
     "full/windows/FAswitch.Desktop/SupportReportVerification.cs",
     "full/windows/FAswitch.Windows.Checks/BrowserUdpChecks.cs",
     "full/windows/ThirdParty/ModelTrace/SOURCE.json",
-    "full/windows/ThirdParty/YamlDotNet/SOURCE.md",
-    "simple/Verification/BrowserChecks.cs",
-    "simple/Verification/NetworkChecks.cs"
+    "full/windows/ThirdParty/YamlDotNet/SOURCE.md"
   ],
   "findings": [],
   "excluded": [
@@ -38,8 +36,8 @@
     },
     {
       "file": "build.ps1",
-      "sha256": "8e40fe0f69bc140f2875570f1f20a0066804af639674fd62355f3eed980f7cf2",
-      "bytes": 5388
+      "sha256": "7bd3b9ed7dd036a0342e6d6fbe3b13552980efdb8407c51583911ed3242d4322",
+      "bytes": 5069
     },
     {
       "file": "docs/assets/download-full.svg",
@@ -47,14 +45,9 @@
       "bytes": 749
     },
     {
-      "file": "docs/assets/download-simple.svg",
-      "sha256": "cc02f53a0b784e35e73de8916a22db6a3b1997b809d112ccdad48f5700c79e12",
-      "bytes": 792
-    },
-    {
       "file": "docs/assets/readme-cover.svg",
-      "sha256": "666677fca8ea94f6420257217c768335fc1fedc046538e8e648ae75fe5272df5",
-      "bytes": 2555
+      "sha256": "b78a7e673b48aaff89834ddc63f729910a3330199b6d626cec33b4e9404c0b85",
+      "bytes": 2549
     },
     {
       "file": "docs/assets/screenshot-account-freeze.png",
@@ -75,11 +68,6 @@
       "file": "docs/assets/screenshot-network.png",
       "sha256": "6e735cb310ccc4bb817ae0031df92ce060570f3f0c33f0606be06adfa7eabc86",
       "bytes": 110817
-    },
-    {
-      "file": "docs/assets/screenshot-simple.png",
-      "sha256": "be335c43523f68d9bfaf7d976eb3884f802daf2d5441880736d12dc6b6ee87eb",
-      "bytes": 67624
     },
     {
       "file": "docs/assets/screenshot-test-progress.png",
@@ -1508,108 +1496,8 @@
     },
     {
       "file": "README.md",
-      "sha256": "143a2b3fecfc33649b9f2388591b2486717c987ec031c1327204c49d83126cca",
-      "bytes": 13849
-    },
-    {
-      "file": "simple/App.xaml",
-      "sha256": "9878a6b0d50bac83ca13954aad4dae5098dad4590c6a568a88ceca73bfda7ebc",
-      "bytes": 2016
-    },
-    {
-      "file": "simple/App.xaml.cs",
-      "sha256": "3831866e55372a0b7c5c6a097a02f7c270c7e89514c385702229a3771556fe10",
-      "bytes": 3086
-    },
-    {
-      "file": "simple/Assets/App.ico",
-      "sha256": "4fa500218cde868bbad2055694d338b6d25df99841b382f41805a23d02b4bb21",
-      "bytes": 47615
-    },
-    {
-      "file": "simple/ChunsonLogin.csproj",
-      "sha256": "d5dd27cc62e7ac8189ad86a1bcc33b3b35ca45d3a28b7299e47529f08233014f",
-      "bytes": 1062
-    },
-    {
-      "file": "simple/LoginViewModel.cs",
-      "sha256": "0e204bcd2dc267a385061a88c1a66171880eff0eb2f14a0193ca7a9c42b48342",
-      "bytes": 7121
-    },
-    {
-      "file": "simple/MainWindow.xaml",
-      "sha256": "066e8dde460fe16d7700d60f91ce280faa70e2c6db28dee5936331e695b397e9",
-      "bytes": 5844
-    },
-    {
-      "file": "simple/MainWindow.xaml.cs",
-      "sha256": "c2ad17873304c7bc3d21d78ffaa488204523e79a20d91c5bbc0c00949ca88aaa",
-      "bytes": 695
-    },
-    {
-      "file": "simple/Services/DedicatedBrowser.cs",
-      "sha256": "3f0b4b66af0b48267b18cddff58c62666d9d5f7eaed760fd1b6aa85a08fd1648",
-      "bytes": 11455
-    },
-    {
-      "file": "simple/Services/EgressProbe.cs",
-      "sha256": "0264bf0951ef55c0606ae0eee45e44d85250161dfa58eb5caf8963bf3fe7f611",
-      "bytes": 11474
-    },
-    {
-      "file": "simple/Services/EnvironmentCoordinator.cs",
-      "sha256": "dd314e593fc76fac82b7c82ab2b3cff8a004c322afe63385886d34bee17065bb",
-      "bytes": 3189
-    },
-    {
-      "file": "simple/Services/FlClashNetwork.cs",
-      "sha256": "b5d5fbff4f9f0acd5caa6170ef4a9d84e2436e44128053ceacc969699be4c003",
-      "bytes": 8568
-    },
-    {
-      "file": "simple/Services/SystemRegion.cs",
-      "sha256": "74b25969a810bc7e9e551c610332cb206b22c13afe254860bdacb511f2fea993",
-      "bytes": 2365
-    },
-    {
-      "file": "simple/Services/SystemTimezone.cs",
-      "sha256": "a0b1602c6930482c42106ea855e924899197e2c0126ee71597d920e02fc716fd",
-      "bytes": 4891
-    },
-    {
-      "file": "simple/ThirdParty/YamlDotNet/LICENSE.txt",
-      "sha256": "556ab734f87bd3a2de1150cfc446524721405aa5d7667c22766a6995ecbc6689",
-      "bytes": 1129
-    },
-    {
-      "file": "simple/ThirdParty/YamlDotNet/SOURCE.md",
-      "sha256": "fd31aef300510d81dbe329129597934f9fc59dc067515311833111f26a27ffe7",
-      "bytes": 472
-    },
-    {
-      "file": "simple/Verification/BrowserChecks.cs",
-      "sha256": "ed39d351f167aa3fda750ea8ffd8f04a0161944c738335a864588cbde2652064",
-      "bytes": 11234
-    },
-    {
-      "file": "simple/Verification/NetworkChecks.cs",
-      "sha256": "7a66012ce1c5a77976612b0e447c3bea10a4fa053f4840b76ec13e7a35fdddc9",
-      "bytes": 16082
-    },
-    {
-      "file": "simple/Verification/ProviderFallbackChecks.cs",
-      "sha256": "754cefe69dd4c1748c30211605aa15e13efe542f7a5f7b56e419eb01ffe674e4",
-      "bytes": 6733
-    },
-    {
-      "file": "simple/Verification/RegionChecks.cs",
-      "sha256": "ec2a66c3415038b3c0925c888d7fc816377ed8d4a3a647ba25e046901ff82331",
-      "bytes": 1659
-    },
-    {
-      "file": "simple/Verification/VerificationSuite.cs",
-      "sha256": "d9878fd4e2a4657f81e691347793fd2a81dfe6039bb38dd62d9ef1cf2558dbc4",
-      "bytes": 13001
+      "sha256": "e8262f1029fe4a67859b3ff270d085527ff23a639d10533b82cd96e8a9c700bf",
+      "bytes": 11885
     },
     {
       "file": "taskbar-clock/Build-Clock.ps1",

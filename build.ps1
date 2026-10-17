@@ -1,5 +1,4 @@
 ﻿param(
-    [ValidateSet('All','Full','Simple')][string]$Edition='All',
     [Parameter(Mandatory=$true)][string]$Output,
     [string]$DotnetPath='dotnet',
     [switch]$Verify,
@@ -9,13 +8,8 @@ $ErrorActionPreference='Stop'
 $outputPath=[IO.Path]::GetFullPath($Output)
 if(Test-Path -LiteralPath $outputPath){throw 'Output must be a new directory'}
 New-Item -ItemType Directory -Path $outputPath | Out-Null
-if($Edition -in @('All','Full')){ & (Join-Path $PSScriptRoot 'Initialize-Dependencies.ps1') }
-$editions=@(
-    @{Name='Full';Project='full/windows/FAswitch.Desktop/FAswitch.Desktop.csproj';Exe='ChunsonSwitch.exe';Modes=@('--verify-ui','--verify-storage-ui')},
-    @{Name='Simple';Project='simple/ChunsonLogin.csproj';Exe='ChunsonLogin.exe';Modes=@('--verify')}
-)
-foreach($item in $editions){
-    if($Edition -ne 'All' -and $Edition -ne $item.Name){continue}
+& (Join-Path $PSScriptRoot 'Initialize-Dependencies.ps1')
+$item=@{Name='Full';Project='full/windows/FAswitch.Desktop/FAswitch.Desktop.csproj';Exe='ChunsonSwitch.exe';Modes=@('--verify-ui','--verify-storage-ui')}
     $app=Join-Path $outputPath $item.Name
     & $DotnetPath publish (Join-Path $PSScriptRoot $item.Project) -c Release -r win-x64 --self-contained true -o $app --nologo --disable-build-servers -m:1 -p:UseSharedCompilation=false -p:NuGetAudit=false -p:DebugType=None -p:DebugSymbols=false
     if($LASTEXITCODE -ne 0){throw ('Build failed: '+$item.Name)}
@@ -69,5 +63,4 @@ foreach($item in $editions){
         }finally{$zip.Dispose()}
         [pscustomobject]@{passed=$true;files=$manifest.Count;sha256=(Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputPath ($item.Name+'-zip-check.json')) -Encoding utf8
     }
-}
 Write-Output ('Build output: '+$outputPath)

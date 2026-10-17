@@ -16,7 +16,7 @@
     <text x="60" y="144" font-size="62" font-weight="700" letter-spacing="-2" fill="#263e2d">Chunson Space</text>
     <text x="64" y="194" font-size="23" fill="#57704e">账号管理 · 英文浏览器 · 地区与时区同步</text>
     <rect x="64" y="225" width="134" height="32" rx="16" fill="#fff" opacity=".72"/>
-    <text x="131" y="247" text-anchor="middle" font-size="14" fill="#45613c">完整版 + 简洁版</text>
+    <text x="131" y="247" text-anchor="middle" font-size="14" fill="#45613c">统一完整版</text>
     <text x="216" y="247" font-size="14" fill="#68815a">内置北京时间小组件</text>
   </g>
 </svg>
