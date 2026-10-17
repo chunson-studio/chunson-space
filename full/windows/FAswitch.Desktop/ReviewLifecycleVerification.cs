@@ -45,6 +45,7 @@ internal static class ReviewLifecycleVerification
         loginServices.OfflineCallbacks!.HoldCallback = true;
         loginModel.Selected = loginModel.FilteredItems.Single(item => item.Name == "A");
         loginModel.LoginCommand.Execute(null);
+        await TwoStageLoginVerification.ContinueAsync(loginModel, loginServices, loginModel.CurrentOperation);
         await BackgroundAccountTestsVerification.Until(() => loginServices.Login.Status.Stage == LoginStage.Browser);
         var loginWindow = UiVerification.CreateWindow(loginModel); var loginClosed = false;
         using (var lifecycle = new DesktopLifetime(loginWindow, loginModel, new Tray(), new Lease(), () => Task.FromResult(false), async () =>
@@ -58,14 +59,14 @@ internal static class ReviewLifecycleVerification
         newServices.OfflineCallbacks!.HoldCallback = true;
         newModel.NewAccountLoginCommand.Execute(null); var onboarding = newModel.Onboarding!;
         onboarding.AuthorizeCommand.Execute(null);
-        await BackgroundAccountTestsVerification.Until(() => newServices.Login.Status.Stage == LoginStage.Browser);
+        await BackgroundAccountTestsVerification.Until(() => newServices.Login.Status.Stage == LoginStage.AccountPreparation);
         var newWindow = UiVerification.CreateWindow(newModel); var newClosed = false;
         using (var lifecycle = new DesktopLifetime(newWindow, newModel, new Tray(), new Lease(), () => Task.FromResult(false), async () =>
         {
             newClosed = !newModel.IsLoggingIn && newModel.CurrentOperation.IsCompleted && newServices.OfflineNewAccountBrowser!.CleanupCalls > 0;
             await newServices.DisposeAsync(); return newClosed;
         }, shutdown: () => { }))
-            check("exit joins a new authorization even after its onboarding panel closes", await lifecycle.RequestExitAsync() && newClosed && newWorkspace.Profiles.ListAccounts().Count == 2);
+            check("exit cancels account preparation before callback starts and releases its browser", await lifecycle.RequestExitAsync() && newClosed && newWorkspace.Profiles.ListAccounts().Count == 2 && newServices.OfflineCallbacks.Starts == 0);
         await onboarding.CurrentOperation;
         var retryWorkspace = BackgroundAccountTestsVerification.Fixture(Path.Combine(directory, "retry-exit"));
         var retryModel = new ShellViewModel(retryWorkspace); var retryNodes = retryModel.ProxyPanel.NodeTesting;

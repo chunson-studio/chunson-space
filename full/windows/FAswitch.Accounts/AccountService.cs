@@ -79,6 +79,7 @@ public sealed partial class AccountService(AccountRepository repository, IAccoun
     }
     public async Task<ConnectivityResult> TestAccountAsync(string profileName, CancellationToken cancellationToken = default)
     {
+        repository.RequireTestsAllowed(profileName);
         var session = new AuthSession(repository.ReadAuth(profileName), repository.Proxy(profileName));
         var started = this.clock.UtcNow;
         foreach (var model in new[] { "gpt-6.1-sol", "gpt-6-sol" })
@@ -143,6 +144,7 @@ public sealed partial class AccountService(AccountRepository repository, IAccoun
         string prompt = "ciallo", string instructions = "You are a helpful assistant.", string? effort = "low",
         IReadOnlyList<string>? images = null, TimeSpan? requestTimeout = null, bool refreshAuthorization = true)
     {
+        repository.RequireTestsAllowed(name);
         var credentials = Credentials(session.Auth);
         var headers = Headers(credentials.Access, credentials.Account);
         headers["accept"] = "text/event-stream"; headers["originator"] = "codex_cli_rs"; headers["session-id"] = Guid.NewGuid().ToString();

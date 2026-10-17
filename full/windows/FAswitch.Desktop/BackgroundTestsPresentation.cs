@@ -13,13 +13,13 @@ public sealed partial class ShellViewModel
     public bool HasMultipleBackgroundModels => visualPanels.Count + cialloPanels.Count > 1;
     private int RunningModelCount => visualPanels.Count(panel => panel.IsBusy) + cialloPanels.Count(panel => panel.IsBusy);
     public string BackgroundModelTitle => "模型测试 · " + (IsModelTestRunning ? $"{RunningModelCount} 项进行中" : "查看结果");
-    public string BackgroundModelStatus => (lastBackgroundPanel switch { CialloPanelViewModel panel => panel.Status, VisualTestPanelViewModel panel => panel.Status, _ => "" })
+    public string BackgroundModelStatus => (lastBackgroundPanel switch { CialloPanelViewModel panel => panel.ProgressSummary + "\n" + panel.Status, VisualTestPanelViewModel panel => panel.ProgressSummary + "\n" + panel.Status, _ => "" })
         + (visualPanels.Count + cialloPanels.Count > 1 ? " · 再次点击切换任务" : "");
     public DelegateCommand OpenBackgroundModelCommand { get; private set; } = null!;
 
     private void BackgroundModelChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is "Status" or "IsBusy") RefreshBackgroundModel();
+        if (e.PropertyName is "Status" or "IsBusy" or "ProgressSummary") RefreshBackgroundModel();
         if (e.PropertyName == "IsBusy") RefreshBusyState();
     }
     private void RefreshBackgroundModel()

@@ -14,7 +14,7 @@ public sealed record ExitObservation(string Proxy, bool FollowSystemProxy, strin
 {
     public bool Matches(EnvironmentSettings environment) => Proxy == environment.Proxy && FollowSystemProxy == environment.FollowSystemProxy;
 }
-public sealed record AccountProfile(string Name, bool HasCredentials, EnvironmentSettings Environment);
+public sealed record AccountProfile(string Name, bool HasCredentials, EnvironmentSettings Environment, bool TestsFrozen = false);
 public sealed record ProviderProfile(string Name, string BaseUrl, string Model, string Created, bool HasKey);
 public sealed record ProviderSaveResult(ProviderProfile Profile, string? ArchivedPath);
 public sealed record ProviderUpdateResult(ProviderProfile Profile, bool ActiveUpdated, string RecoveryPath, IReadOnlyList<string> Warnings);

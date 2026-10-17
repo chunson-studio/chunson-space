@@ -21,6 +21,7 @@ public sealed partial class ShellViewModel
     public DelegateCommand ChooseVisualTestCommand { get; private set; } = null!;
     private void InitializeVisualTestCommands()
     {
+        InitializeTestFreeze();
         InitializeCialloCommands();
         accountTests.Changed += RefreshBusyState;
         OpenBackgroundModelCommand = new(_ => ResumeBackgroundModel(), _ => !operationBusy && !exitDraining && HasBackgroundModel);

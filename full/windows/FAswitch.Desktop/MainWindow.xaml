@@ -63,6 +63,7 @@
             <MenuItem Style="{StaticResource AccountMenuItem}" Header="切换并启动" Command="{Binding HomeLaunchCommand}" />
             <MenuItem Style="{StaticResource AccountMenuItem}" Header="账号配置" Command="{Binding EditSelectedCommand}" />
             <MenuItem Style="{StaticResource AccountMenuItem}" Header="重命名" Command="{Binding RenameSelectedCommand}" ToolTip="正在使用的账号需先切换到其他账号再重命名。" ToolTipService.ShowOnDisabled="True" />
+            <MenuItem Style="{StaticResource AccountMenuItem}" Header="{Binding TestFreezeLabel}" Command="{Binding ToggleTestFreezeCommand}" ToolTip="冻结后跳过所有模型测试；若测试进行中，请先取消并等待结束。" ToolTipService.ShowOnDisabled="True"/>
             <Separator Margin="4,4"><Separator.Template><ControlTemplate TargetType="Separator"><Border Height="1" Background="{DynamicResource LineBrush}" /></ControlTemplate></Separator.Template></Separator>
             <MenuItem Style="{StaticResource AccountMenuItem}" Header="删除账号…" Command="{Binding ArchiveSelectedCommand}" ToolTip="删除本地账号档案并保留可恢复归档；正在使用的账号需先切换。" ToolTipService.ShowOnDisabled="True" />
           </ContextMenu>
@@ -183,7 +184,7 @@
         </StackPanel>
         <StackPanel Grid.Row="2" Margin="17,0,12,0">
           <Button x:Name="BackgroundModelButton" Command="{Binding OpenBackgroundModelCommand}" Visibility="{Binding HasBackgroundModel,Converter={StaticResource BoolVisibility}}" HorizontalContentAlignment="Stretch" Padding="8,7" Margin="0,0,0,6" ToolTip="{Binding BackgroundModelStatus}">
-            <StackPanel><TextBlock Text="{Binding BackgroundModelTitle}" FontSize="12" FontWeight="SemiBold"/><TextBlock Text="{Binding BackgroundModelStatus}" FontSize="10" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"/></StackPanel>
+            <StackPanel><TextBlock Text="{Binding BackgroundModelTitle}" FontSize="12" FontWeight="SemiBold"/><TextBlock Text="{Binding BackgroundModelStatus}" FontSize="10" TextWrapping="Wrap" MaxHeight="72" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"/></StackPanel>
           </Button>
           <Button x:Name="BackgroundIpButton" DataContext="{Binding ProxyPanel.NodeTesting}" Command="{Binding OpenCommand}" Visibility="{Binding HasBackgroundTask,Converter={StaticResource BoolVisibility}}" HorizontalContentAlignment="Stretch" Padding="8,7" Margin="0,0,0,10" ToolTip="{Binding Status}">
             <StackPanel><TextBlock Text="{Binding BackgroundTitle}" FontSize="12" FontWeight="SemiBold"/><TextBlock Text="{Binding Status}" FontSize="10" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"/></StackPanel>
@@ -211,7 +212,7 @@
             <TextBlock x:Name="LocalEnvironmentStatusText" Text="{Binding LocalEnvironmentStatus}" ToolTip="{Binding LocalEnvironmentDetail}" Foreground="{DynamicResource MutedBrush}" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
           </DockPanel>
           <StackPanel Grid.Column="1" Grid.RowSpan="2" Visibility="{Binding IsAccountsPage,Converter={StaticResource BoolVisibility}}" VerticalAlignment="Center">
-            <Button x:Name="AddAccountLoginButton" Content="＋  登录账号" Command="{Binding NewAccountLoginCommand}" Style="{StaticResource PrimaryButton}" Height="28" MinHeight="28" FontSize="12" Padding="12,3" Margin="0,0,0,4" />
+            <Button x:Name="AddAccountLoginButton" Content="＋  准备账号" Command="{Binding NewAccountLoginCommand}" Style="{StaticResource PrimaryButton}" Height="28" MinHeight="28" FontSize="12" Padding="12,3" Margin="0,0,0,4" />
             <Button x:Name="ImportLocalAccountButton" Content="导入本机账号" Command="{Binding ImportLocalAccountCommand}" Height="28" MinHeight="28" FontSize="12" Padding="12,3" ToolTip="复制本机 Codex 已保存的授权，无需重新登录；导入后可选择账号进行模型测试" />
           </StackPanel>
         </Grid>
@@ -243,7 +244,7 @@
               <Border x:Name="HomeLoginStrip" Grid.Row="1" Background="{DynamicResource InfoSurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,1,0,1" Padding="12,6" Visibility="{Binding IsLoggingIn,Converter={StaticResource BoolVisibility}}">
                 <DockPanel>
                   <Button x:Name="HomeCancelLoginButton" Content="取消登录" Command="{Binding CancelLoginCommand}" DockPanel.Dock="Right" FontSize="12" MinHeight="28" Height="28" Padding="8,3" />
-                  <Button x:Name="HomeResumeLoginButton" Content="继续本次授权" Command="{Binding ResumeLoginCommand}" DockPanel.Dock="Right" FontSize="12" MinHeight="28" Height="28" Padding="8,3" Margin="0,0,6,0" ToolTip="已登录网页时，回到本次 Codex 授权页；沿用浏览器与出口，不重复测分" />
+                  <Button x:Name="HomeResumeLoginButton" Content="{Binding LoginContinueLabel}" Command="{Binding ResumeLoginCommand}" DockPanel.Dock="Right" FontSize="12" MinHeight="28" Height="28" Padding="8,3" Margin="0,0,6,0" ToolTip="{Binding LoginContinueHelp}" />
                   <StackPanel Orientation="Horizontal" VerticalAlignment="Center"><ProgressBar IsIndeterminate="True" Width="38" Height="3" Margin="0,0,8,0" /><TextBlock Text="{Binding LoginStageLabel}" VerticalAlignment="Center" FontSize="12" TextTrimming="CharacterEllipsis" /></StackPanel>
                 </DockPanel>
               </Border>
@@ -846,6 +847,7 @@
                   <TextBlock Text="{Binding Selected.Subtitle}" FontSize="12" Foreground="{DynamicResource MutedBrush}" Margin="0,4,0,0" />
                   <WrapPanel Margin="0,9,0,0">
                     <Button MinHeight="28" MinWidth="30" Content="重命名" Command="{Binding RenameSelectedCommand}" Padding="8,4" FontSize="12" />
+                    <Button x:Name="AccountTestFreezeButton" Content="{Binding TestFreezeLabel}" Command="{Binding ToggleTestFreezeCommand}" Padding="8,4" FontSize="12" Margin="6,0,0,0" ToolTip="冻结后跳过所有模型测试；若测试进行中，请先取消并等待结束。" ToolTipService.ShowOnDisabled="True"/>
                     <Button MinHeight="28" MinWidth="30" Command="{Binding ArchiveSelectedCommand}" Padding="8,4" FontSize="12" Margin="6,0,0,0" ToolTip="正在使用的账号需先切换后再删除。" ToolTipService.ShowOnDisabled="True">
                       <Button.Style><Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Content" Value="移入归档" /><Style.Triggers><DataTrigger Binding="{Binding IsAccountsPage}" Value="True"><Setter Property="Content" Value="删除账号…" /></DataTrigger></Style.Triggers></Style></Button.Style>
                     </Button>
@@ -914,7 +916,7 @@
               <Border Background="{DynamicResource InfoSurfaceBrush}" CornerRadius="6" Padding="10" Margin="0,8,0,8" Visibility="{Binding IsLoggingIn, Converter={StaticResource BoolVisibility}}">
                 <DockPanel>
                   <Button MinHeight="28" MinWidth="30" Content="取消登录" Command="{Binding CancelLoginCommand}" DockPanel.Dock="Right" Padding="8,4" FontSize="12" />
-                  <Button Content="继续本次授权" Command="{Binding ResumeLoginCommand}" DockPanel.Dock="Right" MinHeight="28" Padding="8,4" FontSize="12" Margin="0,0,6,0" />
+                  <Button Content="{Binding LoginContinueLabel}" ToolTip="{Binding LoginContinueHelp}" Command="{Binding ResumeLoginCommand}" DockPanel.Dock="Right" MinHeight="28" Padding="8,4" FontSize="12" Margin="0,0,6,0" />
                   <TextBlock Text="{Binding LoginStageLabel}" FontSize="12" VerticalAlignment="Center" />
                 </DockPanel>
               </Border>
@@ -929,7 +931,7 @@
           <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
           <StackPanel Margin="0,0,0,18">
             <DockPanel><Image Source="{StaticResource BrandMark}" Width="38" Height="38" Margin="0,0,12,0" DockPanel.Dock="Left"/><StackPanel><TextBlock Text="登录账号" FontSize="24" FontWeight="SemiBold"/><TextBlock Text="{Binding BrowserLabel}" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="0,4,0,0"/></StackPanel></DockPanel>
-            <TextBlock Text="在浏览器完成授权，账号自动保存，网页登录状态保留。" Foreground="{DynamicResource MutedBrush}" Margin="0,16,0,0"/>
+            <TextBlock Text="先通过「忘记密码」重置密码，用新密码登录并退出所有设备；完成后回到这里，再开始新的 Codex 登录授权。" Foreground="{DynamicResource MutedBrush}" Margin="0,16,0,0"/>
             <TextBlock x:Name="OnboardingStatusText" Text="{Binding Status}" FontSize="12" Margin="0,6,0,0"/>
           </StackPanel>
           <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -966,7 +968,7 @@
             <TextBlock Text="时区和地区随出口匹配，Windows 保持中文。" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="0,4,0,0"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
               <Button Content="取消" Command="{Binding CloseCommand}" Margin="0,0,10,0"/>
-              <Button x:Name="OnboardingAuthorizeButton" Content="登录" Command="{Binding AuthorizeCommand}" Style="{StaticResource PrimaryButton}" MinWidth="110"/>
+              <Button x:Name="OnboardingAuthorizeButton" Content="第一步：重置密码与退出设备" Command="{Binding AuthorizeCommand}" Style="{StaticResource PrimaryButton}" MinWidth="110"/>
             </StackPanel>
           </StackPanel>
         </Grid>
@@ -1166,6 +1168,8 @@
               <Border x:Name="VisualTestQuickResult" Background="{DynamicResource InfoSurfaceBrush}" CornerRadius="10" Padding="12" Margin="0,0,0,10"><StackPanel>
                 <DockPanel><Button DockPanel.Dock="Right" Content="打开作品对比 ↗" Command="{Binding OpenGalleryCommand}" Padding="8,4" Margin="8,0,0,0"/><TextBlock Text="{Binding Summary}" FontWeight="SemiBold" VerticalAlignment="Center"/></DockPanel>
                 <TextBlock Text="{Binding Status}" TextWrapping="Wrap" MaxHeight="54" FontSize="12" Margin="0,5,0,0"/>
+                <TextBlock x:Name="VisualTestProgressText" Text="{Binding ProgressSummary}" TextWrapping="Wrap" FontSize="12" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                <ProgressBar x:Name="VisualTestReplyProgress" Minimum="0" Maximum="{Binding ExpectedReplies,Mode=OneWay}" Value="{Binding CompletedReplies,Mode=OneWay}" Height="5" Margin="0,8,0,0" Visibility="{Binding IsBusy,Converter={StaticResource BoolVisibility}}" ToolTip="按已返回的回复计数；等待模型时不估算百分比"/>
               </StackPanel></Border>
               <ScrollViewer x:Name="VisualTestScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"><StackPanel>
                 <ItemsControl ItemsSource="{Binding Steps}"><ItemsControl.ItemTemplate><DataTemplate>
@@ -1206,13 +1210,14 @@
               <ComboBox x:Name="CialloHistoryPicker" Grid.Column="1" ItemsSource="{Binding History}" SelectedItem="{Binding SelectedHistory}" DisplayMemberPath="Label" IsEnabled="{Binding CanSelectHistory}" ToolTip="{Binding HistoryHint}" MaxDropDownHeight="280"/>
             </Grid>
           </StackPanel>
-          <ScrollViewer Grid.Row="1" x:Name="CialloScroll" VerticalScrollBarVisibility="Auto"><ItemsControl ItemsSource="{Binding Rows}"><ItemsControl.ItemTemplate><DataTemplate>
+          <DockPanel Grid.Row="1"><TextBlock x:Name="CialloProgressText" DockPanel.Dock="Top" Text="{Binding ProgressSummary}" TextWrapping="Wrap" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,10"/>
+          <ScrollViewer x:Name="CialloScroll" VerticalScrollBarVisibility="Auto"><ItemsControl ItemsSource="{Binding Rows}"><ItemsControl.ItemTemplate><DataTemplate>
             <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="12" Padding="14" Margin="0,0,0,10"><StackPanel>
               <DockPanel><TextBlock Text="{Binding State}" DockPanel.Dock="Right" Foreground="{DynamicResource MutedBrush}"/><TextBlock Text="{Binding Model}" FontWeight="SemiBold" FontSize="15"/></DockPanel>
               <TextBlock Text="{Binding Detail}" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" Margin="0,6,0,8"/>
               <TextBox Text="{Binding Text,Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" MaxHeight="160" MinHeight="36" VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0" Padding="0"/>
             </StackPanel></Border>
-          </DataTemplate></ItemsControl.ItemTemplate></ItemsControl></ScrollViewer>
+          </DataTemplate></ItemsControl.ItemTemplate></ItemsControl></ScrollViewer></DockPanel>
           <Grid Grid.Row="2" Margin="0,12,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
             <TextBlock Text="{Binding Status}" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" Margin="0,0,14,0"/>
             <StackPanel Grid.Column="1" Orientation="Horizontal"><Button Content="取消测试" Command="{Binding CancelCommand}" Margin="0,0,10,0"/><Button x:Name="CialloStartButton" Content="一键对比" Command="{Binding StartCommand}" Style="{StaticResource PrimaryButton}"/></StackPanel>

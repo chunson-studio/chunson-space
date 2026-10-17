@@ -182,7 +182,7 @@ internal static class StorageUiVerification
         Check("empty home keeps actionable guidance compact without unused pagination", compactTable.ActualHeight < 240
             && !Displayed((FrameworkElement)window.FindName("AccountPager")));
         var homeLoginButton = (Button)window.FindName("AddAccountLoginButton");
-        Check("empty page has one direct login entry without prior profile or requests", loginModel.HasNoAccounts && homeLoginButton.Content?.ToString()?.TrimStart('＋', '+', ' ').Equals("登录账号", StringComparison.Ordinal) == true && Displayed(homeLoginButton) && homeLoginButton.IsEnabled && Descendants(layout).OfType<Button>().Count(button => Displayed(button) && button.Command == loginModel.NewAccountLoginCommand) == 1 && ((TextBlock)window.FindName("EmptyAccountTitle")).Text == "还没有账号" && loginTransport.RequestCount == 0 && newBrowser.OpenCount == 0);
+        Check("empty page has one direct login entry without prior profile or requests", loginModel.HasNoAccounts && homeLoginButton.Content?.ToString()?.TrimStart('＋', '+', ' ').Equals("准备账号", StringComparison.Ordinal) == true && Displayed(homeLoginButton) && homeLoginButton.IsEnabled && Descendants(layout).OfType<Button>().Count(button => Displayed(button) && button.Command == loginModel.NewAccountLoginCommand) == 1 && ((TextBlock)window.FindName("EmptyAccountTitle")).Text == "还没有账号" && loginTransport.RequestCount == 0 && newBrowser.OpenCount == 0);
         AccountOnboardingViewModel OpenNewLogin(bool follow = true, string proxy = "")
         {
             newBrowser.SystemProxy = follow ? "http://127.0.0.1:7890" : proxy;
@@ -190,7 +190,7 @@ internal static class StorageUiVerification
         }
         async Task AuthorizeNewLogin(bool follow = true, string proxy = "")
         {
-            var input = OpenNewLogin(follow, proxy); await input.CurrentOperation; Flush();
+            var input = OpenNewLogin(follow, proxy); await TwoStageLoginVerification.ContinueAsync(loginModel, loginWorkspace.Accounts!, input.CurrentOperation); await input.CurrentOperation; Flush();
         }
         newBrowser.SystemProxy = null;
         loginModel.NewAccountLoginCommand.Execute(null); var routeInput = loginModel.Onboarding!;
@@ -271,14 +271,21 @@ internal static class StorageUiVerification
         var requestsBeforePendingLogin = loginTransport.RequestCount;
         loginWorkspace.Accounts.OfflineCallbacks!.HoldCallback = true;
         var cancelInput = OpenNewLogin(false, "http://127.0.0.1:7897"); var cancelledHomeLogin = cancelInput.CurrentOperation;
+        await BackgroundAccountTestsVerification.Until(() => loginWorkspace.Accounts.Login.Status.Stage == LoginStage.AccountPreparation);
+        var callbacksBeforePreparation = loginWorkspace.Accounts.OfflineCallbacks.Starts;
+        Check("first step opens password reset entry without OAuth or callback", newBrowser.LastUrl?.AbsoluteUri == "https://chatgpt.com/auth/login"
+            && callbacksBeforePreparation == 0 && !loginWorkspace.Accounts.Login.CanResumeBrowser
+            && loginModel.LoginContinueLabel == "重新登录并授权" && !loginModel.ResumeLoginCommand.CanExecute(null) && OnlyPublicLoginProbes());
+        Capture("login-account-preparation-minimum", 1040, 670);
+        await TwoStageLoginVerification.ContinueAsync(loginModel, loginWorkspace.Accounts!, cancelledHomeLogin);
         for (var attempt = 0; attempt < 100 && (loginWorkspace.Accounts.Login.Status.Stage != LoginStage.Browser || !((Button)window.FindName("HomeCancelLoginButton")).IsEnabled); attempt++) await Task.Delay(20);
         for (var attempt = 0; attempt < 50 && loginModel.FeedbackTitle != "等待浏览器授权"; attempt++) await Task.Delay(20);
         Check("missing score cache keeps opened authorization pending without closing browser", loginWorkspace.Accounts.Login.Status.Stage == LoginStage.Browser
-            && newBrowser.CleanupCalls == cleanupsBeforePendingLogin && loginWorkspace.Profiles.ListAccounts().Count == 0
+            && newBrowser.CleanupCalls == cleanupsBeforePendingLogin + 1 && loginWorkspace.Profiles.ListAccounts().Count == 0
             && loginTransport.Requests.Skip(requestsBeforePendingLogin).All(request => request.Url == AccountEndpoints.Egress || request.Url == AccountEndpoints.Trace));
         loginTransport.ScorePayload = acceptedScore;
         Check("browser authorization progress replaces stale preparation and explains unlimited wait", loginModel.FeedbackTitle == "等待浏览器授权"
-            && loginModel.Feedback.Contains("不会自动超时") && loginModel.LoginStageLabel.Contains("不自动超时"));
+            && loginModel.Feedback.Contains("新的 Codex 授权") && loginModel.LoginStageLabel.Contains("不自动超时"));
         var resumeUrl = newBrowser.LastUrl; var resumeOpenCount = newBrowser.OpenCount;
         var resumeRequests = loginTransport.Requests.Count;
         Check("waiting login has an explicit continue authorization button", ((Button)window.FindName("HomeResumeLoginButton")).IsEnabled
@@ -356,7 +363,7 @@ internal static class StorageUiVerification
         var tunRoot = loginWorkspace.ProxyServices.FlClashRoot; Directory.CreateDirectory(tunRoot);
         File.WriteAllText(Path.Combine(tunRoot, "config.yaml"), "mixed-port: 7897\nbind-address: '*'\nauthentication: []\ntun: {enable: true}\n");
         loginWorkspace.Accounts.OfflineProxyListeners!.Add(new("FlClashCore.exe", "127.0.0.1", 7897));
-        loginModel.NewAccountLoginCommand.Execute(null); var tunInput = loginModel.Onboarding!; tunInput.AuthorizeCommand.Execute(null); await tunInput.CurrentOperation; Flush();
+        loginModel.NewAccountLoginCommand.Execute(null); var tunInput = loginModel.Onboarding!; tunInput.AuthorizeCommand.Execute(null); await TwoStageLoginVerification.ContinueAsync(loginModel, loginWorkspace.Accounts!, tunInput.CurrentOperation); await tunInput.CurrentOperation; Flush();
         Check("current-network choice completes fixture OAuth via TUN core without a system proxy or manual fields", !loginModel.IsBusy && !loginModel.IsOnboardingOpen
             && newBrowser.SystemProxy is null && newBrowser.Proxy == "http://127.0.0.1:7897"
             && loginWorkspace.Profiles.ReadEnvironment(recordedProfile).Proxy == newBrowser.Proxy && loginTransport.Requests.Last().Proxy == newBrowser.Proxy);
@@ -490,7 +497,7 @@ internal static class StorageUiVerification
             if (request.Url == NetCoffeeService.TraceEndpoint || NetCoffeeService.IsLookup(request.Url))
                 throw new AccountException(AccountError.Network, "fixture screening provider unavailable after successful selection");
         };
-        dedicatedInput.AuthorizeCommand.Execute(null); await dedicatedInput.CurrentOperation; Flush();
+        dedicatedInput.AuthorizeCommand.Execute(null); await TwoStageLoginVerification.ContinueAsync(loginModel, loginWorkspace.Accounts!, dedicatedInput.CurrentOperation); await dedicatedInput.CurrentOperation; Flush();
         loginTransport.RequestObserved = previousObserver;
         var independentProxy = loginWorkspace.Profiles.ReadEnvironment(recordedProfile).Proxy;
         Check("dedicated login pins automatic port and preserves main FlClash config", !loginModel.IsError && independentProxy != "http://127.0.0.1:7897"
@@ -517,7 +524,7 @@ internal static class StorageUiVerification
         importWorkspace.Profiles.CreateBoundAccount("独立登录目标", new("http://127.0.0.1:7895")); importModel.RefreshCommand.Execute(null);
         importModel.Selected = importModel.FilteredItems.Single(i => i.Name == "独立登录目标"); await importModel.SwitchSelectedAsync(true);
         importModel.Selected = importModel.FilteredItems.Single(i => i.Name == "首次导入"); await importModel.SwitchSelectedAsync(false);
-        importModel.Selected = importModel.FilteredItems.Single(i => i.Name == "独立登录目标"); await importModel.LoginSelectedAsync();
+        importModel.Selected = importModel.FilteredItems.Single(i => i.Name == "独立登录目标"); var importedLogin = importModel.LoginSelectedAsync(); await TwoStageLoginVerification.ContinueAsync(importModel, importWorkspace.Accounts!, importedLogin); await importedLogin;
         Check("new switch clears stale login continuation intent", importModel.Active?.Name == "首次导入" && !importModel.NeedsLogin && importWorkspace.Profiles.ListAccounts().Single(a => a.Name == "独立登录目标").HasCredentials);
         void Select(string name) { model.Selected = model.FilteredItems.Single(i => i.Name == name); Flush(); }
         Check("explicit fixture reads real profiles and current identity", !model.IsPreview && model.ItemCount == 2 && model.Active?.Name == "工作甲");
@@ -696,6 +703,7 @@ internal static class StorageUiVerification
         Select("待登录目标"); await model.SwitchSelectedAsync(true);
         workspace.Accounts!.OfflineCallbacks!.HoldCallback = true;
         model.LoginCommand.Execute(null); var cancelledLogin = model.CurrentOperation;
+        await TwoStageLoginVerification.ContinueAsync(model, workspace.Accounts!, cancelledLogin);
         for (var attempt = 0; attempt < 100 && (workspace.Accounts.Login.Status.Stage != LoginStage.Browser || !model.CancelLoginCommand.CanExecute(null)); attempt++) await Task.Delay(20);
         Check("login exposes browser stage and cancellation command", workspace.Accounts.Login.Status.Stage == LoginStage.Browser && model.CancelLoginCommand.CanExecute(null));
         model.CancelLoginCommand.Execute(null); await cancelledLogin;
@@ -706,6 +714,7 @@ internal static class StorageUiVerification
         var tokensBeforeResume = workspace.Accounts.OfflineTransport!.Requests.Count(request => request.Url == AccountEndpoints.Token);
         var authorizationsBeforeResume = workspace.Accounts.OfflineTransport.Requests.Count(request => request.Url == AccountEndpoints.Token && request.ContentType == "application/x-www-form-urlencoded");
         model.HomeLaunchCommand.Execute(null); var resumedLogin = model.CurrentOperation;
+        await TwoStageLoginVerification.ContinueAsync(model, workspace.Accounts!, resumedLogin);
         for (var attempt = 0; attempt < 100 && (workspace.Accounts.Login.Status.Stage != LoginStage.Browser || !model.CancelLoginCommand.CanExecute(null)); attempt++) await Task.Delay(20);
         var continuationCancelButton = (Button)window.FindName("HomeCancelLoginButton");
         UiVerification.ArrangeForCapture(layout, 1040, 670);
@@ -1554,6 +1563,7 @@ internal static class StorageUiVerification
         Check("explicit original cleanup affects only original state and retains configuration and project", managedModel.Editor is null && !File.Exists(Path.Combine(originalHome, "auth.json")) && !Directory.Exists(Path.Combine(originalHome, "sessions")) && File.ReadAllText(Path.Combine(originalHome, "config.toml")).Contains("original-model") && File.Exists(Path.Combine(managedWorkspace.ActiveHome, "auth.json")) && managedModel.Active?.Name == "分身甲" && File.ReadAllText(projectFile) == "user-project");
         await AccountIpChangeVerification.RunAsync(window, Path.Combine(fixtureContainer, "account-ip-change"), Check, name => Capture(name, 1040, 670));
         await VisualTestVerification.RunAsync(window, Path.Combine(fixtureContainer, "fingerprint-batch"), Check, name => Capture(name, 1040, 670));
+        await AccountFreezeVerification.RunAsync(window, Path.Combine(fixtureContainer, "account-freeze"), Check, name => Capture(name, 1040, 670));
         await ResidentialExemptionVerification.RunAsync(window, Path.Combine(fixtureContainer, "residential-exemption"), Check, name => Capture(name, 1040, 670));
         window.DataContext = model;
         File.WriteAllText(Path.Combine(directory, "ui-verification.json"), JsonSerializer.Serialize(new { passed = true, mode = "real_storage_with_offline_runtime", actualAccountOperations = false, actualProxyChanges = false, actualFirewallChanges = false, actualOriginalCodexCleanup = false, actualFingerprintRequests = false, actualNodeProbes = false, fixtureContainer, checks, renders }, new JsonSerializerOptions { WriteIndented = true }));

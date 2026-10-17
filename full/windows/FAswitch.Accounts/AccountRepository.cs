@@ -21,6 +21,10 @@ public sealed class AccountRepository
     public JsonObject ReadAuth(string name) => Read(Path.Combine(AccountPath(name), "auth.json"));
     public JsonObject ReadProvider(string name) => Read(Path.Combine(Profiles.ProfileDirectory(new(IdentityKind.Provider, name)), "provider.json"));
     public bool Exists(string name) => files.DirectoryExists(AccountPath(name));
+    public void RequireTestsAllowed(string name)
+    {
+        if (Profiles.AreTestsFrozen(name)) throw new AccountException(AccountError.Busy, "账号已冻结静置，未发送测试请求；解冻后才能测试。");
+    }
     public string Proxy(string name)
     {
         var environment = Profiles.ReadEnvironment(name);

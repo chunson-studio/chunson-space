@@ -234,7 +234,7 @@ internal static class UiVerification
     {
         var items = menu.Items.OfType<MenuItem>().ToArray();
         var expected = new[] { (Label: "切换并启动", Command: model.HomeLaunchCommand), (Label: "账号配置", Command: model.EditSelectedCommand),
-            (Label: "重命名", Command: model.RenameSelectedCommand), (Label: "删除账号…", Command: model.ArchiveSelectedCommand) };
+            (Label: "重命名", Command: model.RenameSelectedCommand), (Label: model.TestFreezeLabel, Command: model.ToggleTestFreezeCommand), (Label: "删除账号…", Command: model.ArchiveSelectedCommand) };
         return items.Length == expected.Length && items.Zip(expected).All(pair => pair.First.Header?.ToString() == pair.Second.Label
             && pair.First.Command == pair.Second.Command && pair.First.CommandParameter is null);
     }

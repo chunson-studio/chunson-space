@@ -62,14 +62,27 @@ public sealed partial class ShellViewModel
     public string DiagnosticDetails => diagnosticDetails;
     public bool HasDiagnostics => diagnosticIdentity == Selected?.Identity && diagnosticDetails.Length > 0;
     public bool IsLoggingIn => workspace?.Accounts?.Login.Status.Active == true;
-    public string LoginStageLabel => workspace?.Accounts?.Login.Status.Stage switch { LoginStage.Checking => "正在打开本机浏览器并确认出口（复用已存评分）", LoginStage.Browser => "等待浏览器授权 · 不自动超时", LoginStage.Token => "正在交换凭据", LoginStage.Save => "正在保存登录", _ => "准备登录" };
+    public bool IsAccountPreparation => workspace?.Accounts?.Login.Status.Stage is LoginStage.AccountPreparation or LoginStage.ReadyToAuthorize && IsLoggingIn;
+    public string LoginStageLabel => workspace?.Accounts?.Login.Status.Stage switch { LoginStage.Checking => "正在确认所选出口（复用已存评分）", LoginStage.AccountPreparation => "第一步：完成操作后手动关闭浏览器", LoginStage.ReadyToAuthorize => "临时浏览器已清理 · 可以开始第二步", LoginStage.Browser => "第二步：重新登录并授权 · 不自动超时", LoginStage.Token => "正在交换凭据", LoginStage.Save => "正在保存登录", _ => "准备登录" };
+    public string LoginContinueLabel => IsAccountPreparation ? "重新登录并授权" : "继续本次授权";
+    public string LoginContinueHelp => IsAccountPreparation
+        ? "先重置密码、登录并退出所有设备，然后手动关闭第一步浏览器。进程和临时资料清理完成后，才能开始新的授权。"
+        : "返回本次新建的 Codex 授权页，沿用已选浏览器与出口。";
     private void RefreshLoginProgress()
     {
         Raise(nameof(IsLoggingIn)); Raise(nameof(LoginStageLabel)); CancelLoginCommand.Refresh(); ResumeLoginCommand.Refresh();
+        Raise(nameof(LoginContinueLabel)); Raise(nameof(LoginContinueHelp));
+        Raise(nameof(IsAccountPreparation));
         Raise(nameof(EmptyTitle)); Raise(nameof(EmptyDescription)); Raise(nameof(EmptyDetailDescription));
+        if (workspace?.Accounts?.Login.Status is { Active: true, Stage: LoginStage.AccountPreparation, BrowserOpened: true }
+            && FeedbackTitle is not ("先重置密码与退出设备" or "正在取消登录" or "正在退出"))
+            ShowFeedback("先重置密码与退出设备", "在官方网页登录页点「忘记密码」，用新密码登录后退出所有设备，然后手动关闭这个浏览器的所有窗口。项目会结束本次后台进程并删除临时资料，清理完成后才开放第二步。此时尚未发起 Codex 授权。", "Info");
+        if (workspace?.Accounts?.Login.Status is { Active: true, Stage: LoginStage.ReadyToAuthorize }
+            && FeedbackTitle is not ("第一步已清理" or "正在取消登录" or "正在退出"))
+            ShowFeedback("第一步已清理", "临时浏览器进程已退出，临时资料已删除。点击「重新登录并授权」开始第二步；新的授权不会沿用第一步的登录会话。", "Info");
         if (workspace?.Accounts?.Login.Status is { Active: true, Stage: LoginStage.Browser, BrowserOpened: true }
             && FeedbackTitle is not ("等待浏览器授权" or "正在取消登录" or "授权页面未打开"))
-            ShowFeedback("等待浏览器授权", "已打开 ChatGPT 和 Codex 授权两个标签页。先在 ChatGPT 登录，再切到授权页刷新并完成授权，账号才会自动保存。找不到授权页时点击「继续本次授权」，沿用本次会话。这里不会自动超时；关闭本次浏览器或取消即可结束。", "Info");
+            ShowFeedback("等待浏览器授权", "已创建新的 Codex 授权。请用新密码重新登录并完成授权，项目提示保存成功才算完成。此阶段若还需重置密码或退出设备，请先取消本次授权，再重新开始账号准备。找不到授权页可点击「继续本次授权」。", "Info");
     }
     public DelegateCommand LoginCommand { get; private set; } = null!;
     public DelegateCommand CancelLoginCommand { get; private set; } = null!;
@@ -92,8 +105,8 @@ public sealed partial class ShellViewModel
         SyncLocalTimezoneCommand = new(_ => CurrentOperation = ConfigureRegionAsync(), _ => !busy && !checkingLocalEnvironment && workspace?.Accounts is not null && workspace.LocalEnvironment is not null);
         RecheckLocalEnvironmentCommand = new(_ => LocalEnvironmentOperation = RefreshLocalEnvironmentAsync(), _ => !busy && !checkingLocalEnvironment && workspace?.LocalEnvironment is not null);
         LoginCommand = new(_ => CurrentOperation = LoginSelectedAsync(), _ => AccountReady());
-        ResumeLoginCommand = new(async _ => await ResumeLoginAsync(), _ => workspace?.Accounts?.Login.CanResumeBrowser == true);
-        CancelLoginCommand = new(_ => { ClearLoginIntent(); ShowFeedback("正在取消登录", "未完成的登录凭据不会保存。", "Info"); workspace?.Accounts?.Login.Cancel(); }, _ => workspace?.Accounts?.Login.Status.Stage is LoginStage.Checking or LoginStage.Browser && IsLoggingIn);
+        ResumeLoginCommand = new(async _ => await ResumeLoginAsync(), _ => workspace?.Accounts?.Login is { } login && (login.CanBeginAuthorization || login.CanResumeBrowser));
+        CancelLoginCommand = new(_ => { ClearLoginIntent(); ShowFeedback("正在取消登录", "未完成的登录凭据不会保存。", "Info"); workspace?.Accounts?.Login.Cancel(); }, _ => workspace?.Accounts?.Login.Status.Stage is LoginStage.Checking or LoginStage.AccountPreparation or LoginStage.ReadyToAuthorize or LoginStage.Browser && IsLoggingIn);
         OpenBrowserCommand = new(_ => CurrentOperation = OpenBrowserAsync(), _ => AccountReady());
         QuotaCommand = new(_ => CurrentOperation = RunAccountActionAsync(AccountAction.Quota), _ => AccountReady());
         ConnectivityCommand = new(_ => CurrentOperation = RunAccountActionAsync(AccountAction.Connectivity), _ => AccountReady());
@@ -113,6 +126,11 @@ public sealed partial class ShellViewModel
         if (workspace?.Accounts is null) return;
         try
         {
+            if (workspace.Accounts.Login.CanBeginAuthorization)
+            {
+                if (workspace.Accounts.Login.BeginAuthorization()) ShowFeedback("正在创建新的授权", "账号准备阶段已结束，正在打开新的 Codex 授权页。", "Info");
+                return;
+            }
             if (await workspace.Accounts.Login.ResumeBrowserAsync() && IsLoggingIn)
                 ShowFeedback("等待浏览器授权", "已在原来的英文浏览器档案中打开本次 Codex 授权页。完成授权后账号会自动保存；没有重新测分。", "Info");
         }
@@ -205,7 +223,7 @@ public sealed partial class ShellViewModel
         timer.Start(); bool resume = false;
         try
         {
-            var result = await Task.Run(() => services.Login.LoginAsync(target.Name));
+            var result = await Task.Run(() => services.Login.LoginAsync(target.Name, prepareAccount: true));
             if (result.Ok)
             {
                 ReloadProfiles(); SyncActive(); Selected = FilteredItems.FirstOrDefault(i => i.Identity == target.Identity);
@@ -233,7 +251,7 @@ public sealed partial class ShellViewModel
             token.ThrowIfCancellationRequested();
             authorizationBrowser = workspace.Accounts.CreateAuthorizationBrowser(proxy, input.IndependentBrowserTimezone);
             ShowFeedback("正在准备英文浏览器", "已识别 " + input.Source + "。浏览器先显示英文准备页，确认出口并通过线路准入后进入登录。Windows 继续使用中文。", "Info");
-            var result = await Task.Run(() => workspace.Accounts.Login.LoginNewAsync(explicitProxy: proxy, authorizationBrowser: authorizationBrowser, cancellationToken: token));
+            var result = await Task.Run(() => workspace.Accounts.Login.LoginNewAsync(explicitProxy: proxy, authorizationBrowser: authorizationBrowser, cancellationToken: token, prepareAccount: true));
             if (result.Ok)
             {
                 Navigate("Accounts"); ReloadProfiles(); SyncActive();

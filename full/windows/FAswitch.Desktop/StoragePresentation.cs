@@ -193,7 +193,7 @@ public sealed partial class ShellViewModel
     private void ReloadProfiles()
     {
         if (workspace is null) return;
-        var accounts = workspace.Profiles.ListAccounts().Select((a, index) => new IdentityItem(a.Name, "Account", a.HasCredentials ? "已保存登录资料" : "待登录", Initial(a.Name), AvatarColor(index), a.Environment.Proxy, a.Environment.Timezone, a.Environment.Locale, "Codex 默认", a.Environment.FollowSystemProxy));
+        var accounts = workspace.Profiles.ListAccounts().Select((a, index) => new IdentityItem(a.Name, "Account", a.TestsFrozen ? "已冻结静置 · 不参与模型测试" : a.HasCredentials ? "已保存登录资料" : "待登录", Initial(a.Name), AvatarColor(index), a.Environment.Proxy, a.Environment.Timezone, a.Environment.Locale, "Codex 默认", a.Environment.FollowSystemProxy, a.TestsFrozen));
         identities = accounts.ToArray();
         LoadExitObservations();
         Selected = null; UpdateItems(); Selected = FilteredItems.FirstOrDefault();
@@ -260,6 +260,7 @@ public sealed partial class ShellViewModel
     }
     private void RefreshBusyState()
     {
+        ToggleTestFreezeCommand?.Refresh();
         Raise(nameof(IsBusy));
         ProxyPanel?.SetHostBusy(globalBusy);
         NavigateCommand.Refresh(); OpenBackgroundModelCommand?.Refresh();
@@ -324,6 +325,7 @@ public sealed partial class ShellViewModel
     }
     private void RefreshSelectionCommands()
     {
+        Raise(nameof(TestFreezeLabel)); ToggleTestFreezeCommand?.Refresh();
         Raise(nameof(IsBusy)); ProxyPanel?.SetHostBusy(globalBusy);
         RefreshSimpleActions();
         OpenVisualTestsCommand?.Refresh();

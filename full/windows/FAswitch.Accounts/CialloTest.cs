@@ -41,6 +41,7 @@ public sealed partial class AccountService
     }
     public async Task<CialloResult> TestCialloAsync(string profileName, IProgress<CialloReply>? progress = null, CancellationToken token = default)
     {
+        repository.RequireTestsAllowed(profileName);
         var session = new AuthSession(repository.ReadAuth(profileName), repository.Proxy(profileName));
         _ = Credentials(session.Auth); _ = HttpAccountTransport.RequireHttpProxy(session.Proxy);
         var replies = new List<CialloReply>();
@@ -59,6 +60,7 @@ public sealed partial class AccountService
         foreach (var model in CialloTest.Models)
         {
             if (token.IsCancellationRequested) return Save(true);
+            repository.RequireTestsAllowed(profileName);
             progress?.Report(new(model, "", CialloTest.Effort, "running", "", TimeSpan.Zero));
             var watch = Stopwatch.StartNew(); CialloReply reply;
             try

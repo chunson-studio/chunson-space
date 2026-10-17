@@ -13,7 +13,7 @@ public sealed partial class ShellViewModel
     internal async Task<bool> DrainTasksForExitAsync()
     {
         var login = workspace?.Accounts?.Login.Status;
-        var cancellableLogin = login?.Active == true && login.Stage is LoginStage.Checking or LoginStage.Browser;
+        var cancellableLogin = login?.Active == true && login.Stage is LoginStage.Checking or LoginStage.AccountPreparation or LoginStage.ReadyToAuthorize or LoginStage.Browser;
         if (operationBusy && !cancellableLogin && onboarding?.IsStarting != true)
         {
             ReportLifecycleFailure("暂不能退出", "当前操作正在提交或写入资料。请等待完成后再退出；没有强制停止或删除数据。");

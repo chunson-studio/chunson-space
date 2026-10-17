@@ -334,6 +334,7 @@ try
     count += await StrictEgressChecks.Run(Path.Combine(root, "strict-egress"));
     count += await StrictBrowserChecks.Run(Path.Combine(root, "strict-browser"));
     count += await PersistentBrowserChecks.Run(Path.Combine(root, "persistent-browser"));
+    count += await TwoStageLoginChecks.Run(Path.Combine(root, "two-stage-login"));
     count += await CialloChecks.Run(Path.Combine(root, "ciallo"));
     count += await ResponsesFailureChecks.Run(Path.Combine(root, "responses-failures"));
     count += await BrowserTimezoneTargetChecks.Run();
@@ -368,9 +369,10 @@ sealed class FakeTransport : IAccountTransport
 sealed class FakeCallbackFactory(FakeClock clock) : ILoginCallbackFactory
 {
     public int Starts { get; private set; }
+    public List<string> States { get; } = [];
     public int WaitsBeforeResult { get; set; }
     public CallbackKind Kind { get; set; } = CallbackKind.Code;
-    public Task<ILoginCallback> StartAsync(string state, CancellationToken cancellationToken) { Starts++; return Task.FromResult<ILoginCallback>(new FakeCallback(clock, Kind, WaitsBeforeResult)); }
+    public Task<ILoginCallback> StartAsync(string state, CancellationToken cancellationToken) { Starts++; States.Add(state); return Task.FromResult<ILoginCallback>(new FakeCallback(clock, Kind, WaitsBeforeResult)); }
 }
 sealed class FakeCallback(FakeClock clock, CallbackKind kind, int waitsBeforeResult) : ILoginCallback
 {

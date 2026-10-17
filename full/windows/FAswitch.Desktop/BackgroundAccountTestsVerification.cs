@@ -64,12 +64,18 @@ internal static class BackgroundAccountTestsVerification
         check("another test for A queues without issuing a parallel request", queued.IsBusy && runtime.Requests.Count == 2 && maximum == 1);
         queued.CancelCommand.Execute(null); await queued.CurrentOperation;
         check("queued cancellation does not send a model request or cancel predecessor", queued.Result?.Cancelled == true && first.IsBusy && runtime.Requests.Count == 2);
+        var cancelledTime = queued.ProgressSummary; await Task.Delay(1100);
+        check("cancelled queue time is frozen while predecessor remains active", queued.ProgressSummary == cancelledTime && first.IsBusy && queued.CompletedReplies == 0);
         queued.StartCommand.Execute(null); queued.CloseCommand.Execute(null);
         model.OpenCialloCommand.Execute(null); var ciallo = model.Ciallo!; ciallo.SelectedProfile = "A";
         ciallo.StartCommand.Execute(null); ciallo.CloseCommand.Execute(null);
         check("Ciallo shares the same account queue as visual tests", ciallo.IsBusy && workspace.Accounts.OfflineTransport.Requests.Count == 0);
+        var cialloTime = ciallo.ProgressSummary; await Task.Delay(1250);
+        check("Ciallo queued background timer advances without issuing requests", ciallo.ProgressSummary != cialloTime && ciallo.ProgressSummary.Contains("已结束 0/") && workspace.Accounts.OfflineTransport.Requests.Count == 0);
         gateA.SetResult(); await Task.WhenAll(first.CurrentOperation, queued.CurrentOperation, ciallo.CurrentOperation);
         check("A sequences complete serially while B remains independently running", maximum == 1 && first.Result?.Completed == true && queued.Result?.Completed == true && !ciallo.IsBusy && second.IsBusy);
+        cialloTime = ciallo.ProgressSummary; await Task.Delay(1100);
+        check("Ciallo completion freezes elapsed time and records ended models", ciallo.ProgressSummary == cialloTime && ciallo.Rows.All(row => row.Finished));
         model.Selected = model.FilteredItems.Single(item => item.Name == "A"); model.EditSelectedCommand.Execute(null); var finalEditor = model.Editor;
         check("account editor becomes available when its own tests finish", model.Editor?.Original?.Name == "A");
         gateB.SetResult(); await second.CurrentOperation;

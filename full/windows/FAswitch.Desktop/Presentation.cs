@@ -24,7 +24,7 @@ public sealed class DelegateCommand(Action<object?> execute, Func<object?, bool>
     public void Refresh() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 }
 
-public sealed record IdentityItem(string Name, string Kind, string Subtitle, string Initials, string Color, string Proxy, string Timezone, string Locale, string Model, bool FollowSystemProxy = false)
+public sealed record IdentityItem(string Name, string Kind, string Subtitle, string Initials, string Color, string Proxy, string Timezone, string Locale, string Model, bool FollowSystemProxy = false, bool TestsFrozen = false)
 {
     public string Key => $"{Kind}:{Name}";
     public IdentityRef Identity => new(Kind == "Account" ? IdentityKind.Account : IdentityKind.Provider, Name);
@@ -32,7 +32,7 @@ public sealed record IdentityItem(string Name, string Kind, string Subtitle, str
     public string ProxyDisplay => FollowSystemProxy ? "跟随 FlClash 当前网络" : Proxy.Length > 0 ? Proxy : "尚未配置代理";
     public string ExitSummary => FollowSystemProxy ? "跟随本机" : Proxy.Length > 0 ? "独立 IP" : "未配置";
     public string PortLabel => FollowSystemProxy ? "系统端口" : Uri.TryCreate(Proxy, UriKind.Absolute, out var uri) && uri.Port > 0 ? uri.Port.ToString(System.Globalization.CultureInfo.InvariantCulture) : "—";
-    public string SavedStateLabel => Subtitle == "待登录" ? "待登录" : "已保存";
+    public string SavedStateLabel => TestsFrozen ? "已冻结" : Subtitle == "待登录" ? "待登录" : "已保存";
     public string KindLabel => Kind == "Account" ? "账号档案" : "历史档案";
 }
 
@@ -116,8 +116,8 @@ public sealed partial class ShellViewModel : ObservableObject
     public bool HasNoAccounts => IsAccountsPage && !identities.Any(i => i.Kind == "Account");
     public bool HasSearchMiss => IsEmpty && identities.Any(i => i.Kind == "Account");
     public string EmptyTitle => HasNoAccounts ? IsLoggingIn ? "正在添加账号" : "还没有账号" : HasSearchMiss ? "没有匹配的档案" : "还没有账号";
-    public string EmptyDescription => HasNoAccounts ? IsLoggingIn ? "完成浏览器中的 Codex 授权后，账号会自动加入列表。" : "点击上方「登录账号」，在浏览器完成 OpenAI 授权后自动加入列表。" : HasSearchMiss ? "档案仍保存在本机。请更换搜索内容，或清除筛选查看全部档案。" : "登录账号后即可开始使用。";
-    public string EmptyDetailDescription => IsLoggingIn ? "完成授权后，可在这里查看账号出口和运行环境。" : HasNoAccounts ? "登录账号后，可在这里查看出口和运行环境。" : "选择一个账号，即可查看出口和运行环境。";
+    public string EmptyDescription => HasNoAccounts ? IsAccountPreparation ? "先通过忘记密码重置密码，再登录并退出所有设备；手动关闭第一步浏览器，等待临时资料清理后开始新的授权。" : IsLoggingIn ? "完成浏览器中的 Codex 授权后，账号会自动加入列表。" : "点击上方「准备账号」，先整理登录状态，再进行 OpenAI 授权。" : HasSearchMiss ? "档案仍保存在本机。请更换搜索内容，或清除筛选查看全部档案。" : "登录账号后即可开始使用。";
+    public string EmptyDetailDescription => IsAccountPreparation ? "当前只准备账号，尚未发起 Codex 授权。" : IsLoggingIn ? "完成授权后，可在这里查看账号出口和运行环境。" : HasNoAccounts ? "登录账号后，可在这里查看出口和运行环境。" : "选择一个账号，即可查看出口和运行环境。";
     public bool HasSelection => selected is not null;
     public bool HasNoSelection => selected is null;
     public IdentityItem? Selected { get => selected; set { if (updatingIdentityPage && value is null) return; if (value is not null) EnsureIdentityVisible(value); if (Set(ref selected, value)) { Raise(nameof(HasSelection)); Raise(nameof(HasNoSelection)); Raise(nameof(SelectedIsActive)); Raise(nameof(IdentityState)); NotifyHomeDetails(); SimulateSwitchCommand.Refresh(); SimulateLaunchCommand.Refresh(); RefreshSelectionCommands(); } } }

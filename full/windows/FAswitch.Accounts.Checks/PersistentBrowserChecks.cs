@@ -185,7 +185,7 @@ internal static class PersistentBrowserChecks
         public Task EnsureAsync(string root, BrowserIdentity browser, string timezone, CancellationToken token)
         { Timezones[browser.ProfileDirectory] = timezone; return Task.CompletedTask; }
     }
-    private sealed class ProfileChrome : IChromeSystem
+    internal sealed class ProfileChrome : IChromeSystem
     {
         public Dictionary<string, BrowserIdentity> Roots { get; } = new(StringComparer.OrdinalIgnoreCase);
         public int StartedRoots { get; private set; }
@@ -194,9 +194,15 @@ internal static class PersistentBrowserChecks
         public int? CloseAfterObservations { get; set; }
         public int Observations { get; set; }
         public Action<string>? OnStarted { get; set; }
+        public List<IReadOnlyList<string>> LaunchArguments { get; } = [];
+        public HashSet<string> HiddenProfiles { get; } = [];
+        public bool UnknownWindows { get; set; }
+        public Task<bool?> HasOpenWindowsAsync(string exe, string profile, IReadOnlyList<BrowserIdentity> known, CancellationToken token)
+            => Task.FromResult<bool?>(UnknownWindows ? null : Roots.ContainsKey(profile) && !HiddenProfiles.Contains(profile));
         public string? FindChrome() => @"C:\fixture\chrome.exe";
         public Task StartAsync(string executable, IReadOnlyList<string> args, CancellationToken token)
         {
+            LaunchArguments.Add(args);
             var profile = ChromeArguments.RootProfile(args)!;
             if (!Roots.ContainsKey(profile)) { StartedRoots++; Roots[profile] = new(StartedRoots, StartedRoots, executable, profile); OnStarted?.Invoke(profile); }
             return Task.CompletedTask;

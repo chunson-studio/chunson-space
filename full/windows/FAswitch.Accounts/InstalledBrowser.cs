@@ -96,7 +96,7 @@ public sealed partial class ChromeLoginBrowser
         if (previewSession == session) { previewSession = null; preparedProxy = null; preparedExecutable = null; }
         return Task.CompletedTask;
     }
-    private async Task PrepareInstalledAsync(string proxy, CancellationToken token, string profileName = LoginService.NewAccountRequestProfile)
+    private async Task PrepareInstalledAsync(string proxy, CancellationToken token, string profileName = LoginService.NewAccountRequestProfile, bool disposablePreparation = false)
     {
         if (Volatile.Read(ref disposed) != 0) throw new AccountException(AccountError.Browser, "登录浏览器会话已关闭。");
         proxy = ChromeArguments.RequireLoopbackProxy(HttpAccountTransport.RequireHttpProxy(proxy));
@@ -106,7 +106,7 @@ public sealed partial class ChromeLoginBrowser
             return;
         }
         var profiles = new AccountBrowserProfiles(repository.Root);
-        var bound = repository.Exists(profileName) ? profiles.Read(profileName) : null;
+        var bound = !disposablePreparation && repository.Exists(profileName) ? profiles.Read(profileName) : null;
         var profile = bound ?? profiles.Create();
         var files = new PhysicalFileStorage();
         SavedBrowserRoute? saved = null;
@@ -124,7 +124,7 @@ public sealed partial class ChromeLoginBrowser
             || existing.Any(root => !saved.Roots.Contains(root))))
             throw new AccountException(AccountError.Browser, "该账号的浏览器仍使用另一个出口或窗口状态已变化。请先关闭该账号的档案浏览器，再重新打开；网页登录状态会保留。");
         if (existing.Count == 0) WriteEnglishPreferences(profile);
-        if (bound is null && repository.Exists(profileName)) { profiles.Bind(profileName, profile); bound = profile; }
+        if (!disposablePreparation && bound is null && repository.Exists(profileName)) { profiles.Bind(profileName, profile); bound = profile; }
         var page = Path.Combine(profile, "preparing.html");
         // A local page reloads until admission and the browser timezone readback finish.
         new PhysicalFileStorage().WriteAtomic(page, Encoding.UTF8.GetBytes("<!doctype html><meta charset='utf-8'><meta http-equiv='refresh' content='1'><title>Preparing sign-in</title><style>body{background:#f3f1e8;color:#202820;font:18px system-ui;display:grid;place-content:center;min-height:90vh}h1{font-weight:600;color:#466332}p{color:#56634e;max-width:560px;line-height:1.7}</style><h1>Preparing sign-in…</h1><p>Setting up your selected connection and timezone.</p><p>The sign-in page will open automatically.</p>"));
@@ -138,7 +138,7 @@ public sealed partial class ChromeLoginBrowser
         // override: Chrome explicitly flags it as an unsafe startup argument.
         arguments.Insert(0, "--disable-background-networking");
         var launch = new BrowserLaunch(executable, profile, [], existing);
-        previewSession = new(launch) { Persistent = bound is not null }; sessions[profile] = previewSession;
+        previewSession = new(launch) { Persistent = bound is not null, DisposablePreparation = disposablePreparation }; sessions[profile] = previewSession;
         preparedProxy = proxy; preparedExecutable = executable; preparedAccount = profileName;
         IReadOnlyList<BrowserIdentity> roots;
         if (existing.Count > 0)
@@ -155,12 +155,12 @@ public sealed partial class ChromeLoginBrowser
         files.WriteAtomic(RoutePath(profile), JsonSerializer.SerializeToUtf8Bytes(new SavedBrowserRoute(executable, proxy, roots, alignTimezone, existing.Count > 0 ? saved?.Timezone : null)));
     }
 
-    private async Task<BrowserLaunch> OpenInstalledAsync(string name, Uri url, string proxy, EgressResult? admitted, CancellationToken token)
+    private async Task<BrowserLaunch> OpenInstalledAsync(string name, Uri url, string proxy, EgressResult? admitted, CancellationToken token, bool disposablePreparation = false)
     {
         if (!url.IsAbsoluteUri || url.Scheme != "https" || url.UserInfo.Length != 0
             || !(url.Host == AccountEndpoints.Authorize.Host || url.Host == "chatgpt.com"))
             throw new AccountException(AccountError.Browser, "登录网站地址无效。");
-        await PrepareInstalledAsync(proxy, token, name);
+        await PrepareInstalledAsync(proxy, token, name, disposablePreparation);
         var exit = admitted ?? (egressProbe is null ? null : await egressProbe(proxy, token));
         if (exit is not { Ok: true } || !System.Net.IPAddress.TryParse(exit.Ip, out _))
             throw new AccountException(AccountError.ExitUnavailable, "当前出口未确认，尚未打开授权网站。");
@@ -194,9 +194,23 @@ public sealed partial class ChromeLoginBrowser
         }
         session.Launch = session.Launch with { Warnings = [$"已使用本机 {Path.GetFileNameWithoutExtension(session.Launch.Executable)} 的英文独立配置；代理出口 {exit.Ip}。" + (route.AlignTimezone == true ? $"浏览器时区已读回确认：{exit.Timezone}；Windows 时区保持不变。" : "浏览器沿用 Windows 当前时区。") ] };
         previewSession = null; preparedProxy = null; preparedExecutable = null;
-        if (url.Host == "chatgpt.com" && repository.Exists(name))
+        if (!disposablePreparation && url.Host == "chatgpt.com" && repository.Exists(name))
             await KeepAccountProfileAsync(name, session.Launch, token);
         return session.Launch;
+    }
+
+    public Task<BrowserLaunch> OpenAccountPreparationAsync(string name, string proxy, EgressResult? egress, CancellationToken token)
+        => installedBrowser ? OpenInstalledAsync(name, new Uri("https://chatgpt.com/auth/login"), proxy, egress, token, disposablePreparation: true)
+            : throw new AccountException(AccountError.Browser, "分步登录需要本机浏览器的独立资料目录。");
+
+    public async Task<bool> IsPreparationClosedAsync(BrowserLaunch launch, CancellationToken token)
+    {
+        if (!sessions.TryGetValue(launch.ProfileDirectory, out var session) || session.Launch != launch || !session.DisposablePreparation)
+            throw new AccountException(AccountError.Browser, "账号准备会话已结束，请重新开始。");
+        var visible = await system.HasOpenWindowsAsync(launch.Executable, launch.ProfileDirectory, session.Roots, token);
+        // Never interpret unknown ownership/window visibility as a manual close.
+        if (visible is true) session.PreparationWindowSeen = true;
+        return visible is false && (session.PreparationWindowSeen || (await ObserveAsync(launch, token)) is { Count: 0 });
     }
 
     public async Task ResumeAsync(BrowserLaunch launch, CancellationToken token)

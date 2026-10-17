@@ -24,6 +24,7 @@ public sealed partial class AccountService
         IReadOnlyList<FingerprintChallenge> challenges, IProgress<FingerprintTestProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
+        repository.RequireTestsAllowed(profileName);
         ArgumentNullException.ThrowIfNull(challenges);
         if (challenges.Count != 3 || challenges.Any(q => q is null || string.IsNullOrWhiteSpace(q.Id) ||
             string.IsNullOrWhiteSpace(q.Prompt) || q.Prompt.Length > 1048576 || q.ExpectedCount <= 0) ||

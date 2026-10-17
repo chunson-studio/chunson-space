@@ -18,6 +18,7 @@ public sealed partial class AccountService
     internal async Task<VisualReply> RequestVisualAsync(string profile, string model, string prompt, IReadOnlyList<string> images, string directory, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
+        repository.RequireTestsAllowed(profile);
         if (!VisualTestCatalog.ValidModel(model)) throw new ArgumentException("模型名称无效。");
         var session = new AuthSession(repository.ReadAuth(profile), repository.Proxy(profile));
         _ = Credentials(session.Auth); _ = HttpAccountTransport.RequireHttpProxy(session.Proxy);

@@ -4,7 +4,7 @@ using System.Text.Json.Nodes;
 
 namespace FAswitch.Accounts;
 
-public enum LoginStage { Idle, Checking, Browser, Token, Save, Done, Failed }
+public enum LoginStage { Idle, Checking, Browser, Token, Save, Done, Failed, AccountPreparation, ReadyToAuthorize }
 public enum CallbackKind { Waiting, Code, Cancelled, StateMismatch, ProviderError, MissingCode, BrowserClosed, Timeout }
 public sealed record LoginCallback(CallbackKind Kind, string? Code = null);
 public sealed record LoginResult(bool Ok, string Profile, string Message, CallbackKind? Callback = null, AccountError? Error = null, CredentialSaveResult? Save = null, IReadOnlyList<string>? Warnings = null);
@@ -42,6 +42,11 @@ public interface IResumableLoginBrowser
 {
     Task ResumeAsync(BrowserLaunch launch, CancellationToken token);
 }
+public interface IAccountPreparationBrowser : IBrowserSessionCleanup
+{
+    Task<BrowserLaunch> OpenAccountPreparationAsync(string profileName, string proxy, EgressResult? egress, CancellationToken token);
+    Task<bool> IsPreparationClosedAsync(BrowserLaunch preparation, CancellationToken token);
+}
 
 public static class OAuthPkce
 {
@@ -76,6 +81,13 @@ public sealed class LoginService(AccountRepository repository, IAccountTransport
     private readonly IAccountClock clock = clock ?? new SystemAccountClock();
     private readonly AccountNetwork network = new(transport);
     private int running;
+    private TaskCompletionSource? accountPrepared;
+    public bool CanBeginAuthorization => Status is { Active: true, Stage: LoginStage.ReadyToAuthorize } && accountPrepared is not null;
+    public bool BeginAuthorization()
+    {
+        if (!CanBeginAuthorization) return false;
+        return Interlocked.Exchange(ref accountPrepared, null)?.TrySetResult() == true;
+    }
     private ILoginCallback? callback;
     private CancellationTokenSource? preparationCancellation;
     private IBrowserSessionCleanup? pendingCleanup;
@@ -100,19 +112,19 @@ public sealed class LoginService(AccountRepository repository, IAccountTransport
     }
     public bool Cancel()
     {
-        if (Status.Active && Status.Stage is LoginStage.Idle or LoginStage.Checking && preparationCancellation is { } pending)
+        if (Status.Active && Status.Stage is LoginStage.Idle or LoginStage.Checking or LoginStage.AccountPreparation or LoginStage.ReadyToAuthorize && preparationCancellation is { } pending)
         { pending.Cancel(); return true; }
         if (Status.Stage == LoginStage.Browser && callback?.Cancel() == true)
         { pendingBrowser = null; preparationCancellation?.Cancel(); return true; }
         return false;
     }
-    public Task<LoginResult> LoginAsync(string profileName, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
-        => LoginCoreAsync(profileName, false, null, false, browser, timeout, cancellationToken);
+    public Task<LoginResult> LoginAsync(string profileName, TimeSpan? timeout = null, CancellationToken cancellationToken = default, bool prepareAccount = false)
+        => LoginCoreAsync(profileName, false, null, false, browser, timeout, cancellationToken, prepareAccount);
     public Task<LoginResult> LoginNewAsync(string? explicitProxy = null, ILoginBrowser? authorizationBrowser = null,
-        bool followSystemProxy = false, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
-        => LoginCoreAsync(NewAccountRequestProfile, true, explicitProxy, followSystemProxy, authorizationBrowser ?? newAccountBrowser, timeout, cancellationToken);
+        bool followSystemProxy = false, TimeSpan? timeout = null, CancellationToken cancellationToken = default, bool prepareAccount = false)
+        => LoginCoreAsync(NewAccountRequestProfile, true, explicitProxy, followSystemProxy, authorizationBrowser ?? newAccountBrowser, timeout, cancellationToken, prepareAccount);
     private async Task<LoginResult> LoginCoreAsync(string profileName, bool newAccount, string? explicitProxy, bool followSystemProxy, ILoginBrowser? selectedBrowser,
-        TimeSpan? timeout, CancellationToken cancellationToken)
+        TimeSpan? timeout, CancellationToken cancellationToken, bool prepareAccount)
     {
         if (Interlocked.CompareExchange(ref running, 1, 0) != 0) return new(false, newAccount ? "" : profileName, "已有登录正在进行。", Error: AccountError.Busy);
         using var operationCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -155,8 +167,8 @@ public sealed class LoginService(AccountRepository repository, IAccountTransport
             if (verifiedAdmission is not null)
             {
                 using var preparation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                browserAttempted = selectedBrowser is IVerifiedProxyLoginBrowser;
-                var prepare = selectedBrowser is IVerifiedProxyLoginBrowser preparedBrowser
+                browserAttempted = !prepareAccount && selectedBrowser is IVerifiedProxyLoginBrowser;
+                var prepare = !prepareAccount && selectedBrowser is IVerifiedProxyLoginBrowser preparedBrowser
                     ? preparedBrowser.PrepareAsync(profileName, proxy, preparation.Token) : Task.CompletedTask;
                 var check = verifiedAdmission(proxy, preparation.Token);
                 var first = await Task.WhenAny(check, prepare);
@@ -175,6 +187,30 @@ public sealed class LoginService(AccountRepository repository, IAccountTransport
                 if (admittedEgress is not { Ok: true }) throw new AccountException(AccountError.ExitUnavailable, "出口未确认，无法匹配系统时区。");
                 await configureNewAccountEnvironment(admittedEgress, cancellationToken);
             }
+            if (prepareAccount)
+            {
+                if (selectedBrowser is not IAccountPreparationBrowser preparable)
+                    throw new AccountException(AccountError.Browser, "此浏览器不支持分步登录，未提前发起授权。");
+                browserAttempted = true;
+                openedBrowser = await preparable.OpenAccountPreparationAsync(profileName, proxy, admittedEgress, cancellationToken);
+                Status = new(profileName, LoginStage.AccountPreparation, true, BrowserOpened: true);
+                // No OAuth URL, PKCE or callback exists while the user resets their password and signs out devices.
+                while (!await preparable.IsPreparationClosedAsync(openedBrowser, cancellationToken))
+                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                var cleaned = await preparable.CleanupAsync(openedBrowser, cancellationToken);
+                if (!cleaned.Success)
+                {
+                    throw new AccountException(AccountError.Browser, "第一步临时浏览器清理未完成，未发起授权：" + ErrorRedaction.Scrub(cleaned.Message));
+                }
+                if (cleaned.Warnings is { } preparationWarnings) warnings.AddRange(preparationWarnings);
+                openedBrowser = null; browserAttempted = false;
+                var ready = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+                accountPrepared = ready;
+                Status = new(profileName, LoginStage.ReadyToAuthorize, true);
+                await ready.Task.WaitAsync(cancellationToken);
+                accountPrepared = null;
+            }
+            cancellationToken.ThrowIfCancellationRequested();
             var pkce = OAuthPkce.Create();
             var state = OAuthPkce.State();
             callback = await callbacks.StartAsync(state, cancellationToken);
@@ -256,6 +292,7 @@ public sealed class LoginService(AccountRepository repository, IAccountTransport
         { result = new(false, profileName, "登录准备未完成，未保存新凭据。请重新选择线路后重试。", Error: AccountError.Network); }
         finally
         {
+            accountPrepared = null;
             pendingBrowser = null;
             await browserContinuation.CancelAsync();
             if (browserAttempted && selectedBrowser is IBrowserSessionCleanup cleanup)

@@ -53,10 +53,18 @@ internal static class VisualTestVerification
         panel.StartAllCommand.Execute(null); await Until(() => runtime.Requests.Count == 3);
         check("visual accounts run concurrently with one request each", maxAccount == 1 && maxAll == 3 && counts.Values.All(v => v == 1));
         check("visual running can hide but cannot start duplicate or change account", !panel.StartCommand.CanExecute(null) && panel.CloseCommand.CanExecute(null) && !panel.CanEdit && panel.CancelCommand.CanExecute(null));
+        await Until(() => panel.Status.Contains("第 1/3 步"));
+        check("running tests show actual step and zero replies before first response", panel.Summary.StartsWith("进行中") && panel.CompletedReplies == 0 && panel.ExpectedReplies == 9 && panel.ProgressSummary.Contains("本轮用时"));
+        check("live progress stays visible above the result scroll", UiVerification.FullyVisible((TextBlock)window.FindName("VisualTestProgressText"), window.RenderRoot) && UiVerification.FullyVisible((ProgressBar)window.FindName("VisualTestReplyProgress"), window.RenderRoot));
+        capture("visual-progress-running-minimum");
         check("visual overlay leaves native minimize reachable", UiVerification.ReceivesInput((Button)window.FindName("MinimizeButton"), window.RenderRoot));
         panel.CloseCommand.Execute(null); Flush();
         var runningRequests = runtime.Requests.Count;
         model.NavigateCommand.Execute("Accounts"); Flush();
+        var firstTime = panel.ProgressSummary; var firstDetail = panel.BatchRows[0].Detail; var ticks = 0;
+        panel.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(panel.ProgressSummary)) ticks++; };
+        await Task.Delay(1250); Flush();
+        check("hidden waiting request updates elapsed time without more requests", ticks > 0 && panel.ProgressSummary != firstTime && panel.BatchRows[0].Detail != firstDetail && panel.CompletedReplies == 0 && runtime.Requests.Count == runningRequests && model.BackgroundModelStatus.Contains(panel.ProgressSummary));
         check("hidden visual task keeps requests alive and permits page navigation", !model.IsVisualTestsOpen && panel.IsBusy && !panel.CurrentOperation.IsCompleted
             && model.NavigateCommand.CanExecute("Proxy") && model.IsAccountsPage && model.BackgroundModelTitle.Contains("进行中"));
         model.Selected = model.FilteredItems.Single(item => item.Name == "未授权");
@@ -80,6 +88,8 @@ internal static class VisualTestVerification
         check("hidden visual completion updates status without reopening", !model.IsVisualTestsOpen && !model.IsModelTestRunning && !model.IsBusy && model.BackgroundModelTitle.Contains("查看结果"));
         model.OpenBackgroundModelCommand.Execute(null); Flush();
         check("revision completes three stages for each account", runtime.Requests.Count == 9 && panel.BatchRows.All(r => r.Result!.Completed && r.Result.Steps.Count == 3) && maxAccount == 1);
+        var finishedTime = panel.ProgressSummary; ticks = 0; await Task.Delay(1250); Flush();
+        check("completed run freezes its timer and counts only actual replies", ticks == 0 && panel.ProgressSummary == finishedTime && panel.CompletedReplies == 9 && panel.BatchRows.All(r => r.IsFinished) && panel.Result!.ElapsedSeconds >= 1);
         check("revision uses actual rendered image for critique and original plus critique for revision", runtime.Requests.Where(r => r.Prompt.StartsWith("Inspect")).All(r => r.Images.Count == 1 && File.Exists(r.Images[0]))
             && runtime.Requests.Where(r => r.Prompt.StartsWith("Revise")).All(r => r.Prompt.Contains(OfflineVisualTestRuntime.Svg) && r.Prompt.Contains("脚踏连接")));
         check("all accounts share selected model and initial task", runtime.Requests.All(r => r.Model == "gpt-6-astra") && runtime.Requests.Where(r => r.Prompt.StartsWith("Generate")).Select(r => r.Prompt).Distinct().Count() == 1);
@@ -90,6 +100,7 @@ internal static class VisualTestVerification
         var before = runtime.Requests.Count;
         var restored = new VisualTestPanelViewModel(workspace.Accounts, panel.Profiles[0], VisualTestKind.Revision, _ => {}, () => {}, panel.Profiles);
         check("visual cached results reload in a new panel without requests", restored.Result?.Completed == true && restored.Steps.Count == 3 && runtime.Requests.Count == before);
+        check("historical elapsed time survives reload without a live timer", restored.Result?.ElapsedSeconds >= 1 && restored.ProgressSummary.StartsWith("已记录用时"));
         restored.Model = "gpt-6-sol";
         check("visual cache is scoped by model", restored.Result is null && runtime.Requests.Count == before);
         restored.Model = "invalid model"; check("invalid model blocks native request", !restored.StartCommand.CanExecute(null));

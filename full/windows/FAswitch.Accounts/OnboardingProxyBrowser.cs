@@ -3,7 +3,7 @@ using FAswitch.Core;
 namespace FAswitch.Accounts;
 
 /// <summary>A new isolated Chrome session using the explicit, resolved login route.</summary>
-public sealed class OnboardingProxyBrowser : IProxyBoundLoginBrowser, IVerifiedProxyLoginBrowser, IPersistentLoginBrowser, IResumableLoginBrowser, IBrowserSessionCleanup, IAsyncDisposable
+public sealed class OnboardingProxyBrowser : IProxyBoundLoginBrowser, IVerifiedProxyLoginBrowser, IPersistentLoginBrowser, IResumableLoginBrowser, IAccountPreparationBrowser, IBrowserSessionCleanup, IAsyncDisposable
 {
     private readonly string workspaceRoot;
     private readonly IChromeSystem system;
@@ -48,6 +48,15 @@ public sealed class OnboardingProxyBrowser : IProxyBoundLoginBrowser, IVerifiedP
             profiles.SaveEnvironment(profileName, environment with { Proxy = independent ? Proxy : "", FollowSystemProxy = !independent, Timezone = independent ? environment.Timezone : local });
         }
     }
+    public async Task<BrowserLaunch> OpenAccountPreparationAsync(string name, string proxy, EgressResult? egress, CancellationToken token)
+    {
+        if (strictBrowser is null || launched is not null || HttpAccountTransport.RequireHttpProxy(proxy) != Proxy)
+            throw new AccountException(AccountError.Browser, "本次准备浏览器或出口无效，请重新开始。");
+        return launched = await strictBrowser.OpenAccountPreparationAsync(name, proxy, egress, token);
+    }
+    public Task<bool> IsPreparationClosedAsync(BrowserLaunch launch, CancellationToken token)
+        => strictBrowser is not null && launch == launched ? strictBrowser.IsPreparationClosedAsync(launch, token)
+            : throw new AccountException(AccountError.Browser, "没有可继续的账号准备浏览器。");
     public Task ResumeAsync(BrowserLaunch launch, CancellationToken token)
         => strictBrowser is not null && launch == launched ? strictBrowser.ResumeAsync(launch, token)
             : throw new AccountException(AccountError.Browser, "没有可继续的本次授权浏览器。");
@@ -98,6 +107,10 @@ public sealed class OnboardingProxyBrowser : IProxyBoundLoginBrowser, IVerifiedP
         catch (Exception) { return null; }
     }
     public ValueTask DisposeAsync() => strictBrowser?.DisposeAsync() ?? ValueTask.CompletedTask;
-    public Task<BrowserSessionCleanupResult> CleanupAsync(BrowserLaunch? launch, CancellationToken token)
-        => strictBrowser?.CleanupAsync(launch, token) ?? Task.FromResult(new BrowserSessionCleanupResult(false, "此兼容浏览器未连接严格会话清理服务。"));
+    public async Task<BrowserSessionCleanupResult> CleanupAsync(BrowserLaunch? launch, CancellationToken token)
+    {
+        var result = strictBrowser is null ? new BrowserSessionCleanupResult(false, "此兼容浏览器未连接严格会话清理服务。") : await strictBrowser.CleanupAsync(launch, token);
+        if (result.Success && (launch is null || launch == launched)) launched = null;
+        return result;
+    }
 }

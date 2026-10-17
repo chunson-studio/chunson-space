@@ -13,7 +13,21 @@ public sealed class FileProfileStore
     }
     public string ProfileDirectory(IdentityRef identity) => Path.Combine(Root, identity.Kind == IdentityKind.Account ? "profiles" : "providers", ProfileRules.Name(identity.Name));
     public IReadOnlyList<AccountProfile> ListAccounts() => files.Directories(Path.Combine(Root, "profiles"))
-        .Select(path => new AccountProfile(Path.GetFileName(path), files.FileExists(Path.Combine(path, "auth.json")), ReadEnvironment(Path.GetFileName(path)))).ToArray();
+        .Select(path => new AccountProfile(Path.GetFileName(path), files.FileExists(Path.Combine(path, "auth.json")), ReadEnvironment(Path.GetFileName(path)), AreTestsFrozen(Path.GetFileName(path)))).ToArray();
+    public bool AreTestsFrozen(string name)
+    {
+        var path = Path.Combine(ProfileDirectory(new(IdentityKind.Account, name)), "test-settings.json");
+        if (!files.FileExists(path)) return false;
+        var value = JsonFiles.Read(files, path);
+        if (value["frozen"] is System.Text.Json.Nodes.JsonValue flag && flag.TryGetValue<bool>(out var frozen)) return frozen;
+        throw new StorageException(StorageError.Corrupt, path, "账号冻结状态无法读取，未允许测试。请检查账号资料。");
+    }
+    public void SetTestsFrozen(string name, bool frozen)
+    {
+        var directory = ProfileDirectory(new(IdentityKind.Account, name));
+        if (!files.DirectoryExists(directory)) throw new StorageException(StorageError.Missing, directory, "账号档案不存在。");
+        JsonFiles.Write(files, Path.Combine(directory, "test-settings.json"), new() { ["frozen"] = frozen });
+    }
     public IReadOnlyList<ProviderProfile> ListProviders() => files.Directories(Path.Combine(Root, "providers")).Select(path => ReadProvider(Path.GetFileName(path))).ToArray();
     public EnvironmentSettings ReadEnvironment(string name)
     {

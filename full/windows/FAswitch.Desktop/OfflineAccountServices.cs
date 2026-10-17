@@ -88,8 +88,10 @@ public sealed class OfflineAccountTransport(AccountRepository repository, Offlin
     }
 }
 
-public sealed class OfflineLoginBrowser(AccountRepository repository) : ILoginBrowser, IAccountBrowserNetwork
+public sealed class OfflineLoginBrowser(AccountRepository repository) : ILoginBrowser, IAccountBrowserNetwork, IAccountPreparationBrowser
 {
+    public Task<BrowserSessionCleanupResult> CleanupAsync(BrowserLaunch? launch, CancellationToken token)
+    { token.ThrowIfCancellationRequested(); return Task.FromResult(new BrowserSessionCleanupResult(true, "fixture cleanup")); }
     public bool NetworkBrowserOpen { get; set; }
     public bool FailNetworkClose { get; set; }
     public Task<bool> CloseForNetworkChangeAsync(string profileName, CancellationToken token)
@@ -97,6 +99,11 @@ public sealed class OfflineLoginBrowser(AccountRepository repository) : ILoginBr
     public string LastProfile { get; private set; } = "";
     public Uri? LastUrl { get; private set; }
     public int OpenCount { get; private set; }
+    public bool PreparationClosed { get; set; }
+    public Task<BrowserLaunch> OpenAccountPreparationAsync(string name, string proxy, EgressResult? egress, CancellationToken token)
+    { PreparationClosed = false; return OpenAsync(name, new Uri("https://chatgpt.com/auth/login"), token); }
+    public Task<bool> IsPreparationClosedAsync(BrowserLaunch launch, CancellationToken token)
+    { token.ThrowIfCancellationRequested(); return Task.FromResult(PreparationClosed); }
     public Task<BrowserLaunch> OpenAsync(string profileName, Uri authorizeUrl, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested(); _ = repository.Proxy(profileName);
@@ -106,9 +113,14 @@ public sealed class OfflineLoginBrowser(AccountRepository repository) : ILoginBr
     public Task<IReadOnlyList<BrowserIdentity>?> ObserveAsync(BrowserLaunch launch, CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<BrowserIdentity>?>([new(999, 1, launch.Executable, launch.ProfileDirectory)]);
 }
 
-public sealed class OfflineDefaultLoginBrowser : IProxyBoundLoginBrowser, IVerifiedProxyLoginBrowser, IResumableLoginBrowser, IBrowserSessionCleanup, IAsyncDisposable
+public sealed class OfflineDefaultLoginBrowser : IProxyBoundLoginBrowser, IVerifiedProxyLoginBrowser, IResumableLoginBrowser, IAccountPreparationBrowser, IBrowserSessionCleanup, IAsyncDisposable
 {
     public int ResumeCount { get; private set; }
+    public bool PreparationClosed { get; set; }
+    public Task<BrowserLaunch> OpenAccountPreparationAsync(string name, string proxy, EgressResult? egress, CancellationToken token)
+    { PreparationClosed = false; return OpenAsync(name, new Uri("https://chatgpt.com/auth/login"), token); }
+    public Task<bool> IsPreparationClosedAsync(BrowserLaunch launch, CancellationToken token)
+    { token.ThrowIfCancellationRequested(); return Task.FromResult(PreparationClosed); }
     public Task ResumeAsync(BrowserLaunch launch, CancellationToken token)
     { token.ThrowIfCancellationRequested(); ResumeCount++; return Task.CompletedTask; }
     public Func<string, CancellationToken, Task>? Prepare { get; init; }
@@ -142,8 +154,9 @@ public sealed class OfflineDefaultLoginBrowser : IProxyBoundLoginBrowser, IVerif
 
 public sealed class OfflineLoginCallbackFactory(OfflineLoginBrowser browser, OfflineDefaultLoginBrowser? newAccountBrowser = null) : ILoginCallbackFactory
 {
+    public int Starts { get; private set; }
     public bool HoldCallback { get; set; }
-    public Task<ILoginCallback> StartAsync(string state, CancellationToken cancellationToken) { newAccountBrowser?.ResetCallback(); return Task.FromResult<ILoginCallback>(new Callback(this, browser, newAccountBrowser)); }
+    public Task<ILoginCallback> StartAsync(string state, CancellationToken cancellationToken) { Starts++; newAccountBrowser?.ResetCallback(); return Task.FromResult<ILoginCallback>(new Callback(this, browser, newAccountBrowser)); }
     private sealed class Callback(OfflineLoginCallbackFactory owner, OfflineLoginBrowser browser, OfflineDefaultLoginBrowser? newAccountBrowser) : ILoginCallback
     {
         private bool cancelled;

@@ -39,7 +39,7 @@ public interface IVisualTestRuntime
 public sealed record VisualTestStep(string Stage, string Prompt, string Reply, long? CachedTokens, double Seconds,
     string CliVersion, string? Artifact, string? Preview, string Validation, string Transport = "codex-cli", string ResponseModel = "");
 public sealed record VisualTestResult(string Profile, string Model, VisualTestKind Kind, string Variant, string Version,
-    DateTimeOffset Started, string Directory, IReadOnlyList<VisualTestStep> Steps, bool Completed, bool Cancelled, string Message);
+    DateTimeOffset Started, string Directory, IReadOnlyList<VisualTestStep> Steps, bool Completed, bool Cancelled, string Message, double? ElapsedSeconds = null);
 
 public sealed class VisualTestService(AccountRepository repository, IVisualTestRuntime runtime)
 {
@@ -90,6 +90,7 @@ public sealed class VisualTestService(AccountRepository repository, IVisualTestR
     public async Task<VisualTestResult> RunAsync(string profile, string model, VisualTestKind kind, string variant,
         IProgress<VisualTestResult>? progress = null, CancellationToken token = default)
     {
+        repository.RequireTestsAllowed(profile);
         if (!VisualTestCatalog.ValidModel(model)) throw new ArgumentException("请填写有效的 Codex 模型名称。");
         var prompt = VisualTestCatalog.Prompt(kind, variant);
         var cache = CacheDirectory(profile, model, kind, variant);
@@ -97,7 +98,8 @@ public sealed class VisualTestService(AccountRepository repository, IVisualTestR
         Directory.CreateDirectory(directory);
         var steps = new List<VisualTestStep>();
         var started = DateTimeOffset.UtcNow;
-        VisualTestResult Snapshot(bool complete, bool cancelled, string message) => new(profile, model, kind, variant, VisualTestCatalog.Version, started, directory, steps.ToArray(), complete, cancelled, message);
+        var elapsed = System.Diagnostics.Stopwatch.StartNew();
+        VisualTestResult Snapshot(bool complete, bool cancelled, string message) => new(profile, model, kind, variant, VisualTestCatalog.Version, started, directory, steps.ToArray(), complete, cancelled, message, elapsed.Elapsed.TotalSeconds);
         void Save(VisualTestResult result)
         {
             var json = JsonSerializer.Serialize(result, Json);
@@ -110,7 +112,8 @@ public sealed class VisualTestService(AccountRepository repository, IVisualTestR
         async Task Add(string stage, string question, IReadOnlyList<string> images, bool artwork)
         {
             token.ThrowIfCancellationRequested();
-            Save(Snapshot(false, false, stage + "进行中…"));
+            repository.RequireTestsAllowed(profile);
+            Save(Snapshot(false, false, $"第 {steps.Count + 1}/{VisualTestCatalog.Requests(kind)} 步 · {stage}：等待模型回复…"));
             var reply = await runtime.ReplyAsync(profile, model, question, images, Path.Combine(directory, "request-" + (steps.Count + 1)), token);
             string? artifact = null, preview = null;
             var validation = artwork ? "未取得有效作品" : "检查意见；不是独立评分";
@@ -143,6 +146,7 @@ public sealed class VisualTestService(AccountRepository repository, IVisualTestR
                 var revise = "Revise the original SVG using this critique. Return only the complete corrected SVG, with the same viewBox. No tools, scripts, external resources or embedded images.\nOriginal task:\n" + prompt + "\nOriginal SVG:\n" + steps[0].Reply + "\nImage-based critique:\n" + steps[1].Reply;
                 await Add("修改稿", revise, [], true);
             }
+            Save(Snapshot(false, false, "回复已完成，正在生成本地预览…"));
             try { await runtime.RenderAsync(Path.Combine(directory, steps[^1].Preview!), Path.Combine(directory, "step-" + steps.Count + ".png"), token); }
             catch (IOException e) { throw new IOException("模型回复和作品已保存，本地预览未完成：" + e.Message, e); }
             var result = Snapshot(true, false, "测试完成 · 作品已保存，尚未进行独立视觉评分。"); Save(result); return result;

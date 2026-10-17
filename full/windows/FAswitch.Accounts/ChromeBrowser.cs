@@ -19,6 +19,8 @@ public interface IChromeSystem
     async Task<BrowserIdentity?> StartTrackedAsync(string executable, IReadOnlyList<string> arguments, CancellationToken token)
     { await StartAsync(executable, arguments, token); return null; }
     Task<bool> CloseOwnedAsync(IReadOnlyList<BrowserIdentity> identities, CancellationToken token) => Task.FromResult(false);
+    async Task<bool?> HasOpenWindowsAsync(string executable, string profile, IReadOnlyList<BrowserIdentity> known, CancellationToken token)
+    { var roots = await ObserveAsync(executable, profile, token); return roots is null ? null : roots.Count > 0; }
 }
 public sealed record BrowserSessionCleanupResult(bool Success, string Message, IReadOnlyList<string>? Warnings = null);
 public interface IBrowserSessionCleanup { Task<BrowserSessionCleanupResult> CleanupAsync(BrowserLaunch? launch, CancellationToken token); }
@@ -91,6 +93,19 @@ public static class ChromeArguments
 
 public sealed class WindowsChromeSystem(Func<string?>? finder = null) : IChromeSystem
 {
+    public async Task<bool?> HasOpenWindowsAsync(string executable, string profile, IReadOnlyList<BrowserIdentity> known, CancellationToken token)
+    {
+        var roots = await ObserveAsync(executable, profile, token);
+        if (roots is null || roots.Any(root => !known.Contains(root))) return null;
+        if (roots.Count == 0) return false;
+        var visible = false;
+        if (!EnumWindows((window, _) => { GetWindowThreadProcessId(window, out var pid); if (roots.Any(root => root.Pid == pid) && IsWindowVisible(window)) visible = true; return true; }, 0)) return null;
+        return visible;
+    }
+    private delegate bool WindowCallback(nint window, nint parameter);
+    [DllImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)] private static extern bool EnumWindows(WindowCallback callback, nint parameter);
+    [DllImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)] private static extern bool IsWindowVisible(nint window);
+    [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(nint window, out uint pid);
     public Task<IReadOnlyList<BrowserIdentity>?> ObserveKnownAsync(string executable, string profileDirectory, IReadOnlyList<BrowserIdentity> known, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -206,7 +221,7 @@ public sealed partial class ChromeLoginBrowser(AccountRepository repository, ICh
     Func<string, CancellationToken, Task<EgressResult>>? egressProbe = null, Func<string, string, CancellationToken, Task<bool>>? protectionVerifier = null,
     Func<string, EnvironmentSettings>? environmentReader = null,
     Func<string, CancellationToken, Task<string>>? prepareBrowser = null, bool previewDuringPreparation = false, bool installedBrowser = false,
-    IBrowserTimezoneController? installedTimezone = null, bool? alignInstalledTimezone = null) : IResolvedProxyLoginBrowser, IVerifiedProxyLoginBrowser, IPersistentLoginBrowser, IResumableLoginBrowser, IBrowserSessionCleanup, IAccountBrowserNetwork, IAsyncDisposable
+    IBrowserTimezoneController? installedTimezone = null, bool? alignInstalledTimezone = null) : IResolvedProxyLoginBrowser, IVerifiedProxyLoginBrowser, IPersistentLoginBrowser, IResumableLoginBrowser, IAccountPreparationBrowser, IBrowserSessionCleanup, IAccountBrowserNetwork, IAsyncDisposable
 {
     private string? preparedProxy;
     private string? preparedExecutable;
@@ -244,7 +259,7 @@ public sealed partial class ChromeLoginBrowser(AccountRepository repository, ICh
     private readonly CancellationTokenSource stopped = new();
     private readonly HashSet<string> trackedRoots = new(StringComparer.OrdinalIgnoreCase);
     private sealed class AuthorizationSession(BrowserLaunch launch)
-    { public BrowserLaunch Launch { get; set; } = launch; public List<BrowserIdentity> Roots { get; } = []; public ICdpConnection? Connection { get; set; } public bool Persistent { get; set; } public Uri? AuthorizationUrl { get; set; } }
+    { public BrowserLaunch Launch { get; set; } = launch; public List<BrowserIdentity> Roots { get; } = []; public ICdpConnection? Connection { get; set; } public bool Persistent { get; set; } public Uri? AuthorizationUrl { get; set; } public bool DisposablePreparation { get; init; } public bool PreparationWindowSeen { get; set; } }
     private readonly ConcurrentDictionary<string, AuthorizationSession> sessions = new(StringComparer.OrdinalIgnoreCase);
     private readonly SemaphoreSlim cleanupGate = new(1, 1);
     private int disposed;
@@ -591,7 +606,7 @@ public sealed partial class ChromeLoginBrowser(AccountRepository repository, ICh
                 foreach (var identity in latest)
                     if (!session.Roots.Any(owned => owned.Pid == identity.Pid && owned.CreationTime == identity.CreationTime && owned.Executable.Equals(identity.Executable, StringComparison.OrdinalIgnoreCase)))
                         return new(false, "发现未确认所有权的授权窗口，未关闭或删除临时目录。");
-                if (latest.Count > 0 && !await system.CloseOwnedAsync(latest, token)) return new(false, "专用授权窗口退出尚未确认，临时目录保留。");
+                if ((latest.Count > 0 || session.DisposablePreparation) && !await system.CloseOwnedAsync(session.DisposablePreparation ? session.Roots : latest, token)) return new(false, "专用授权窗口或后台进程退出尚未确认，临时目录保留。");
                 var remaining = await system.ObserveAsync(session.Launch.Executable, session.Launch.ProfileDirectory, token);
                 if (remaining is null || remaining.Count > 0) return new(false, "授权窗口仍在运行或状态未知，临时目录保留。");
                 // A confirmed ended browser releases authorization even if its cache
@@ -604,6 +619,18 @@ public sealed partial class ChromeLoginBrowser(AccountRepository repository, ICh
                         finally { connections.Remove(session.Connection); }
                     }
                     var profile = ResolveCleanupProfileDirectory(repository.Root, session.Launch.ProfileDirectory);
+                    if (session.DisposablePreparation)
+                    {
+                        var statePath = Path.Combine(profile, BrowserTimezoneController.StateFile);
+                        var deadline = DateTimeOffset.UtcNow.AddSeconds(4);
+                        while (File.Exists(statePath))
+                        {
+                            var state = System.Text.Json.JsonSerializer.Deserialize<BrowserTimezoneState>(new PhysicalFileStorage().Read(statePath));
+                            if (state is null || !BrowserTimezoneController.IsAlive(state.HelperPid, state.HelperCreated)) break;
+                            if (DateTimeOffset.UtcNow >= deadline) throw new IOException("Preparation timezone helper is still exiting.");
+                            await Task.Delay(100, token);
+                        }
+                    }
                     if (!session.Persistent && Directory.Exists(profile))
                     {
                         var pending = new Stack<string>(); pending.Push(profile);
@@ -611,7 +638,11 @@ public sealed partial class ChromeLoginBrowser(AccountRepository repository, ICh
                         Directory.Delete(profile, true);
                     }
                 }
-                catch (Exception error) { warnings.Add("授权会话已结束，临时浏览器资料暂未清理（" + error.GetType().Name + "）；不会阻止下次登录。"); }
+                catch (Exception error)
+                {
+                    if (session.DisposablePreparation) return new(false, "第一步临时资料尚未删除（" + error.GetType().Name + "），不能进入第二步；关闭占用后重试。");
+                    warnings.Add("授权会话已结束，临时浏览器资料暂未清理（" + error.GetType().Name + "）；不会阻止下次登录。");
+                }
                 ReleaseSession(session);
             }
             catch (Exception) { return new(false, "授权资料保留；专用浏览器与临时目录清理未确认。"); }
