@@ -43,16 +43,16 @@ public static class PreviewDataSource
 {
     public static IReadOnlyList<IdentityItem> Identities { get; } =
     [
-        new("日常工作", "Account", "Plus · 演示账号", "工", "#7855AD", "http://127.0.0.1:18081", "America/Chicago", "en-US", "Codex 默认"),
-        new("开发测试", "Account", "Pro · 演示账号", "测", "#386EAD", "http://127.0.0.1:18082", "Asia/Shanghai", "en-US", "Codex 默认"),
-        new("个人空间", "Account", "Free · 演示账号", "个", "#947132", "http://127.0.0.1:18083", "Asia/Shanghai", "en-US", "Codex 默认"),
-        new("备用账号 01", "Account", "已保存登录资料", "备", "#357D84", "http://127.0.0.1:18084", "Asia/Tokyo", "en-US", "Codex 默认"),
-        new("备用账号 02", "Account", "已保存登录资料", "备", "#A45370", "http://127.0.0.1:18085", "America/New_York", "en-US", "Codex 默认"),
-        new("备用账号 03", "Account", "待登录", "备", "#386EAD", "http://127.0.0.1:18086", "Asia/Singapore", "en-US", "Codex 默认"),
-        new("备用账号 04", "Account", "已保存登录资料", "备", "#9550A0", "http://127.0.0.1:18087", "Europe/London", "en-US", "Codex 默认"),
-        new("备用账号 05", "Account", "已保存登录资料", "备", "#487F55", "http://127.0.0.1:18088", "Europe/Berlin", "en-US", "Codex 默认"),
-        new("备用账号 06", "Account", "已保存登录资料", "备", "#A47346", "http://127.0.0.1:18089", "Asia/Hong_Kong", "en-US", "Codex 默认"),
-        new("备用账号 07", "Account", "已保存登录资料", "备", "#607494", "", "", "en-US", "Codex 默认", true),
+        new("日常工作", "Account", "Plus · 演示账号", "工", WorkspaceTheme.AvatarColor(0), "http://127.0.0.1:18081", "America/Chicago", "en-US", "Codex 默认"),
+        new("开发测试", "Account", "Pro · 演示账号", "测", WorkspaceTheme.AvatarColor(1), "http://127.0.0.1:18082", "Asia/Shanghai", "en-US", "Codex 默认"),
+        new("个人空间", "Account", "Free · 演示账号", "个", WorkspaceTheme.AvatarColor(2), "http://127.0.0.1:18083", "Asia/Shanghai", "en-US", "Codex 默认"),
+        new("备用账号 01", "Account", "已保存登录资料", "备", WorkspaceTheme.AvatarColor(3), "http://127.0.0.1:18084", "Asia/Tokyo", "en-US", "Codex 默认"),
+        new("备用账号 02", "Account", "已保存登录资料", "备", WorkspaceTheme.AvatarColor(4), "http://127.0.0.1:18085", "America/New_York", "en-US", "Codex 默认"),
+        new("备用账号 03", "Account", "待登录", "备", WorkspaceTheme.AvatarColor(5), "http://127.0.0.1:18086", "Asia/Singapore", "en-US", "Codex 默认"),
+        new("备用账号 04", "Account", "已保存登录资料", "备", WorkspaceTheme.AvatarColor(6), "http://127.0.0.1:18087", "Europe/London", "en-US", "Codex 默认"),
+        new("备用账号 05", "Account", "已保存登录资料", "备", WorkspaceTheme.AvatarColor(7), "http://127.0.0.1:18088", "Europe/Berlin", "en-US", "Codex 默认"),
+        new("备用账号 06", "Account", "已保存登录资料", "备", WorkspaceTheme.AvatarColor(8), "http://127.0.0.1:18089", "Asia/Hong_Kong", "en-US", "Codex 默认"),
+        new("备用账号 07", "Account", "已保存登录资料", "备", WorkspaceTheme.AvatarColor(9), "", "", "en-US", "Codex 默认", true),
     ];
 }
 

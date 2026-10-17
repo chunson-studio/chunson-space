@@ -1,33 +1,35 @@
 <Application x:Class="FAswitch.Desktop.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <Application.Resources>
     <FontFamily x:Key="AppFont">/ChunsonSwitch;component/Assets/Fonts/#Inter, /ChunsonSwitch;component/Assets/Fonts/#Source Han Sans CN</FontFamily>
-    <SolidColorBrush x:Key="CanvasBrush" Color="#F5F7F2" />
-    <SolidColorBrush x:Key="SurfaceBrush" Color="#FEFFFB" />
-    <SolidColorBrush x:Key="ElevatedBrush" Color="#F0F5EA" />
-    <SolidColorBrush x:Key="SidebarBrush" Color="#EAF1E5" />
-    <SolidColorBrush x:Key="PlayerBrush" Color="#EAF1E5" />
-    <SolidColorBrush x:Key="InkBrush" Color="#243329" />
-    <SolidColorBrush x:Key="MutedBrush" Color="#62705D" />
-    <SolidColorBrush x:Key="AccentBrush" Color="#638746" />
-    <SolidColorBrush x:Key="AccentInkBrush" Color="#243B19" />
-    <SolidColorBrush x:Key="BrandSecondaryBrush" Color="#638746" />
-    <SolidColorBrush x:Key="PrimaryBrush" Color="#D1E5B9" />
-    <SolidColorBrush x:Key="LineBrush" Color="#E0E7D8" />
-    <SolidColorBrush x:Key="OutlineBrush" Color="#84947C" />
-    <SolidColorBrush x:Key="HoverOutlineBrush" Color="#638746" />
-    <SolidColorBrush x:Key="FocusOutlineBrush" Color="#638746" />
-    <SolidColorBrush x:Key="SelectionBrush" Color="#E2EED5" />
-    <SolidColorBrush x:Key="InfoSurfaceBrush" Color="#F0F5EA" />
-    <SolidColorBrush x:Key="ErrorSurfaceBrush" Color="#F7EBE5" />
-    <SolidColorBrush x:Key="BadgeBrush" Color="#E2EED5" />
+    <SolidColorBrush x:Key="CanvasBrush" Color="#F8F4ED" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#FCFAF5" />
+    <SolidColorBrush x:Key="ElevatedBrush" Color="#F3EFE8" />
+    <SolidColorBrush x:Key="SidebarBrush" Color="#F4F0EA" />
+    <SolidColorBrush x:Key="PlayerBrush" Color="#F4F0EA" />
+    <SolidColorBrush x:Key="InkBrush" Color="#343C43" />
+    <SolidColorBrush x:Key="MutedBrush" Color="#5F676E" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#4A7087" />
+    <SolidColorBrush x:Key="AccentInkBrush" Color="#2F4B5C" />
+    <SolidColorBrush x:Key="BrandSecondaryBrush" Color="#4A7087" />
+    <SolidColorBrush x:Key="PrimaryBrush" Color="#DAE5EB" />
+    <SolidColorBrush x:Key="LineBrush" Color="#E4DFD7" />
+    <SolidColorBrush x:Key="OutlineBrush" Color="#C3BDB4" />
+    <SolidColorBrush x:Key="HoverOutlineBrush" Color="#7391A3" />
+    <SolidColorBrush x:Key="FocusOutlineBrush" Color="#4A7087" />
+    <SolidColorBrush x:Key="SelectionBrush" Color="#E8E4DE" />
+    <SolidColorBrush x:Key="InfoSurfaceBrush" Color="#F3F0E9" />
+    <SolidColorBrush x:Key="ErrorSurfaceBrush" Color="#F4E8E2" />
+    <SolidColorBrush x:Key="BadgeBrush" Color="#E6EDF0" />
+    <SolidColorBrush x:Key="ScrimBrush" Color="#66353F48" />
+    <SolidColorBrush x:Key="DetailScrimBrush" Color="#44353F48" />
     <LinearGradientBrush x:Key="HeroBrush" StartPoint="0,0" EndPoint="1,0.45">
-      <GradientStop Color="#EAF1E5" Offset="0" />
-      <GradientStop Color="#FEFFFB" Offset="1" />
+      <GradientStop Color="#F4F0EA" Offset="0" />
+      <GradientStop Color="#FCFAF5" Offset="1" />
     </LinearGradientBrush>
     <LinearGradientBrush x:Key="AmbientBrush" StartPoint="0,0" EndPoint="0,1">
-      <GradientStop Color="#0078A950" Offset="0" />
-      <GradientStop Color="#0078A950" Offset="0.58" />
-      <GradientStop Color="#0078A950" Offset="1" />
+      <GradientStop Color="#004A7087" Offset="0" />
+      <GradientStop Color="#004A7087" Offset="0.58" />
+      <GradientStop Color="#004A7087" Offset="1" />
     </LinearGradientBrush>
     <BitmapImage x:Key="BrandMark" UriSource="/ChunsonSwitch;component/Assets/BrandMark.png"/>
     <Style TargetType="TextBlock">

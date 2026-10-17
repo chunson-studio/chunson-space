@@ -25,8 +25,8 @@ internal sealed class FlClashSetupWindow : Window
         MinWidth = missing ? 560 : 580; MinHeight = missing ? 290 : 470;
         ResizeMode = missing ? ResizeMode.NoResize : ResizeMode.CanResize;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
-        Background = new SolidColorBrush(Color.FromRgb(246, 248, 240));
-        Foreground = new SolidColorBrush(Color.FromRgb(36, 55, 42));
+        Background = TryFindResource("CanvasBrush") as Brush ?? new SolidColorBrush(Color.FromRgb(248, 244, 237));
+        Foreground = TryFindResource("InkBrush") as Brush ?? new SolidColorBrush(Color.FromRgb(52, 60, 67));
         FontFamily = new FontFamily("Microsoft YaHei UI"); FontSize = 15;
         var stack = new StackPanel { Margin = new Thickness(28) };
         stack.Children.Add(new TextBlock { Text = missing ? "未检测到 FlClash" : "先准备好 FlClash", FontSize = 27, FontWeight = FontWeights.SemiBold });
@@ -40,6 +40,9 @@ internal sealed class FlClashSetupWindow : Window
         {
             // Keep setup controls independent of the main application's templates.
             button.Style = new Style(typeof(Button));
+            button.SetResourceReference(Control.BackgroundProperty, "SurfaceBrush");
+            button.SetResourceReference(Control.ForegroundProperty, "InkBrush");
+            button.SetResourceReference(Control.BorderBrushProperty, "OutlineBrush");
             button.Padding = new Thickness(13, 9, 13, 9); button.Margin = new Thickness(0, 0, 8, 9);
             actions.Children.Add(button);
         }

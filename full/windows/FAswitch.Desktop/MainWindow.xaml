@@ -820,7 +820,7 @@
         </StackPanel>
       </Grid>
     </Border>
-    <Grid Grid.RowSpan="4" Background="#66202B28" Visibility="{Binding IsDetailOpen,Converter={StaticResource BoolVisibility}}" Grid.ColumnSpan="2">
+    <Grid Grid.RowSpan="4" Background="{DynamicResource DetailScrimBrush}" Visibility="{Binding IsDetailOpen,Converter={StaticResource BoolVisibility}}" Grid.ColumnSpan="2">
       <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
         <Border Width="820" Height="585" Background="{DynamicResource SurfaceBrush}" CornerRadius="13" BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="1" />
         <Button MinHeight="28" MinWidth="30" Content="×" Command="{Binding CloseDetailsCommand}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,7,0" Padding="10,6" Background="Transparent" BorderThickness="0" FontSize="20" />
@@ -929,7 +929,7 @@
         </Border>
       </Grid>
     </Grid>
-    <Grid Grid.RowSpan="4" Background="#88202B28" KeyboardNavigation.TabNavigation="Cycle" Visibility="{Binding IsOnboardingOpen,Converter={StaticResource BoolVisibility}}" Grid.ColumnSpan="2">
+    <Grid Grid.RowSpan="4" Background="{DynamicResource ScrimBrush}" KeyboardNavigation.TabNavigation="Cycle" Visibility="{Binding IsOnboardingOpen,Converter={StaticResource BoolVisibility}}" Grid.ColumnSpan="2">
       <Border Width="560" MaxHeight="600" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="1" CornerRadius="20" Padding="28" HorizontalAlignment="Center" VerticalAlignment="Center" DataContext="{Binding Onboarding}">
         <Grid>
           <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
@@ -978,7 +978,7 @@
         </Grid>
       </Border>
     </Grid>
-    <Grid Grid.RowSpan="4" Background="#88202B28" KeyboardNavigation.TabNavigation="Cycle" Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolVisibility}}" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Grid.ColumnSpan="2">
+    <Grid Grid.RowSpan="4" Background="{DynamicResource ScrimBrush}" KeyboardNavigation.TabNavigation="Cycle" Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolVisibility}}" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Grid.ColumnSpan="2">
       <Border Width="540" MaxHeight="620" Background="{DynamicResource CanvasBrush}" CornerRadius="14" Padding="28" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="1">
         <Grid DataContext="{Binding Editor}">
           <Grid.RowDefinitions>
@@ -1046,7 +1046,7 @@
         </Grid>
       </Border>
     </Grid>
-    <Grid Grid.RowSpan="4" Grid.ColumnSpan="2" Background="#88202B28" KeyboardNavigation.TabNavigation="Cycle" Visibility="{Binding IsDiagnosticOpen,Converter={StaticResource BoolVisibility}}">
+    <Grid Grid.RowSpan="4" Grid.ColumnSpan="2" Background="{DynamicResource ScrimBrush}" KeyboardNavigation.TabNavigation="Cycle" Visibility="{Binding IsDiagnosticOpen,Converter={StaticResource BoolVisibility}}">
       <Border Width="680" Height="530" Padding="24" CornerRadius="12" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="1">
         <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
           <StackPanel Margin="0,0,0,16"><TextBlock x:Name="AccountResultTitle" Text="{Binding DiagnosticTitle}" FontSize="20" FontWeight="SemiBold"/><TextBlock Text="{Binding DiagnosticAccount}" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="0,6,0,0" TextTrimming="CharacterEllipsis"/></StackPanel>
@@ -1055,7 +1055,7 @@
         </Grid>
       </Border>
     </Grid>
-    <Grid Grid.RowSpan="4" Background="#88202B28" KeyboardNavigation.TabNavigation="Cycle" DataContext="{Binding ProxyPanel.NodeTesting}" Visibility="{Binding IsOpen,Converter={StaticResource BoolVisibility}}" Grid.ColumnSpan="2">
+    <Grid Grid.RowSpan="4" Background="{DynamicResource ScrimBrush}" KeyboardNavigation.TabNavigation="Cycle" DataContext="{Binding ProxyPanel.NodeTesting}" Visibility="{Binding IsOpen,Converter={StaticResource BoolVisibility}}" Grid.ColumnSpan="2">
       <Border Width="920" Height="600" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="1" CornerRadius="18" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center">
         <Grid>
           <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
@@ -1137,7 +1137,7 @@
         </Grid>
       </Border>
     </Grid>
-    <Grid Grid.RowSpan="4" Grid.ColumnSpan="2" Background="#88202B28" KeyboardNavigation.TabNavigation="Cycle" Visibility="{Binding IsVisualTestsOpen,Converter={StaticResource BoolVisibility}}">
+    <Grid Grid.RowSpan="4" Grid.ColumnSpan="2" Background="{DynamicResource ScrimBrush}" KeyboardNavigation.TabNavigation="Cycle" Visibility="{Binding IsVisualTestsOpen,Converter={StaticResource BoolVisibility}}">
       <Border Width="920" Height="600" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="1" CornerRadius="18" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center">
         <Grid DataContext="{Binding VisualTests}">
           <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
@@ -1202,7 +1202,7 @@
         </Grid>
       </Border>
     </Grid>
-    <Grid Grid.RowSpan="4" Grid.ColumnSpan="2" Background="#88202B28" KeyboardNavigation.TabNavigation="Cycle" Visibility="{Binding IsCialloOpen,Converter={StaticResource BoolVisibility}}">
+    <Grid Grid.RowSpan="4" Grid.ColumnSpan="2" Background="{DynamicResource ScrimBrush}" KeyboardNavigation.TabNavigation="Cycle" Visibility="{Binding IsCialloOpen,Converter={StaticResource BoolVisibility}}">
       <Border Width="920" Height="600" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="1" CornerRadius="18" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center">
         <Grid DataContext="{Binding Ciallo}">
           <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
@@ -1230,7 +1230,7 @@
         </Grid>
       </Border>
     </Grid>
-    <Grid Grid.RowSpan="4" Grid.ColumnSpan="2" Background="#88202B28" KeyboardNavigation.TabNavigation="Cycle" Visibility="{Binding IsModelTestOpen,Converter={StaticResource BoolVisibility}}">
+    <Grid Grid.RowSpan="4" Grid.ColumnSpan="2" Background="{DynamicResource ScrimBrush}" KeyboardNavigation.TabNavigation="Cycle" Visibility="{Binding IsModelTestOpen,Converter={StaticResource BoolVisibility}}">
       <Border x:Name="ModelTestPanel" Width="680" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="1" CornerRadius="18" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center">
         <StackPanel>
           <DockPanel><Button Content="×" Command="{Binding CloseModelTestCommand}" DockPanel.Dock="Right" FontSize="20" Padding="9,4" Background="Transparent" BorderThickness="0"/><TextBlock Text="模型测试" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/></DockPanel>

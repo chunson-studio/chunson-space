@@ -41,43 +41,43 @@
     },
     {
       "file": "docs/assets/download-full.svg",
-      "sha256": "859ceff56a10156cc44ad8724fcc0be5dceb97d5dd9b0396008006a35af981e1",
+      "sha256": "0e612b7f8138652fa8f24218c2c65e346bf126d98a9e9c501177ac80959c1658",
       "bytes": 749
     },
     {
       "file": "docs/assets/readme-cover.svg",
-      "sha256": "b78a7e673b48aaff89834ddc63f729910a3330199b6d626cec33b4e9404c0b85",
-      "bytes": 2549
+      "sha256": "1b2ba2327566079095bcf7a92f77d9bdc25dbd0ef9c89298db9ef836782b3889",
+      "bytes": 2555
     },
     {
       "file": "docs/assets/screenshot-account-freeze.png",
-      "sha256": "3486bb51c7762c2d1043d63d8254f2117a25ee8840ce3e7ec559bc0ccd641187",
-      "bytes": 143897
+      "sha256": "8ec05a5ef81ecb2a2af99b1abc353eaafef21ad13ca686ebb97aee64a01e2922",
+      "bytes": 142111
     },
     {
       "file": "docs/assets/screenshot-flclash-missing.png",
-      "sha256": "95832e932ba598df4b5cbaa7c0b707b031ee72d074ab219d071abfb3dc25fcac",
-      "bytes": 26902
+      "sha256": "c5033a4039de2ad56f07f736fa85fbd363de0e39cf0966df847eb0ea77e4c281",
+      "bytes": 26762
     },
     {
       "file": "docs/assets/screenshot-full-home.png",
-      "sha256": "d263d4eb850b86db519290537b3f2b8d7c404598e6f66f33fb9d6af9fd8968aa",
-      "bytes": 205046
+      "sha256": "a705b6422e690a453328455d38191ce0aa474d22370f17e3ab424dbdc9f3d57e",
+      "bytes": 201981
     },
     {
       "file": "docs/assets/screenshot-model-tests.png",
-      "sha256": "4d87df2d65de5b5e9927bfee75e524d4de3bc02335ea0ee244b3b82f11a617bb",
-      "bytes": 98723
+      "sha256": "961bd06e4a10169f33a78655fd681eb8d032d0dbe4b1c05e373a2ac25b1b00dd",
+      "bytes": 99741
     },
     {
       "file": "docs/assets/screenshot-network.png",
-      "sha256": "6e735cb310ccc4bb817ae0031df92ce060570f3f0c33f0606be06adfa7eabc86",
-      "bytes": 110817
+      "sha256": "03f20648db197f900031c9cd1f3dd30b42be79fd6ef08ef39fa62089b1b3a490",
+      "bytes": 110339
     },
     {
       "file": "docs/assets/screenshot-test-progress.png",
-      "sha256": "11c192952d3574f634b450f7625721807277e77ed0f8c26c308e639cf5267115",
-      "bytes": 113518
+      "sha256": "365f92f47e30a393c63eac06176449f5026b98ac586919a92e48b085c5372eae",
+      "bytes": 112716
     },
     {
       "file": "docs/assets/wechat-appreciation.jpg",
@@ -101,8 +101,8 @@
     },
     {
       "file": "FlClashSetup/FlClashSetupWindow.cs",
-      "sha256": "9a1afd9b59c60626b0da7d0153d7ad252ae61171561ab282448ab88e6060f6b4",
-      "bytes": 5932
+      "sha256": "42b497e26bbb8b296becfce4b78fa8fa29d281b455a8ede80678e9ee39378656",
+      "bytes": 6270
     },
     {
       "file": "FlClashSetup/README.md",
@@ -611,8 +611,8 @@
     },
     {
       "file": "full/windows/FAswitch.Desktop/App.xaml",
-      "sha256": "3bdabfb6e3f7510047e33da0c8afa5b7f152ab466d1f1cb8e09fe134252b4beb",
-      "bytes": 33152
+      "sha256": "73dfd87b0c546aa6140dc9a51d90edce957cd8fc083e32cac8eb5c48778e457b",
+      "bytes": 33282
     },
     {
       "file": "full/windows/FAswitch.Desktop/App.xaml.cs",
@@ -751,7 +751,7 @@
     },
     {
       "file": "full/windows/FAswitch.Desktop/FAswitch.Desktop.csproj",
-      "sha256": "9ab41a123a7c59dded009532138157dca70f0375e987289c78aea2e03ccc1f78",
+      "sha256": "777c3d33a275ec3edae5c743f3c211b68cf74c99780eb023310c36abf326e3d1",
       "bytes": 2581
     },
     {
@@ -781,8 +781,8 @@
     },
     {
       "file": "full/windows/FAswitch.Desktop/MainWindow.xaml",
-      "sha256": "f96e38eafcf713ca3a68244c020c0c536c5ff0ab5fabae62ed56a43575065061",
-      "bytes": 130340
+      "sha256": "1ea69fccabc7fb39d760a415915e20b4a46ce80813a6dc9511f03c17543322a2",
+      "bytes": 130498
     },
     {
       "file": "full/windows/FAswitch.Desktop/MainWindow.xaml.cs",
@@ -826,8 +826,8 @@
     },
     {
       "file": "full/windows/FAswitch.Desktop/Presentation.cs",
-      "sha256": "93a20941ea2d7018bccbf8f17f332a61238b202689b5ace02053312acc715a6b",
-      "bytes": 14110
+      "sha256": "9d7159e533f42b68f4564212842d65333388e3e7f27f12d659b05f5f0edfb00c",
+      "bytes": 14310
     },
     {
       "file": "full/windows/FAswitch.Desktop/ProfileEditorNetwork.cs",
@@ -871,8 +871,8 @@
     },
     {
       "file": "full/windows/FAswitch.Desktop/StoragePresentation.cs",
-      "sha256": "16febd4e49ffb2e855c310e616a4177f6a69bc7369583bc3eba821c006849571",
-      "bytes": 32873
+      "sha256": "180c918412aaca59c853a87b61d47b2275fe7ea94c663ab4fe80c2ba4608c596",
+      "bytes": 32770
     },
     {
       "file": "full/windows/FAswitch.Desktop/StorageUiVerification.cs",
@@ -936,8 +936,8 @@
     },
     {
       "file": "full/windows/FAswitch.Desktop/WorkspaceTheme.cs",
-      "sha256": "d57765e8894a01805dbc0e6eb6cf0a28d4ed02535bd122b35938f33e426cf9ef",
-      "bytes": 4041
+      "sha256": "4e38821367688e5d61e3be93462a7a0cad032117250f23af2f6eaf5fb1f471b4",
+      "bytes": 4353
     },
     {
       "file": "full/windows/FAswitch.Fingerprint/Challenges.cs",
@@ -1511,8 +1511,8 @@
     },
     {
       "file": "README.md",
-      "sha256": "49057d7818d77fd50843bdd7fdc107663fc1fa2e0df1f07a5dc7310d56a6c985",
-      "bytes": 13142
+      "sha256": "558646c57083735dcee670b4d99bb48ad91ed03338fcb42726e783cbfa469d51",
+      "bytes": 13663
     },
     {
       "file": "taskbar-clock/Build-Clock.ps1",

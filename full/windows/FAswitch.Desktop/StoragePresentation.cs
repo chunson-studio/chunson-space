@@ -193,13 +193,12 @@ public sealed partial class ShellViewModel
     private void ReloadProfiles()
     {
         if (workspace is null) return;
-        var accounts = workspace.Profiles.ListAccounts().Select((a, index) => new IdentityItem(a.Name, "Account", a.TestsFrozen ? "已冻结静置 · 不参与模型测试" : a.HasCredentials ? "已保存登录资料" : "待登录", Initial(a.Name), AvatarColor(index), a.Environment.Proxy, a.Environment.Timezone, a.Environment.Locale, "Codex 默认", a.Environment.FollowSystemProxy, a.TestsFrozen));
+        var accounts = workspace.Profiles.ListAccounts().Select((a, index) => new IdentityItem(a.Name, "Account", a.TestsFrozen ? "已冻结静置 · 不参与模型测试" : a.HasCredentials ? "已保存登录资料" : "待登录", Initial(a.Name), WorkspaceTheme.AvatarColor(index), a.Environment.Proxy, a.Environment.Timezone, a.Environment.Locale, "Codex 默认", a.Environment.FollowSystemProxy, a.TestsFrozen));
         identities = accounts.ToArray();
         LoadExitObservations();
         Selected = null; UpdateItems(); Selected = FilteredItems.FirstOrDefault();
     }
     private static string Initial(string name) => name.Length > 0 ? System.Globalization.StringInfo.GetNextTextElement(name) : "?";
-    private static string AvatarColor(int index) => new[] { "#527545", "#49725E", "#687B4D", "#54766C" }[index % 4];
     private void SaveSettings()
     {
         if (workspace is null) { ShowFeedback("演示设置已应用", "这些演示设置仅在当前窗口保存。", "Info"); return; }
