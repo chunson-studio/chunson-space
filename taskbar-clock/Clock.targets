@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <ClockSourceDirectory>$(MSBuildThisFileDirectory)</ClockSourceDirectory>
+    <ClockBuildOutput>$(MSBuildProjectDirectory)/obj/clock/$(Configuration)/BeijingClock.exe</ClockBuildOutput>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(ClockSourceDirectory)ClockLauncher.cs" Link="Widgets/ClockLauncher.cs" />
+    <Compile Include="$(ClockSourceDirectory)ClockLauncherChecks.cs" Link="Verification/ClockLauncherChecks.cs" />
+    <Content Include="$(ClockBuildOutput)" Link="Widgets/BeijingClock.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="BuildBundledBeijingClock" BeforeTargets="PrepareForBuild"
+    Inputs="$(ClockSourceDirectory)TaskbarClock.cs;$(ClockSourceDirectory)Native.cs;$(ClockSourceDirectory)ClockVisibility.cs;$(ClockSourceDirectory)ClockChecks.cs;$(ClockSourceDirectory)Build-Clock.ps1"
+    Outputs="$(ClockBuildOutput)">
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(ClockSourceDirectory)Build-Clock.ps1&quot; -OutputPath &quot;$(ClockBuildOutput)&quot;" />
+  </Target>
+</Project>

@@ -1,0 +1,25 @@
+// CHUNSON_SWITCH_FLCLASH_DNS_V3
+// proxy-group-json: __PROXY_JSON__
+const main = (config) => {
+  const proxy = __PROXY_JSON__;
+  config.tun = config.tun || {};
+  config.tun["strict-route"] = true;
+  config["find-process-mode"] = "always";
+  const directProcesses = __PROCESSES__;
+  const directDomains = __DIRECT__;
+  const proxyDomains = __FOREIGN__;
+  const original = Array.isArray(config.rules) ? config.rules : [];
+  const priority = [
+    ...directProcesses.map(name => `PROCESS-NAME,${name},DIRECT`),
+    ...directDomains.map(domain => `DOMAIN-SUFFIX,${domain},DIRECT`),
+    ...proxyDomains.map(domain => `DOMAIN-SUFFIX,${domain},${proxy}`),
+    ...__GEOSITES__.map(site => `GEOSITE,${site},${proxy}`),
+  ];
+  const domestic = __DOMESTIC_RULES__;
+  const key = rule => rule.split(",").slice(0, 2).join(",").toLowerCase();
+  const managed = new Set([...priority, ...domestic].map(key));
+  const retained = original.filter(rule => typeof rule === "string" &&
+    !/^(MATCH|FINAL),/i.test(rule) && !managed.has(key(rule)));
+  config.rules = [...priority, ...retained, ...domestic, `MATCH,${proxy}`];
+  return config;
+};

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "archives": [
+    { "id": "source-han-sans-cn", "version": "2.005R", "filename": "19_SourceHanSansCN.zip", "url": "https://github.com/adobe-fonts/source-han-sans/releases/download/2.005R/19_SourceHanSansCN.zip", "sha256": "3A769D1B082EBD813CDB4C06EA57D29B340BCE548EDCC8E61976B78CA28E6236", "checksumSource": "Official GitHub release asset digest" },
+    { "id": "inter", "version": "v4.1", "filename": "Inter-4.1.zip", "url": "https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip", "sha256": "9883FDD4A49D4FB66BD8177BA6625EF9A64AA45899767DDE3D36AA425756B11E", "checksumSource": "Computed from the official HTTPS release archive; upstream did not publish an asset digest" }
+  ],
+  "fonts": [
+    { "archive": "source-han-sans-cn", "entry": "SubsetOTF/CN/SourceHanSansCN-Regular.otf", "file": "SourceHanSansCN-Regular.otf", "sha256": "E2BC8A2E7F37474B774FFF8DB758681ECE40BB6947A90D571BCE9DD60671A8E4", "family": "Source Han Sans CN", "weight": 400, "glyphSet": "chinese" },
+    { "archive": "source-han-sans-cn", "entry": "SubsetOTF/CN/SourceHanSansCN-Bold.otf", "file": "SourceHanSansCN-Bold.otf", "sha256": "62383707C086A32F3AFD5E293F34C7EFF64C7FEA31F579FDC6CBE34D920519A6", "family": "Source Han Sans CN", "weight": 700, "glyphSet": "chinese" },
+    { "archive": "inter", "entry": "extras/ttf/Inter-Regular.ttf", "file": "Inter-Regular.ttf", "sha256": "40D692FCE188E4471E2B3CBA937BE967878F631AD3EBBBDCD587687C7EBE0C82", "family": "Inter", "weight": 400, "glyphSet": "latin" },
+    { "archive": "inter", "entry": "extras/ttf/Inter-SemiBold.ttf", "file": "Inter-SemiBold.ttf", "sha256": "78A843FADE9D4612A5567302FB595B56976EB5FCEBF4FEA5A5912D638BAFCDE3", "family": "Inter", "weight": 600, "glyphSet": "latin" },
+    { "archive": "inter", "entry": "extras/ttf/Inter-Bold.ttf", "file": "Inter-Bold.ttf", "sha256": "288316099B1E0A47A4716D159098005EEF7C0066921F34E3200393DBDB01947F", "family": "Inter", "weight": 700, "glyphSet": "latin" }
+  ],
+  "licenses": [
+    { "archive": "source-han-sans-cn", "entry": "LICENSE.txt", "file": "SourceHanSans/LICENSE.txt", "sha256": "FCAC737E761EC63DBFBDCE11030A1780161920D80315EDBA9C8BEFF1C2BAC5A2" },
+    { "archive": "inter", "entry": "LICENSE.txt", "file": "Inter/LICENSE.txt", "sha256": "262481E844521B326F5ECD053E59B98C8B2DA78C8EE1BDBB6E8174305E54935A" }
+  ],
+  "glyphSets": {
+    "latin": "Chunson Switch Account Workspace Codex DNS IP 0123456789 .,:;!?/-()%+#@",
+    "chinese": "椿生工具账号档案供应商代理备份恢复删除登录设置检查当前切换保存程序预览修复应用还原下载字体英文简体中文，。：；！？（）「」“”—…Chunson Switch 0123456789"
+  }
+}

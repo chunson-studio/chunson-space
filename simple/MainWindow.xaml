@@ -1,0 +1,62 @@
+<Window x:Class="ChunsonLogin.MainWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Title="椿生登录助手" Width="840" Height="790" MinWidth="620" MinHeight="600" Background="#F5F7F1"
+ FontFamily="Segoe UI, Microsoft YaHei UI" FontSize="14" WindowStartupLocation="CenterScreen" Icon="Assets/App.ico">
+ <Grid Margin="28,24,28,16">
+  <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+  <Grid Margin="0,0,0,16">
+   <StackPanel>
+    <TextBlock Text="CHUNSON  /  LOGIN" Foreground="#6F856F" FontSize="11" FontWeight="SemiBold"/>
+    <TextBlock Text="登录环境" FontSize="28" FontWeight="SemiBold" Margin="0,6,0,5"/>
+    <TextBlock Text="跟随当前出口，同步 Windows 国家/地区与时区。" Foreground="{StaticResource Muted}"/>
+   </StackPanel>
+   <Viewbox Width="66" Height="74" HorizontalAlignment="Right" VerticalAlignment="Center" Opacity="0.8" IsHitTestVisible="False">
+    <Canvas Width="66" Height="74"><Path Stroke="#819C77" StrokeThickness="2" Data="M32,70 C32,45 36,32 33,7 M33,46 Q15,44 8,31 M34,34 Q52,29 56,15"/><Path Fill="#B5CEA0" Data="M32,26 C10,12 23,1 32,0 C43,11 42,21 32,26 M18,47 C-2,46 0,28 1,23 C17,24 25,34 18,47 M41,31 C39,13 54,8 65,10 C61,28 52,35 41,31"/></Canvas>
+   </Viewbox>
+  </Grid>
+  <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,5,0">
+   <StackPanel>
+    <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="16" Padding="18">
+     <StackPanel>
+      <Grid><TextBlock Text="01   当前出口" FontWeight="SemiBold"/><Border HorizontalAlignment="Right" Background="#EBF1E4" CornerRadius="10" Padding="10,4"><TextBlock Text="{Binding ResultBadge}" FontSize="12" Foreground="#526D43"/></Border></Grid>
+      <TextBlock Text="{Binding Ip}" FontSize="28" FontWeight="SemiBold" Margin="0,9,0,2"/>
+      <TextBlock Text="{Binding Place}" Foreground="{StaticResource Muted}"/>
+      <Grid Margin="0,11,0,0">
+       <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+       <StackPanel Margin="0,0,20,0"><TextBlock Text="出口对应国家/地区" FontSize="12" Foreground="{StaticResource Muted}"/><TextBlock Text="{Binding TargetCountry}" FontSize="16" Margin="0,6,0,0"/></StackPanel>
+       <StackPanel Grid.Column="1"><TextBlock Text="Windows 当前国家/地区" FontSize="12" Foreground="{StaticResource Muted}"/><TextBlock Text="{Binding CurrentCountry}" FontSize="16" Margin="0,6,0,0"/></StackPanel>
+      </Grid>
+      <Grid Margin="0,13,0,12">
+       <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+       <StackPanel Margin="0,0,20,0"><TextBlock Text="出口对应时区" FontSize="12" Foreground="{StaticResource Muted}"/><TextBlock Text="{Binding TargetTimezone}" FontSize="16" Margin="0,6,0,0"/></StackPanel>
+       <StackPanel Grid.Column="1"><TextBlock Text="Windows 当前时区" FontSize="12" Foreground="{StaticResource Muted}"/><TextBlock Text="{Binding CurrentTimezone}" FontSize="16" Margin="0,6,0,0"/></StackPanel>
+      </Grid>
+      <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition/></Grid.ColumnDefinitions>
+       <Button x:Name="DetectButton" Content="检测当前网络" Click="Detect_Click" IsEnabled="{Binding CanAct}"/>
+       <Button x:Name="SyncButton" Grid.Column="2" Content="同步地区与时区" Background="#E2ECD6" Click="Sync_Click" IsEnabled="{Binding CanAct}"/>
+      </Grid>
+      <TextBlock Text="{Binding CheckedAt}" FontSize="11" Foreground="{StaticResource Muted}" Margin="0,7,0,0"/>
+     </StackPanel>
+    </Border>
+    <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="16" Padding="18" Margin="0,12,0,0">
+     <StackPanel>
+      <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="200"/></Grid.ColumnDefinitions>
+       <StackPanel VerticalAlignment="Center"><TextBlock Text="02   英文专用浏览器" FontWeight="SemiBold"/><TextBlock Text="ChatGPT  +  Claude 环境检测" Foreground="{StaticResource Muted}" Margin="0,5,0,0"/></StackPanel>
+       <ComboBox x:Name="BrowserPicker" Grid.Column="1" ItemsSource="{Binding Browsers}" SelectedItem="{Binding SelectedBrowser}" DisplayMemberPath="Name" IsEnabled="{Binding CanAct}" AutomationProperties.Name="专用浏览器"/>
+      </Grid>
+      <TextBlock Text="{Binding BrowserNote}" Margin="0,12,0,9" FontSize="12" Foreground="{StaticResource Muted}"/>
+      <Button x:Name="OpenButton" Content="打开英文专用浏览器  ↗" Background="#D5E5C2" FontWeight="SemiBold" Click="Open_Click" IsEnabled="{Binding CanOpen}"/>
+      <TextBlock Text="打开前核对出口、国家/地区与时区；需要同步时会提示。" FontSize="11" Foreground="{StaticResource Muted}" Margin="0,9,0,0"/>
+     </StackPanel>
+    </Border>
+   </StackPanel>
+  </ScrollViewer>
+  <Border Grid.Row="2" Background="#EAF0E4" CornerRadius="12" Padding="16,13" Margin="0,14,0,0">
+   <StackPanel>
+    <DockPanel><Button x:Name="ClockButton" DockPanel.Dock="Right" Content="北京时间" Click="Clock_Click" IsEnabled="{Binding CanAct}" Padding="10,3" MinHeight="24" FontSize="11" ToolTip="打开内置任务栏小组件，不修改系统时区"/><TextBlock Text="{Binding StatusTitle}" FontWeight="SemiBold" VerticalAlignment="Center"/></DockPanel>
+    <TextBlock Text="{Binding StatusMessage}" FontSize="12" Margin="0,5,0,0"/>
+    <TextBlock Text="{Binding NetworkSummary}" FontSize="11" Foreground="{StaticResource Muted}" Margin="0,7,0,0"/>
+   </StackPanel>
+  </Border>
+ </Grid>
+</Window>

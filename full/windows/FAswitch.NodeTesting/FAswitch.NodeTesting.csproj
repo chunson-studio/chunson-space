@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../FAswitch.Accounts/FAswitch.Accounts.csproj" />
+    <ProjectReference Include="../FAswitch.Proxy/FAswitch.Proxy.csproj" />
+  </ItemGroup>
+</Project>

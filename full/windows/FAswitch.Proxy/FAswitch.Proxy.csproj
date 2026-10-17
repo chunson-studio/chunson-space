@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../FAswitch.Core/FAswitch.Core.csproj" />
+    <EmbeddedResource Include="Resources/dns-policy.json" />
+    <EmbeddedResource Include="Resources/clash-verge-dns-v1.js" />
+    <Content Include="Resources/dns-policy.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../ThirdParty/YamlDotNet/LICENSE.txt" Link="ThirdParty/YamlDotNet/LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../ThirdParty/YamlDotNet/SOURCE.md" Link="ThirdParty/YamlDotNet/SOURCE.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+</Project>

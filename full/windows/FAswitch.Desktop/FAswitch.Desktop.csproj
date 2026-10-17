@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>ChunsonSwitch</AssemblyName>
+    <ApplicationIcon>Assets/BrandIcon.ico</ApplicationIcon>
+    <RootNamespace>FAswitch.Desktop</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../CheckSupport/LinkFixtures.cs" Link="Verification/LinkFixtures.cs" />
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+    <ProjectReference Include="../FAswitch.Core/FAswitch.Core.csproj" />
+    <ProjectReference Include="../FAswitch.Application/FAswitch.Application.csproj" />
+    <ProjectReference Include="../FAswitch.Accounts/FAswitch.Accounts.csproj" />
+    <ProjectReference Include="../FAswitch.Proxy/FAswitch.Proxy.csproj" />
+    <ProjectReference Include="../FAswitch.Fingerprint/FAswitch.Fingerprint.csproj" />
+    <ProjectReference Include="../FAswitch.NodeTesting/FAswitch.NodeTesting.csproj" />
+
+    <Resource Include="Assets/Sculpture.png" />
+    <Resource Include="Assets/BrandMark.png" />
+    <Resource Include="Assets/HomeGarden.svg" />
+    <Resource Include="Assets/Fonts/*.ttf;Assets/Fonts/*.otf" />
+    <Content Include="../ThirdParty/Fonts/**" Link="ThirdParty/Fonts/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../scripts/proxy/FlClash-DNS.ps1" Link="scripts/proxy/FlClash-DNS.ps1" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../scripts/proxy/FlClash-AllSubscriptions.ps1" Link="scripts/proxy/FlClash-AllSubscriptions.ps1" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../scripts/proxy/lib/FlDns.cs" Link="scripts/proxy/lib/FlDns.cs" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../runtime/mihomo/mihomo.exe" Link="runtimes/mihomo/mihomo.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../ThirdParty/Mihomo/**" Link="ThirdParty/Mihomo/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Import Project="../../../taskbar-clock/Clock.targets" />
+</Project>

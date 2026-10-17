@@ -1,0 +1,13 @@
+{
+  "version": "v1.19.32",
+  "project": "https://github.com/MetaCubeX/mihomo",
+  "release": "https://github.com/MetaCubeX/mihomo/releases/tag/v1.19.32",
+  "source": "https://github.com/MetaCubeX/mihomo/tree/v1.19.32",
+  "asset": "mihomo-windows-amd64-compatible-v1.19.32.zip",
+  "downloadUrl": "https://github.com/MetaCubeX/mihomo/releases/download/v1.19.32/mihomo-windows-amd64-compatible-v1.19.32.zip",
+  "archiveSha256": "974A4D7AD69AED27AA2E8F91D61113573C14DADB14562C63E58EFFABF59816F0",
+  "executableSha256": "04F8D7FC2B314771E1ECBF15951D59F0E1CB7914503C88CFB6972FF6A824E314",
+  "licenseUrl": "https://raw.githubusercontent.com/MetaCubeX/mihomo/v1.19.32/LICENSE",
+  "licenseSha256": "3972DC9744F6499F0F9B2DBF76696F2AE7AD8AF9B23DDE66D6AF86C9DFB36986",
+  "usage": "Separate local probe process; no TUN, no system proxy, no account credentials; GNU GPL v3."
+}

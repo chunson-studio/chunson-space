@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <Content Include="../ThirdParty/GeoTimeZone/LICENSE.txt" Link="ThirdParty/GeoTimeZone/LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../ThirdParty/GeoTimeZone/SOURCE.md" Link="ThirdParty/GeoTimeZone/SOURCE.md" CopyToOutputDirectory="PreserveNewest" />
+    <ProjectReference Include="../FAswitch.Core/FAswitch.Core.csproj" />
+    <ProjectReference Include="../FAswitch.Application/FAswitch.Application.csproj" />
+    <ProjectReference Include="../FAswitch.Fingerprint/FAswitch.Fingerprint.csproj" />
+    <PackageReference Include="GeoTimeZone" Version="6.1.0" />
+  </ItemGroup>
+</Project>

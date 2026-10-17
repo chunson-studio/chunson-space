@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="title">
+  <title id="title">微风花园：蓝天、白云与沿底边生长的花草树木</title>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1">
+      <stop offset="0" stop-color="#dceefa" stop-opacity="0" />
+      <stop offset=".45" stop-color="#e2f2fa" stop-opacity="1" />
+      <stop offset="1" stop-color="#edf5e8" stop-opacity="1" />
+    </linearGradient>
+  </defs>
+  <style>
+    .stem{stroke:#7b8f70}.leaf{fill:#b6cfa1}.pale{fill:#d8e6c5}.shade{fill:#94b180}.petal{fill:#fffdf2;stroke:#b6cfa1}.gold{fill:#c7ae72}
+    @media(prefers-color-scheme:dark){.stem{stroke:#94ac84}.leaf{fill:#759664}.pale{fill:#526c49}.shade{fill:#8bab76}.petal{fill:#d5ddbf;stroke:#94ac84}.gold{fill:#c7b77d}}
+    @media(prefers-reduced-motion:reduce){[data-hover]{transform:none!important}}
+  
+.cloud{fill:#fff}.meadow{fill:#e2edd4}
+</style>
+  <g id="sky-background">
+    <path d="M0 0 H1200 V360 H0Z" data-fill="GardenSkyBrush" opacity="1" fill="url(#sky)" />
+  </g>
+  <g id="cloud-west" data-hover="cloud">
+    <animateTransform attributeName="transform" type="translate" values="0 0;10 0;0 0" dur="18s" repeatCount="indefinite" />
+    <path d="M215 102 C195 103 188 88 197 78 C202 72 210 70 220 73 C218 53 243 45 255 60 C266 43 293 52 292 72 C315 67 331 91 310 102Z M365 146 C349 146 343 135 350 126 C356 120 365 121 370 124 C370 108 389 104 398 116 C410 107 429 115 426 128 C444 128 448 145 433 147Z" data-fill="GardenCloudBrush" opacity=".85" fill="#ffffff" />
+  </g>
+  <g id="cloud-east" data-hover="cloud">
+    <animateTransform attributeName="transform" type="translate" values="0 0;-12 0;0 0" dur="21s" repeatCount="indefinite" />
+    <path d="M745 83 C725 83 722 65 735 57 C744 52 753 55 757 61 C759 38 786 30 800 49 C818 30 845 44 843 63 C862 58 882 81 859 85Z M903 145 C887 145 881 132 892 125 C898 120 904 122 907 125 C911 109 932 108 940 123 C956 116 974 132 962 143Z" data-fill="GardenCloudBrush" opacity=".85" fill="#ffffff" />
+  </g>
+  <g id="meadow">
+    <path d="M0 300 Q150 264 305 300 Q450 270 600 301 Q798 265 960 300 Q1080 276 1200 293 V360 H0Z" data-fill="GardenPaleBrush" opacity=".25" fill="#d8e6c5" />
+    <path d="M0 331 Q170 306 340 330 Q525 309 700 330 Q906 308 1200 323 V360 H0Z" data-fill="GardenMeadowBrush" opacity="1" fill="#e2edd4" />
+  </g>
+  <g transform="matrix(1.05 0 0 1.05 -245 137)">
+    <g id="tree-west" data-hover="tree">
+      <animateTransform attributeName="transform" type="rotate" values="-0.8 358 185;0.8 358 185;-0.8 358 185" dur="10s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+      <path class="stem" data-stroke="GardenStemBrush" fill="none" stroke-width="1.7" d="M358 185 C351 149 352 112 361 77 C363 62 362 45 359 30 M355 138 C333 129 315 115 305 96 M356 113 C376 104 396 91 408 70 M359 85 C340 76 327 62 322 48" />
+      <path class="leaf" data-fill="GardenLeafBrush" d="M359 44 C344 33 348 17 358 9 C369 21 374 35 359 44Z M361 79 C370 60 388 56 400 59 C394 77 379 85 361 79Z M354 113 C334 114 324 102 324 88 C341 87 353 96 354 113Z M356 144 C371 124 390 124 402 130 C391 148 373 153 356 144Z M320 113 C298 116 285 103 284 91 C301 88 315 96 320 113Z" />
+      <path class="pale" data-fill="GardenPaleBrush" d="M340 70 C320 76 305 66 302 52 C320 47 334 53 340 70Z M320 57 C306 47 308 29 318 22 C330 32 333 47 320 57Z M382 96 C380 76 392 66 403 65 C410 80 398 95 382 96Z M409 72 C401 53 410 37 425 31 C433 49 425 63 409 72Z M305 98 C287 92 282 79 288 65 C304 69 314 80 305 98Z" />
+      <path class="shade" data-fill="GardenShadeBrush" d="M362 59 C377 45 391 48 398 54 C385 65 372 66 362 59Z M336 126 C318 133 304 128 299 118 C314 110 329 114 336 126Z M399 83 C417 79 430 87 433 98 C415 102 404 95 399 83Z" />
+      <path class="stem" data-stroke="GardenStemBrush" fill="none" stroke-width="1" opacity="0.7" d="M359 40 L358 20 M362 77 L389 64 M351 110 L332 96 M358 140 L391 133 M335 68 L313 56 M408 69 L421 42 M318 110 L294 96" />
+    </g>
+  </g>
+  <g transform="matrix(1.15 0 0 1.15 660 135)">
+    <g id="tree-east" data-hover="tree">
+      <animateTransform attributeName="transform" type="rotate" values="-0.8 358 185;0.8 358 185;-0.8 358 185" dur="10s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+      <path class="stem" data-stroke="GardenStemBrush" fill="none" stroke-width="1.7" d="M358 185 C351 149 352 112 361 77 C363 62 362 45 359 30 M355 138 C333 129 315 115 305 96 M356 113 C376 104 396 91 408 70 M359 85 C340 76 327 62 322 48" />
+      <path class="leaf" data-fill="GardenLeafBrush" d="M359 44 C344 33 348 17 358 9 C369 21 374 35 359 44Z M361 79 C370 60 388 56 400 59 C394 77 379 85 361 79Z M354 113 C334 114 324 102 324 88 C341 87 353 96 354 113Z M356 144 C371 124 390 124 402 130 C391 148 373 153 356 144Z M320 113 C298 116 285 103 284 91 C301 88 315 96 320 113Z" />
+      <path class="pale" data-fill="GardenPaleBrush" d="M340 70 C320 76 305 66 302 52 C320 47 334 53 340 70Z M320 57 C306 47 308 29 318 22 C330 32 333 47 320 57Z M382 96 C380 76 392 66 403 65 C410 80 398 95 382 96Z M409 72 C401 53 410 37 425 31 C433 49 425 63 409 72Z M305 98 C287 92 282 79 288 65 C304 69 314 80 305 98Z" />
+      <path class="shade" data-fill="GardenShadeBrush" d="M362 59 C377 45 391 48 398 54 C385 65 372 66 362 59Z M336 126 C318 133 304 128 299 118 C314 110 329 114 336 126Z M399 83 C417 79 430 87 433 98 C415 102 404 95 399 83Z" />
+      <path class="stem" data-stroke="GardenStemBrush" fill="none" stroke-width="1" opacity="0.7" d="M359 40 L358 20 M362 77 L389 64 M351 110 L332 96 M358 140 L391 133 M335 68 L313 56 M408 69 L421 42 M318 110 L294 96" />
+    </g>
+  </g>
+  <g transform="matrix(1.8 0 0 1.8 246 14)">
+    <g id="vine" data-hover="vine">
+      <animateTransform attributeName="transform" type="rotate" values="-1 311 181;1 311 181;-1 311 181" dur="12s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+      <path id="vine-line" class="stem" data-stroke="GardenStemBrush" fill="none" stroke-width="1.4" d="M311 181 C278 177 252 151 217 151 C187 151 157 173 124 168 C93 165 80 144 54 148 C41 150 39 163 48 165 C56 167 61 159 55 155" />
+      <path class="leaf" data-fill="GardenLeafBrush" d="M97 160 C87 146 91 136 101 131 C112 145 108 155 97 160Z M135 168 C144 151 155 149 165 151 C162 166 151 172 135 168Z M184 157 C170 148 170 135 177 128 C189 136 193 147 184 157Z M230 152 C232 136 245 129 256 132 C254 146 245 153 230 152Z M270 168 C261 155 264 144 273 141 C284 154 281 164 270 168Z" />
+      <path class="pale" data-fill="GardenPaleBrush" d="M74 150 C63 136 66 124 75 119 C87 132 86 144 74 150Z M151 165 C155 179 169 183 180 177 C176 165 164 160 151 165Z M209 151 C199 136 203 123 212 121 C225 132 223 145 209 151Z M249 159 C252 175 266 182 279 178 C275 164 263 157 249 159Z" />
+      <path class="stem" data-stroke="GardenStemBrush" fill="none" stroke-width="0.9" d="M97 159 L101 141 M184 156 L178 136 M231 152 L248 138 M152 166 L171 175 M210 151 L212 130" />
+    </g>
+  </g>
+  <g transform="matrix(1.3 0 0 1.3 -255 105)">
+    <g id="flowers-west" data-hover="flowers">
+      <animateTransform attributeName="transform" type="rotate" values="-1.2 382 186;1.2 382 186;-1.2 382 186" dur="8s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+      <path class="stem" data-stroke="GardenStemBrush" fill="none" stroke-width="1.2" d="M383 187 Q378 167 387 149 M370 187 Q370 170 361 162 M401 187 Q403 178 413 171" />
+      <path class="shade" data-fill="GardenShadeBrush" d="M381 177 Q367 176 366 168 Q378 164 381 177Z M382 167 Q395 163 399 168 Q394 179 382 176Z M405 182 Q417 179 421 183 Q415 191 405 186Z" />
+      <path class="petal" data-fill="GardenPetalBrush" data-stroke="GardenLeafBrush" stroke-width="0.8" d="M387 149 C374 149 376 140 382 141 C377 131 388 127 390 138 C397 129 405 138 396 144 C407 148 401 158 393 152 C391 163 381 159 387 149Z M361 162 C350 165 347 157 354 154 C347 149 355 143 360 151 C364 142 373 147 367 155 C377 156 374 165 366 161 C363 171 356 169 361 162Z M413 171 C405 173 402 166 408 164 C404 157 412 155 415 162 C420 156 427 163 421 167 C428 171 420 178 416 173 C414 180 407 176 413 171Z" />
+      <path class="gold" data-fill="GardenGoldBrush" d="M393 145 A3 3 0 1 1 387 145 A3 3 0 1 1 393 145 M365 157 A2.5 2.5 0 1 1 360 157 A2.5 2.5 0 1 1 365 157 M418 168 A2.5 2.5 0 1 1 413 168 A2.5 2.5 0 1 1 418 168" />
+    </g>
+  </g>
+  <g transform="matrix(1.3 0 0 1.3 435 105)">
+    <g id="flowers-east" data-hover="flowers">
+      <animateTransform attributeName="transform" type="rotate" values="-1.2 382 186;1.2 382 186;-1.2 382 186" dur="8s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+      <path class="stem" data-stroke="GardenStemBrush" fill="none" stroke-width="1.2" d="M383 187 Q378 167 387 149 M370 187 Q370 170 361 162 M401 187 Q403 178 413 171" />
+      <path class="shade" data-fill="GardenShadeBrush" d="M381 177 Q367 176 366 168 Q378 164 381 177Z M382 167 Q395 163 399 168 Q394 179 382 176Z M405 182 Q417 179 421 183 Q415 191 405 186Z" />
+      <path class="petal" data-fill="GardenPetalBrush" data-stroke="GardenLeafBrush" stroke-width="0.8" d="M387 149 C374 149 376 140 382 141 C377 131 388 127 390 138 C397 129 405 138 396 144 C407 148 401 158 393 152 C391 163 381 159 387 149Z M361 162 C350 165 347 157 354 154 C347 149 355 143 360 151 C364 142 373 147 367 155 C377 156 374 165 366 161 C363 171 356 169 361 162Z M413 171 C405 173 402 166 408 164 C404 157 412 155 415 162 C420 156 427 163 421 167 C428 171 420 178 416 173 C414 180 407 176 413 171Z" />
+      <path class="gold" data-fill="GardenGoldBrush" d="M393 145 A3 3 0 1 1 387 145 A3 3 0 1 1 393 145 M365 157 A2.5 2.5 0 1 1 360 157 A2.5 2.5 0 1 1 365 157 M418 168 A2.5 2.5 0 1 1 413 168 A2.5 2.5 0 1 1 418 168" />
+    </g>
+  </g>
+  <g transform="matrix(1.05 0 0 1.05 -95 153)">
+    <g id="grass-west" data-hover="grass">
+      <animateTransform attributeName="transform" type="rotate" values="-1.1 112 186;1.1 112 186;-1.1 112 186" dur="9s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+      <path class="stem" data-stroke="GardenStemBrush" fill="none" stroke-width="1.3" d="M111 188 Q109 172 103 164 M114 187 Q118 167 116 154 M116 189 Q125 176 132 174 M325 185 Q321 173 324 164 M328 186 Q333 175 340 173" />
+      <path class="pale" data-fill="GardenPaleBrush" d="M113 182 Q95 184 93 174 Q105 169 113 182Z M119 179 Q128 164 138 169 Q134 179 119 179Z M326 180 Q312 178 310 170 Q322 166 326 180Z" />
+    </g>
+  </g>
+  <g transform="matrix(1.1 0 0 1.1 420 148)">
+    <g id="grass-center" data-hover="grass">
+      <animateTransform attributeName="transform" type="rotate" values="-1.1 112 186;1.1 112 186;-1.1 112 186" dur="9s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+      <path class="stem" data-stroke="GardenStemBrush" fill="none" stroke-width="1.3" d="M111 188 Q109 172 103 164 M114 187 Q118 167 116 154 M116 189 Q125 176 132 174 M325 185 Q321 173 324 164 M328 186 Q333 175 340 173" />
+      <path class="pale" data-fill="GardenPaleBrush" d="M113 182 Q95 184 93 174 Q105 169 113 182Z M119 179 Q128 164 138 169 Q134 179 119 179Z M326 180 Q312 178 310 170 Q322 166 326 180Z" />
+    </g>
+  </g>
+  <g transform="matrix(1.05 0 0 1.05 760 153)">
+    <g id="grass-east" data-hover="grass">
+      <animateTransform attributeName="transform" type="rotate" values="-1.1 112 186;1.1 112 186;-1.1 112 186" dur="9s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" />
+      <path class="stem" data-stroke="GardenStemBrush" fill="none" stroke-width="1.3" d="M111 188 Q109 172 103 164 M114 187 Q118 167 116 154 M116 189 Q125 176 132 174 M325 185 Q321 173 324 164 M328 186 Q333 175 340 173" />
+      <path class="pale" data-fill="GardenPaleBrush" d="M113 182 Q95 184 93 174 Q105 169 113 182Z M119 179 Q128 164 138 169 Q134 179 119 179Z M326 180 Q312 178 310 170 Q322 166 326 180Z" />
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup><ProjectReference Include="../FAswitch.Core/FAswitch.Core.csproj" /></ItemGroup>
+  <ItemGroup><EmbeddedResource Include="DirectConnectionProtection.ps1" /></ItemGroup>
+  <ItemGroup><EmbeddedResource Include="../../scripts/Set-BrowserUdpProtection.ps1" LogicalName="FAswitch.Windows.BrowserUdpProtection.ps1" /></ItemGroup>
+</Project>

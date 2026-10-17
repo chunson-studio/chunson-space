@@ -1,0 +1,17 @@
+{
+  "project": "ModelTrace",
+  "source": "User-designated local source: ModelTrace upstream source snapshot",
+  "snapshotDate": "2026-10-13",
+  "sourceVersion": "SHA256-pinned source snapshot; original bank built_at 2026-09-23T06:17:08.081468+00:00",
+  "license": "MIT",
+  "copyright": "Copyright (c) 2026 xqy2006",
+  "files": [
+    { "source": "static/fingerprint-core.js", "sha256": "ADFF55637F6C0534C2C10703E028D4D1970D325E8DAECB55EFAA7F95A1938D5C" },
+    { "source": "static/challenge-browser.js", "sha256": "5EC55B13ECCA5BB7BAEA59D559DFD3E7324AE12B331957676D540C28BED06885" },
+    { "source": "data/unified_bank.json", "sha256": "6A678E6C73EB015C1C507D61CDD1313B41916D55186BB65920D1BF119EC5009E" },
+    { "source": "LICENSE", "sha256": "4812AAF2FC8971C97C8E054F7CECB16486F903D5C5B181EA48304C12182A11E7" }
+  ],
+  "bankCandidates": 16,
+  "runtime": "Pure C#; no Flask, Python, Node, hooks, monitoring or raw reference outputs",
+  "interpretation": "Uniform-prior closed-set reference-bank similarity, not service-side model authentication"
+}

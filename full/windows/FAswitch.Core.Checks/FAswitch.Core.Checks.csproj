@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../FAswitch.Core/FAswitch.Core.csproj" /></ItemGroup>
+  <ItemGroup><Compile Include="../CheckSupport/LinkFixtures.cs" Link="LinkFixtures.cs" /></ItemGroup>
+</Project>
