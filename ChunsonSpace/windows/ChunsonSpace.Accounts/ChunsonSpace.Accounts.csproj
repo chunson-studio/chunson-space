@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <Content Include="../ThirdParty/GeoTimeZone/LICENSE.txt" Link="ThirdParty/GeoTimeZone/LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../ThirdParty/GeoTimeZone/SOURCE.md" Link="ThirdParty/GeoTimeZone/SOURCE.md" CopyToOutputDirectory="PreserveNewest" />
+    <ProjectReference Include="../ChunsonSpace.Core/ChunsonSpace.Core.csproj" />
+    <ProjectReference Include="../ChunsonSpace.Application/ChunsonSpace.Application.csproj" />
+    <ProjectReference Include="../ChunsonSpace.Fingerprint/ChunsonSpace.Fingerprint.csproj" />
+    <PackageReference Include="GeoTimeZone" Version="6.1.0" />
+  </ItemGroup>
+</Project>

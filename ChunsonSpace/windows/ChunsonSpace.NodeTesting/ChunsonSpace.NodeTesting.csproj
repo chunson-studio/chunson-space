@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../ChunsonSpace.Accounts/ChunsonSpace.Accounts.csproj" />
+    <ProjectReference Include="../ChunsonSpace.Proxy/ChunsonSpace.Proxy.csproj" />
+  </ItemGroup>
+</Project>

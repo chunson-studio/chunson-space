@@ -1,0 +1,33 @@
+<UserControl x:Class="ChunsonSpace.Desktop.ArtworkViewer" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:ChunsonSpace.Desktop">
+  <UserControl.Resources><BooleanToVisibilityConverter x:Key="BoolVisibility"/></UserControl.Resources>
+  <Grid Background="{DynamicResource CanvasBrush}" Margin="0" PreviewMouseWheel="ZoomWheel">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+    <DockPanel Margin="16,44,16,8">
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><Button Content="－" Command="{Binding ZoomOutCommand}" ToolTip="缩小"/><TextBlock Text="{Binding ZoomLabel}" Width="56" TextAlignment="Center" VerticalAlignment="Center"/><Button Content="＋" Command="{Binding ZoomInCommand}" ToolTip="放大"/><Button x:Name="ArtworkFit" Content="适合窗口" Command="{Binding FitCommand}" Margin="8,0,0,0"/><Button x:Name="ArtworkBack" Content="返回 · Esc" Command="{Binding CloseCommand}" Margin="12,0,0,0"/></StackPanel>
+      <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center"/>
+    </DockPanel>
+    <TextBlock Grid.Row="1" Text="{Binding Comparison}" TextWrapping="Wrap" Margin="16,0,16,8" FontSize="12" Foreground="{DynamicResource MutedBrush}"/>
+    <ItemsControl x:Name="ArtworkPanes" Grid.Row="2" ItemsSource="{Binding Panes}" Margin="10,0,10,10">
+      <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="{Binding Columns}"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate><DataTemplate>
+        <Border BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource SurfaceBrush}" Margin="5,0">
+          <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+            <StackPanel Margin="12,8"><TextBlock Text="{Binding Row.Identity}" TextWrapping="Wrap" FontWeight="SemiBold"/><TextBlock Text="{Binding Row.TaskLabel}" TextWrapping="Wrap" Margin="0,3,0,3" FontSize="12"/><TextBlock Text="{Binding Row.VersionLabel}" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource MutedBrush}"/></StackPanel>
+            <StackPanel Grid.Row="1" Margin="12,0,12,6"><TextBlock x:Name="PrimarySafetySummary" Style="{StaticResource AccountHealthText}" Text="{Binding Row.SafetySummary}" TextWrapping="Wrap" FontSize="11"/><TextBlock Text="保存的回复原文（可能含英文，未改写）" FontSize="11"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Visible"/><Style.Triggers><DataTrigger Binding="{Binding Row.HasArtwork}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock></StackPanel>
+            <local:ArtworkCanvas x:Name="LargeArtwork" Grid.Row="2" Visibility="{Binding Row.HasArtwork,Converter={StaticResource BoolVisibility}}" Picture="{Binding Image}" Zoom="{Binding DataContext.Zoom,RelativeSource={RelativeSource AncestorType=local:ArtworkViewer}}" Loaded="CanvasLoaded"/>
+            <TextBox x:Name="FullSavedReply" Grid.Row="2" Text="{Binding Row.Text,Mode=OneWay}" ToolTip="保存的原文，可能含英文；没有改写或另发翻译请求。" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontSize="15" Padding="16" Margin="10,0" Background="{DynamicResource InfoSurfaceBrush}" Foreground="{DynamicResource InkBrush}" BorderBrush="{DynamicResource LineBrush}">
+              <TextBox.Style><Style TargetType="TextBox"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Row.HasArtwork}" Value="False"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBox.Style>
+            </TextBox>
+            <DockPanel Grid.Row="3" Margin="10,6"><Button Content="外部打开 ↗" Command="{Binding ExternalCommand}" DockPanel.Dock="Right" FontSize="11" Padding="8,3" Margin="8,0,0,0" ToolTip="次选：在外部浏览器打开沙箱作品"/><TextBlock Text="{Binding Status}" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center"/></DockPanel>
+            <Expander Grid.Row="4" Header="原文与题目" Margin="10,0,10,8"><ScrollViewer MaxHeight="170" VerticalScrollBarVisibility="Auto"><StackPanel>
+              <Expander Header="查看错误详情和模型返回名称"><StackPanel><TextBox Text="{Binding ErrorDetails,Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" MaxHeight="100" VerticalScrollBarVisibility="Auto"/><TextBlock Text="{Binding Row.ResponseModel}" TextWrapping="Wrap"/></StackPanel></Expander>
+              <TextBlock Text="保存的题目（原文）" Margin="0,6,0,4"/><TextBox Text="{Binding Row.Prompt,Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" MaxHeight="120" VerticalScrollBarVisibility="Auto"/>
+              <TextBlock Text="{Binding Row.OriginalNotice}" TextWrapping="Wrap" Margin="0,6,0,4"/><TextBlock Text="保存的回复（原文）" Margin="0,6,0,4"/><TextBox Text="{Binding Row.Text,Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" MaxHeight="180" VerticalScrollBarVisibility="Auto"/>
+            </StackPanel></ScrollViewer></Expander>
+          </Grid>
+        </Border>
+      </DataTemplate></ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </Grid>
+</UserControl>
+

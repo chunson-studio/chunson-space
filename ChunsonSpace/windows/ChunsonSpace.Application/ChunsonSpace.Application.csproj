@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../ChunsonSpace.Core/ChunsonSpace.Core.csproj" />
+    <ProjectReference Include="../ChunsonSpace.Windows/ChunsonSpace.Windows.csproj" />
+  </ItemGroup>
+</Project>

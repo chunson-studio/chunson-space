@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../ChunsonSpace.Accounts/ChunsonSpace.Accounts.csproj" /></ItemGroup>
+  <ItemGroup><Compile Include="../CheckSupport/SafetyBufferingFixtures.cs" Link="SafetyBufferingFixtures.cs" /></ItemGroup>
+  <ItemGroup><EmbeddedResource Include="../CheckSupport/english-prompt-original-policy.json" LogicalName="EnglishPromptProvenance" /></ItemGroup>
+</Project>

@@ -1,0 +1,18 @@
+<Solution>
+  <Project Path="ChunsonSpace.Core/ChunsonSpace.Core.csproj" />
+  <Project Path="ChunsonSpace.Core.Checks/ChunsonSpace.Core.Checks.csproj" />
+  <Project Path="ChunsonSpace.Fingerprint/ChunsonSpace.Fingerprint.csproj" />
+  <Project Path="ChunsonSpace.Fingerprint.Checks/ChunsonSpace.Fingerprint.Checks.csproj" />
+  <Project Path="ChunsonSpace.Windows/ChunsonSpace.Windows.csproj" />
+  <Project Path="ChunsonSpace.Windows.Checks/ChunsonSpace.Windows.Checks.csproj" />
+  <Project Path="ChunsonSpace.Application/ChunsonSpace.Application.csproj" />
+  <Project Path="ChunsonSpace.Application.Checks/ChunsonSpace.Application.Checks.csproj" />
+  <Project Path="ChunsonSpace.Accounts/ChunsonSpace.Accounts.csproj" />
+  <Project Path="ChunsonSpace.Accounts.Checks/ChunsonSpace.Accounts.Checks.csproj" />
+  <Project Path="ChunsonSpace.Proxy/ChunsonSpace.Proxy.csproj" />
+  <Project Path="ChunsonSpace.Proxy.Checks/ChunsonSpace.Proxy.Checks.csproj" />
+  <Project Path="ChunsonSpace.IpQuality.Checks/ChunsonSpace.IpQuality.Checks.csproj" />
+  <Project Path="ChunsonSpace.NodeTesting/ChunsonSpace.NodeTesting.csproj" />
+  <Project Path="ChunsonSpace.NodeTesting.Checks/ChunsonSpace.NodeTesting.Checks.csproj" />
+  <Project Path="ChunsonSpace.Desktop/ChunsonSpace.Desktop.csproj" />
+</Solution>

@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>ChunsonSwitch</AssemblyName>
+    <ApplicationIcon>Assets/BrandIcon.ico</ApplicationIcon>
+    <RootNamespace>ChunsonSpace.Desktop</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../CheckSupport/LinkFixtures.cs" Link="Verification/LinkFixtures.cs" />
+    <Compile Include="../CheckSupport/SafetyBufferingFixtures.cs" Link="Verification/SafetyBufferingFixtures.cs" />
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+    <ProjectReference Include="../ChunsonSpace.Core/ChunsonSpace.Core.csproj" />
+    <ProjectReference Include="../ChunsonSpace.Application/ChunsonSpace.Application.csproj" />
+    <ProjectReference Include="../ChunsonSpace.Accounts/ChunsonSpace.Accounts.csproj" />
+    <ProjectReference Include="../ChunsonSpace.Proxy/ChunsonSpace.Proxy.csproj" />
+    <ProjectReference Include="../ChunsonSpace.Fingerprint/ChunsonSpace.Fingerprint.csproj" />
+    <ProjectReference Include="../ChunsonSpace.NodeTesting/ChunsonSpace.NodeTesting.csproj" />
+
+    <Resource Include="Assets/Sculpture.png" />
+    <Resource Include="Assets/BrandMark.png" />
+    <Resource Include="Assets/HomeGarden.svg" />
+    <Resource Include="Assets/Fonts/*.ttf;Assets/Fonts/*.otf" />
+    <Content Include="../ThirdParty/Fonts/**" Link="ThirdParty/Fonts/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../scripts/proxy/FlClash-DNS.ps1" Link="scripts/proxy/FlClash-DNS.ps1" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../scripts/proxy/FlClash-AllSubscriptions.ps1" Link="scripts/proxy/FlClash-AllSubscriptions.ps1" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../scripts/proxy/lib/FlDns.cs" Link="scripts/proxy/lib/FlDns.cs" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../runtime/mihomo/mihomo.exe" Link="runtimes/mihomo/mihomo.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../ThirdParty/Mihomo/**" Link="ThirdParty/Mihomo/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Import Project="../../../taskbar-clock/Clock.targets" />
+  <PropertyGroup><Version>1.5.0</Version></PropertyGroup>
+  <Import Project="../../../FlClashSetup/FlClashSetup.targets" />
+</Project>

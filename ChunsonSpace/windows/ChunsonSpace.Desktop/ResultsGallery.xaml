@@ -1,0 +1,40 @@
+<UserControl x:Class="ChunsonSpace.Desktop.ResultsGallery" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <UserControl.Resources><BooleanToVisibilityConverter x:Key="BoolVisibility"/></UserControl.Resources>
+  <Grid>
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <DockPanel Margin="0,0,0,10"><Button x:Name="ClearAllTestHistory" Content="清除全部测试历史" Command="{Binding ClearHistoryCommand}" DockPanel.Dock="Right" Margin="8,0,0,0" ToolTip="清除所有账号的测试记录和作品；测试运行中不可用"/><Button x:Name="RefreshResults" Content="刷新结果" Command="{Binding RefreshCommand}" DockPanel.Dock="Right"/><TextBlock Text="测试结果" FontSize="26" FontWeight="SemiBold"/><TextBlock Text="所有保存记录" Foreground="{DynamicResource MutedBrush}" Margin="16,10,0,0"/></DockPanel>
+    <Grid Grid.Row="1" Margin="0,0,0,8"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="160"/><ColumnDefinition Width="150"/><ColumnDefinition Width="110"/></Grid.ColumnDefinitions>
+      <DockPanel Margin="0,0,8,0"><TextBlock Text="搜索" VerticalAlignment="Center" Margin="0,0,8,0"/><TextBox x:Name="ResultSearch" Text="{Binding Search,UpdateSourceTrigger=PropertyChanged,Delay=200}" AutomationProperties.Name="搜索模型、账号、任务、版本" ToolTip="搜索模型、账号、任务或题目版本"/></DockPanel>
+      <ComboBox x:Name="ResultAccountFilter" Grid.Column="1" ItemsSource="{Binding Profiles}" SelectedItem="{Binding Profile}" AutomationProperties.Name="结果账号范围" Margin="0,0,8,0"/>
+      <ComboBox x:Name="ResultTaskFilter" Grid.Column="2" ItemsSource="{Binding Types}" SelectedItem="{Binding Type}" AutomationProperties.Name="结果任务类型" Margin="0,0,8,0"/>
+      <ComboBox x:Name="ResultStateFilter" Grid.Column="3" ItemsSource="{Binding States}" SelectedItem="{Binding State}" AutomationProperties.Name="结果完成状态"/>
+    </Grid>
+    <DockPanel Grid.Row="2" Margin="0,0,0,8"><ComboBox x:Name="ResultOrder" DockPanel.Dock="Right" ItemsSource="{Binding Orders}" SelectedItem="{Binding Order}" Width="110" AutomationProperties.Name="结果排序"/><TextBlock Text="{Binding Status}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/></DockPanel>
+    <Grid Grid.Row="3">
+      <ListBox x:Name="AllResultsList" ItemsSource="{Binding Items}" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" HorizontalContentAlignment="Stretch">
+        <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem"><Setter Property="Foreground" Value="{DynamicResource InkBrush}"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="0,0,0,10"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><ContentPresenter/></ControlTemplate></Setter.Value></Setter></Style></ListBox.ItemContainerStyle>
+        <ListBox.ItemTemplate><DataTemplate>
+          <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="10" Padding="12">
+            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="210"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+              <Button Command="{Binding OpenCommand}" Padding="0" BorderThickness="0" Background="{DynamicResource InfoSurfaceBrush}" Margin="0,0,14,0" ToolTip="在应用内打开大图或原文">
+                <Grid Height="142"><TextBlock Text="查看保存的回复" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource MutedBrush}"/><Image Source="{Binding Thumbnail}" Stretch="Uniform"/></Grid>
+              </Button>
+              <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Identity}" TextWrapping="Wrap" FontWeight="SemiBold" FontSize="14"/>
+                <TextBlock Text="{Binding TaskLabel}" TextWrapping="Wrap" Margin="0,6,0,4"/>
+                <TextBlock Text="{Binding VersionLabel}" FontSize="11" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap"/>
+                <TextBlock Style="{StaticResource AccountHealthText}" Text="{Binding SafetySummary}" FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding Excerpt}" MaxHeight="34" FontSize="11" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,5,0,0"/>
+              </StackPanel>
+              <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="12,0,0,0"><CheckBox Content="加入比较" IsChecked="{Binding Selected}" IsEnabled="{Binding HasArtwork}" Margin="0,0,0,12"/><Button Content="打开" Command="{Binding OpenCommand}"/></StackPanel>
+            </Grid>
+          </Border>
+        </DataTemplate></ListBox.ItemTemplate>
+      </ListBox>
+      <TextBlock Text="{Binding EmptyText}" Visibility="{Binding IsEmpty,Converter={StaticResource BoolVisibility}}" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" MaxWidth="480" FontSize="16" Foreground="{DynamicResource MutedBrush}"/>
+      <ProgressBar IsIndeterminate="True" Height="4" VerticalAlignment="Top" Visibility="{Binding IsLoading,Converter={StaticResource BoolVisibility}}"/>
+    </Grid>
+    <DockPanel Grid.Row="4" Margin="0,10,0,0"><StackPanel Orientation="Horizontal" DockPanel.Dock="Right"><Button Content="清除筛选与选择" Command="{Binding ClearCommand}" Margin="0,0,8,0"/><Button x:Name="CompareSavedResults" Content="并排比较（选两项）" Command="{Binding CompareCommand}"/></StackPanel><TextBlock Text="{Binding CountLabel}" VerticalAlignment="Center" FontSize="12"/></DockPanel>
+  </Grid>
+</UserControl>
+

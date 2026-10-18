@@ -4,7 +4,7 @@
 
 <p align="center">Windows 10 / 11 · 64 位 · 中文界面 · MIT 开源</p>
 
-<p align="center"><strong>当前版本 1.4.2</strong> · 暖米白与雾蓝新配色 · 明暗主题 · 账号冻结与后台测试</p>
+<p align="center"><strong>当前版本 1.5.0</strong> · 最多 16 个账号并发检测 · 正常绿字 / 异常红字 · 清除测试历史</p>
 
 <p align="center">
   <a href="https://github.com/chunson-studio/chunson-space/releases/latest/download/Chunson-Full-Windows-x64.zip"><img src="docs/assets/download-full.svg" alt="下载完整版 ZIP" width="300"></a>
@@ -24,15 +24,17 @@
 
 **[下载 Windows 完整版 ZIP](https://github.com/chunson-studio/chunson-space/releases/latest/download/Chunson-Full-Windows-x64.zip)**
 
-从本次发布起只维护完整版。原简洁版停止更新，旧源码和下载包保留在历史版本中。
+只维护完整版。原简洁版停止更新，旧源码和下载包保留在历史版本中。
 
-## 1.4.2 更新了什么
+## 1.5.0 更新了什么
 
-- **更柔和的界面**：暖米白背景、浅灰侧栏、雾蓝按钮，保留原有嫩芽图案。
-- **统一明暗主题**：账号列表、弹窗、按钮和 FlClash 提示使用同一套配色，调整辅助文字的清晰度。
-- **更新界面截图**：下面的首页、网络、测试与冻结截图均来自新版程序的离线演示。
+- **一键检测所有账号**：未冻结账号最多 16 个并发，各账号内两种模型顺序执行，完成一项就显示一项，支持后台进度与取消。
+- **统一健康颜色**：账号正常用绿色文字，账号异常用红色文字；未能判断时保留原标记，不把请求失败当成异常结论。
+- **清除全部测试历史**：在测试结果页一次清除所有账号的产品测试记录和作品。保留账号、授权、当前标记、冻结状态、项目、聊天与外部导出；测试运行中不可清除。
+- **更简洁的结果**：保留模型原文、历史记录和作品比较，主界面只显示明确结论；修复部分完整回复被误判截断的问题。
+- **更新源码名称与界面预览**：公开工程统一使用 ChunsonSpace，复用已经通过的 SYNTHETIC 离线演示截图。
 
-本次更新聚焦界面配色，功能入口和账号配置保持原有方式。网络与 IP 页面仍独立保留。
+模型测试使用 GPT-6.1 Sol / GPT-6 Astra，思考强度固定为 high；每个账号最多两次模型请求，消耗各自额度。健康标记依据当前规则和完整响应，不能证明实际后端型号或能力。
 
 ### 保留 1.4.1 的功能与修复
 
@@ -62,7 +64,7 @@
 
 ## 界面预览
 
-以下截图来自程序实际界面的离线演示，账号、IP、回复和缓存数值均为示例，不是真实账号测试结果。点击图片可查看大图。
+以下截图来自已通过的离线演示，账号、IP、回复和缓存数值均为示例。检测入口与运行进度为本轮 SYNTHETIC 截图，其他仍适用页面沿用此前已审阅的合成截图；这些图片不代表真实账号结果。点击图片可查看大图。
 
 ### 完整版首页
 
@@ -76,15 +78,15 @@
 
 [![网络与 IP 页面](docs/assets/screenshot-network.png)](docs/assets/screenshot-network.png)
 
-### 模型测试与缓存
+### 一键账号检测与模型测试
 
-按账号保存测试历史，对照原始回复、耗时和缓存 token；测试可以收起到后台。
+一键检测所有未冻结账号；单账号入口可以选择 Ciallo、绘图等测试。下图账号均为 SYNTHETIC 示例。
 
 [![Ciallo 测试与缓存数据](docs/assets/screenshot-model-tests.png)](docs/assets/screenshot-model-tests.png)
 
 ### 测试进度与账号冻结
 
-测试时显示当前步骤、已完成回复数和本轮用时，收起后仍能查看进度。用时包含排队，不代表模型内部的生成百分比。
+不同账号最多 16 个并发，账号内模型顺序执行；逐账号显示进度，支持收起与取消。下图为已验收的合成并发示例，用时包含排队。
 
 [![测试进度与用时](docs/assets/screenshot-test-progress.png)](docs/assets/screenshot-test-progress.png)
 
@@ -120,7 +122,7 @@
 - 系统：**Windows 10 / 11 x64**。
 - 浏览器：本机已安装 **Chrome 或 Edge**。
 - 网络：**必须使用 FlClash，目前只适配这个客户端。** 启动时会检查；没有安装时显示下载通知，点击后在浏览器打开官方发布页，本工具随即退出。请自行下载安装、添加订阅，再重新打开工具。已有便携版请先运行 FlClash。
-- 安装后先打开 FlClash、添加自己的订阅并选择节点，再重新启动本工具。已安装但入口未就绪时，按提示“检查并继续”。支持只开 TUN，但仍需开启主 HTTP / mixed 入口，供工具和独立浏览器连接。
+- 检测到 FlClash 已安装就直接进入主界面，不要求先运行或配置好端口。使用联网功能前，再打开 FlClash、添加自己的订阅并选择节点。支持只开 TUN；工具和独立浏览器连接时仍需可用的主 HTTP / mixed 入口。
 
 下载入口：[FlClash 官方发布页](https://github.com/chen08209/FlClash/releases/latest)。本工具不下载或运行安装包，不附送订阅，也不会替你修改节点或系统代理设置。
 
@@ -176,11 +178,11 @@
 ./build.ps1 -Verify -Package -Output ./out/release
 ```
 
-构建入口只生成完整版；`-DotnetPath` 可指定 SDK。
+构建入口只生成完整版；`-DotnetPath` 可指定 SDK，`-DependencyExecutable` 可复用与固定 SHA-256 一致的 Mihomo。`-Verify` 可选，运行完整离线 UI 验证；不传时只构建、列清单和打包。
 
 ```text
 chunson-space/
-├─ full/             完整版：账号、网络、测试与分身
+├─ ChunsonSpace/             完整版：账号、网络、测试与分身
 ├─ taskbar-clock/    内置北京时间小组件
 ├─ FlClashSetup/     FlClash 检查与安装引导
 └─ build.ps1         构建、离线验证与打包入口
@@ -209,7 +211,7 @@ chunson-space/
 
 原创部分采用 **[MIT License](LICENSE)**，允许使用、修改、分发及商用，须保留版权声明和许可文本。
 
-第三方组件遵循各自许可证。Mihomo 作为独立外部进程使用，适用 GPL-3.0，详情见 [Mihomo 声明](full/windows/ThirdParty/Mihomo)。YamlDotNet、GeoTimeZone、ModelTrace 及字体的声明保留在对应 `ThirdParty` 目录；本项目的 MIT 许可不替代它们的许可证。
+第三方组件遵循各自许可证。Mihomo 作为独立外部进程使用，适用 GPL-3.0，详情见 [Mihomo 声明](ChunsonSpace/windows/ThirdParty/Mihomo)。YamlDotNet、GeoTimeZone、ModelTrace 及字体的声明保留在对应 `ThirdParty` 目录；本项目的 MIT 许可不替代它们的许可证。
 
 ---
 

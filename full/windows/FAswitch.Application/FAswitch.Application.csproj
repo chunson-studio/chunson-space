@@ -1,6 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <ProjectReference Include="../FAswitch.Core/FAswitch.Core.csproj" />
-    <ProjectReference Include="../FAswitch.Windows/FAswitch.Windows.csproj" />
-  </ItemGroup>
-</Project>

@@ -2,14 +2,15 @@
     [Parameter(Mandatory=$true)][string]$Output,
     [string]$DotnetPath='dotnet',
     [switch]$Verify,
-    [switch]$Package
+    [switch]$Package,
+    [string]$DependencyExecutable
 )
 $ErrorActionPreference='Stop'
 $outputPath=[IO.Path]::GetFullPath($Output)
 if(Test-Path -LiteralPath $outputPath){throw 'Output must be a new directory'}
 New-Item -ItemType Directory -Path $outputPath | Out-Null
-& (Join-Path $PSScriptRoot 'Initialize-Dependencies.ps1')
-$item=@{Name='Full';Project='full/windows/FAswitch.Desktop/FAswitch.Desktop.csproj';Exe='ChunsonSwitch.exe';Modes=@('--verify-ui','--verify-storage-ui')}
+& (Join-Path $PSScriptRoot 'Initialize-Dependencies.ps1') -ExistingExecutable $DependencyExecutable
+$item=@{Name='Full';Project='ChunsonSpace/windows/ChunsonSpace.Desktop/ChunsonSpace.Desktop.csproj';Exe='ChunsonSwitch.exe';Modes=@('--verify-ui','--verify-storage-ui')}
     $app=Join-Path $outputPath $item.Name
     & $DotnetPath publish (Join-Path $PSScriptRoot $item.Project) -c Release -r win-x64 --self-contained true -o $app --nologo --disable-build-servers -m:1 -p:UseSharedCompilation=false -p:NuGetAudit=false -p:DebugType=None -p:DebugSymbols=false
     if($LASTEXITCODE -ne 0){throw ('Build failed: '+$item.Name)}

@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup><ProjectReference Include="../ChunsonSpace.Core/ChunsonSpace.Core.csproj" /></ItemGroup>
+  <ItemGroup><EmbeddedResource Include="DirectConnectionProtection.ps1" /></ItemGroup>
+  <ItemGroup><EmbeddedResource Include="../../scripts/Set-BrowserUdpProtection.ps1" LogicalName="ChunsonSpace.Windows.BrowserUdpProtection.ps1" /></ItemGroup>
+</Project>

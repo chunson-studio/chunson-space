@@ -1,20 +1,22 @@
 {
   "passed": true,
   "license": "MIT",
-  "files": 305,
+  "files": 347,
   "sanitizedFiles": [
-    "full/windows/FAswitch.Accounts.Checks/DefaultLoginBrowserChecks.cs",
-    "full/windows/FAswitch.Accounts.Checks/LocalAccountImportChecks.cs",
-    "full/windows/FAswitch.Accounts.Checks/NewAccountLoginChecks.cs",
-    "full/windows/FAswitch.Accounts.Checks/PersistentBrowserChecks.cs",
-    "full/windows/FAswitch.Accounts.Checks/Program.cs",
-    "full/windows/FAswitch.Accounts.Checks/StrictEgressChecks.cs",
-    "full/windows/FAswitch.Accounts.Checks/TwoStageLoginChecks.cs",
-    "full/windows/FAswitch.Desktop/OfflineAccountServices.cs",
-    "full/windows/FAswitch.Desktop/SupportReportVerification.cs",
-    "full/windows/FAswitch.Windows.Checks/BrowserUdpChecks.cs",
-    "full/windows/ThirdParty/ModelTrace/SOURCE.json",
-    "full/windows/ThirdParty/YamlDotNet/SOURCE.md"
+    "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/DefaultLoginBrowserChecks.cs",
+    "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/LocalAccountImportChecks.cs",
+    "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/LoginCompletionChecks.cs",
+    "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/NewAccountLoginChecks.cs",
+    "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/PersistentBrowserChecks.cs",
+    "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/Program.cs",
+    "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/StrictEgressChecks.cs",
+    "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/TransportFailureChecks.cs",
+    "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/TwoStageLoginChecks.cs",
+    "ChunsonSpace/windows/ChunsonSpace.Desktop/OfflineAccountServices.cs",
+    "ChunsonSpace/windows/ChunsonSpace.Desktop/SupportReportVerification.cs",
+    "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/BrowserUdpChecks.cs",
+    "ChunsonSpace/windows/ThirdParty/ModelTrace/SOURCE.json",
+    "ChunsonSpace/windows/ThirdParty/YamlDotNet/SOURCE.md"
   ],
   "findings": [],
   "excluded": [
@@ -36,18 +38,1608 @@
     },
     {
       "file": "build.ps1",
-      "sha256": "7bd3b9ed7dd036a0342e6d6fbe3b13552980efdb8407c51583911ed3242d4322",
-      "bytes": 5069
+      "sha256": "16a97ce9a7565f2d91e84bd366de8ac66bd4acf0d73da00ee92fb3aaae54af7c",
+      "bytes": 5163
+    },
+    {
+      "file": "ChunsonSpace/scripts/proxy/FlClash-AllSubscriptions.ps1",
+      "sha256": "595a35635e6820128c40331466dce83c093dda82b88566344284709fd57a0515",
+      "bytes": 18145
+    },
+    {
+      "file": "ChunsonSpace/scripts/proxy/FlClash-DNS.ps1",
+      "sha256": "0d6f00afe1b3bbc4850c0db1207bfc6aca3faa80952a8df2882d99667c9ba206",
+      "bytes": 64109
+    },
+    {
+      "file": "ChunsonSpace/scripts/proxy/lib/FlDns.cs",
+      "sha256": "6d7723056dd867aaa1e2bfd5ee0939769803399838cfbc3ba48a27a1ff898d64",
+      "bytes": 9840
+    },
+    {
+      "file": "ChunsonSpace/scripts/Set-BrowserUdpProtection.ps1",
+      "sha256": "11567b07eac12343a56bfc722ebdcbfb289c911759b05829cb991704eda506f3",
+      "bytes": 6291
+    },
+    {
+      "file": "ChunsonSpace/windows/CheckSupport/LinkFixtures.cs",
+      "sha256": "fcd7954e597635e77b66bf3d0a5c589c1ef8b78aa39064a843b778b264ec8aad",
+      "bytes": 4613
+    },
+    {
+      "file": "ChunsonSpace/windows/CheckSupport/SafetyBufferingFixtures.cs",
+      "sha256": "222852babb6485e23f6749870eea4e381003bf334a262d66fd2b947a39c4434c",
+      "bytes": 3370
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/AccountCli.cs",
+      "sha256": "01884cfe540dd22359ffb88f1c65ef77f6c24a480c270e693c3debc42291133b",
+      "bytes": 9486
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/AccountContracts.cs",
+      "sha256": "21e1701a7ec5a71d11a06fac6a63dc4578e7efc8ad142d90a5d6c89127bbb0ce",
+      "bytes": 3558
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/AccountEvidence.cs",
+      "sha256": "2c888dce9393b68a6c8b7c90fcd7afd9d277e05df970b46630ee4acebdb01e14",
+      "bytes": 4896
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/AccountHealthBatch.cs",
+      "sha256": "45fb3739dbc0f3bac54fae3eb11199dcaf5fd2d8f9dae246c77b90254328b376",
+      "bytes": 6845
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/AccountNetwork.cs",
+      "sha256": "fbbbc4ab2790dafc9c0a7661e2dd53b297b229f7809bc58ae593d98a8b8095e5",
+      "bytes": 11514
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/AccountRepository.cs",
+      "sha256": "e9fe7e7bc338d500f2abe5fe43203451bfc181d19eec37a679018a29608a56ce",
+      "bytes": 15973
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/AccountService.cs",
+      "sha256": "aaa561c7f777bf6e46554ee8cede39957639fce889ad59793091c9070c0f6e57",
+      "bytes": 22711
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/AccountTraceImport.cs",
+      "sha256": "14287ed5053235ea1b9bebf1c9a47577cdea0b66ab257f895170b11da6608465",
+      "bytes": 5768
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/AccountTransportFailure.cs",
+      "sha256": "10388de99bef59b6e049aac41af66a43e2a4ed569f0c92c571123997e80c54e1",
+      "bytes": 3150
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/AssemblyInfo.cs",
+      "sha256": "01374606e47c7c551fef5cffa434a3f767fa2017c4863e5b208a7fada07504cb",
+      "bytes": 96
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/BrowserTimezone.cs",
+      "sha256": "0011c3c38169297f8a739eb37db38d583bf1fecef1e7696239bdd36a485bcb22",
+      "bytes": 12142
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/BuiltInTestInstructions.cs",
+      "sha256": "7e20229ec195506bec309e211b0e50e566d19dedb907363e96ac4544dd2a7a25",
+      "bytes": 195
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/CdpConnection.cs",
+      "sha256": "467fdffcf72ffcd30f0165af591327ca19f25fc3844b2504174f8a7a47aa7af6",
+      "bytes": 5413
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/ChromeBrowser.cs",
+      "sha256": "54b677aaf0bca8823732e7323f869a40522a27b37ee58e864d81e04e0a8cb0e0",
+      "bytes": 54464
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/ChunsonSpace.Accounts.csproj",
+      "sha256": "e6f3f379e06af841fd23b4285b544a20b65df950cb4a1ac453c7e23644cd28b5",
+      "bytes": 702
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/CialloTest.cs",
+      "sha256": "a244891bd3202f163e6a41d40288799c9c5705ce54659ff258f6b0ee08ed3a62",
+      "bytes": 7841
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/CountryNames.cs",
+      "sha256": "da37917a63ba27f4d2865e6d51836e6934f402e902df803244ba9b56b3fa31f9",
+      "bytes": 9823
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/DefaultLoginBrowser.cs",
+      "sha256": "7566ab09969e29e5d37ffa4b96f6a37a035f4a5048e41b59f4f58e25373b33fa",
+      "bytes": 2166
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/EgressService.cs",
+      "sha256": "eb56aa0afc19043a2ee0ced15b06affd6b67a272e6d78cfa243d961862878ec3",
+      "bytes": 17781
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/EgressSources.cs",
+      "sha256": "13fe7e53cc2a36402a70a23c408d8a8f2e05bd7bbb855233f0c0b2c55249b73e",
+      "bytes": 5321
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/FingerprintAccounts.cs",
+      "sha256": "e291665ffc31619929380e2e61aed26e59aac7adbd72d77662ed0f8f1b956c4b",
+      "bytes": 8386
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/InstalledBrowser.cs",
+      "sha256": "602555eae8644865e1678def2cd850eaeda9d96a047ab67df2f99daa5ce75c5c",
+      "bytes": 18640
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/IpAdmissionPolicy.cs",
+      "sha256": "dede9f462528954820836e4b0e799c16cac053c5285a564612dcaf767905e2e7",
+      "bytes": 2350
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/IpQualityService.cs",
+      "sha256": "626d99a32eb3b308a89afff269003d4c37a0847af6d22d425662e74e59be9c42",
+      "bytes": 10643
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/LocalArtworkSession.cs",
+      "sha256": "102b5209fecea98925bb468c715c8d598672549a2c26e6fab32bcf4a9ffc5378",
+      "bytes": 8687
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/LocalVisualRenderer.cs",
+      "sha256": "35a9a7977d85b20b13e8afccbc16453fe021859df0fa02e9c6af6d511b3e4ed6",
+      "bytes": 2065
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/LoginService.cs",
+      "sha256": "f1a94298e328b9f6de1596cfa7367bd54759003fb22af0d92d502fe54e576d5b",
+      "bytes": 25901
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/LoopbackCallback.cs",
+      "sha256": "de44fe63f6820777613acd2a42a3dac593b783ab55b6bf4ad5ca24c657998bad",
+      "bytes": 7256
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/ModelRequestTrace.cs",
+      "sha256": "46b10d43446e042134368e3ca268f8efe546e5e2a299cda29550de0983d562a8",
+      "bytes": 7344
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/ModelTestParameters.cs",
+      "sha256": "c1941b920188c268fe885b89bfd0b858dd61c9cd3f86500373ea205e059f7aba",
+      "bytes": 1236
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/NetCoffeeService.cs",
+      "sha256": "e527d3410b8ff4a14bea457cac2c7549873194cc7ec36b913b3b7c0893edb74c",
+      "bytes": 6988
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/OnboardingProxyBrowser.cs",
+      "sha256": "d1e28a98f30a24cee50bd79d65c79302cfa76fcef64079b9d4591b19b89bbfe7",
+      "bytes": 9046
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/ProxyLatencyService.cs",
+      "sha256": "a9b9b2e83ec733753bd1614f9f25ad518fb681dfba1dcec6c719e7e1bbde226a",
+      "bytes": 1666
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/ResponsesVisualTestRuntime.cs",
+      "sha256": "867dcb860ad0584b30fd9309e8f769e4e46c949fbcc24f61c12de9f8b7caa167",
+      "bytes": 3987
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/SafetyBuffering.cs",
+      "sha256": "7d93f852abbbed3153cf7a7a4f59910de658e87afd211fb388f9ce794ad12032",
+      "bytes": 11069
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/VisualTestRuntime.cs",
+      "sha256": "8b3e96a7c663f66fa76b6c8f7b14fea38854b31699ad39745604a5a928248814",
+      "bytes": 11908
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/VisualTests.cs",
+      "sha256": "f0c4a91e9cfce2de041a4ed35c0dbc7a3d832743464d0a8579bd6c99d5079e08",
+      "bytes": 19210
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/AccountCliChecks.cs",
+      "sha256": "00518b28e0119cde216504cbaa80a65c82a31ea161e9dfd7b38ef0bc0d6942c8",
+      "bytes": 5946
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/AccountEvidenceChecks.cs",
+      "sha256": "7a26a659408100bca1d7926be56b5352f3b4c298fc6cae89118203de82c5ab26",
+      "bytes": 19177
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/AccountPreparationChecks.cs",
+      "sha256": "fcb159ce51edb025720f778256ed02ac65002403edfe9045b001eef665071aee",
+      "bytes": 3618
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/BrowserSessionInspection.cs",
+      "sha256": "842589ee88a0972282a6abf3519f791c03b6c898e1b00d897ea13d0bf417417c",
+      "bytes": 2943
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/BrowserTimezoneTargetChecks.cs",
+      "sha256": "4502a170940c48ef9448204049f95575abbf1e3757e894e54ca923c8d08d6b18",
+      "bytes": 4216
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/BrowserTimezoneVerification.cs",
+      "sha256": "0bc6e0b48e67cce53f48c76aa7f77873546aa8172e2dca5a4225b6242a409c81",
+      "bytes": 10275
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/ChunsonSpace.Accounts.Checks.csproj",
+      "sha256": "1309b3fde675d2265a929a227a04d093bfd64e675b472b1baf87ae6837d2d21e",
+      "bytes": 493
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/CialloChecks.cs",
+      "sha256": "670c3dd17ab47a97def09e6f6f247ed1f3021e35af2c52b86d3cea53ee2f3cc5",
+      "bytes": 6229
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/DefaultLoginBrowserChecks.cs",
+      "sha256": "0c9a711c5127c92065cac7572c2853eba4c8af2f94ca82ebbac1694a41f308dd",
+      "bytes": 3367
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/EnglishPromptChecks.cs",
+      "sha256": "3b6175f6966a10cc185f42fefcfadd50c7af70ae2ff66e6fe05cb1a53379d78f",
+      "bytes": 4263
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/FingerprintAccountChecks.cs",
+      "sha256": "c399d8e4c860e4d7abecc0e102c8c155f4be96176449082a6d12244e0e28105e",
+      "bytes": 15498
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/LocalAccountImportChecks.cs",
+      "sha256": "48a5c5d0db6d7cf12f35db3e94777b98e494553b89270f0eaa6b3fdd0d10686b",
+      "bytes": 4663
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/LoginCompletionChecks.cs",
+      "sha256": "eae2be88c04dca5c66ef2f12904a584591ccf75ecb1042483ec38895e1caece6",
+      "bytes": 12975
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/NativeBrowserOwnershipChecks.cs",
+      "sha256": "48eca7079847c2ea0955dac432d2d9c1b6845fc1e44477329bbc24d9a7719d77",
+      "bytes": 16233
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/NativeBrowserRouteFixture.cs",
+      "sha256": "d5d918e23bd5012dc7123cf4549813c4ddcff9bb6d8256f3780517665f533586",
+      "bytes": 6121
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/NewAccountLoginChecks.cs",
+      "sha256": "ada44ff0cf35318d96d8a9df190a0c19fc8a5c71a70a5260b2caa549f91a129f",
+      "bytes": 16059
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/PersistentBrowserChecks.cs",
+      "sha256": "85d9d99532d28ae7686468f6c067f7990e0f401e08a6a831b5c2ab9ca46df15e",
+      "bytes": 22255
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/Program.cs",
+      "sha256": "fa1eba58324e6bf60aa091e8370a90c5c8682eea8cd6063edfc831ba828657e0",
+      "bytes": 44653
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/RegionEgressChecks.cs",
+      "sha256": "1876735d2ee56e460f7cc4608a76611ed96b51453ac34e8bcb5463590213f55d",
+      "bytes": 6279
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/RendererEgressProbe.cs",
+      "sha256": "29e3103a95d9e07f0deb925d5dcf4d7fa067155619d2e373ea20971dcf7505a0",
+      "bytes": 5882
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/ResponsesFailureChecks.cs",
+      "sha256": "65542146b8bc41b9b121efe1512af7bc5103542be5c57699c930d01a3a99bd57",
+      "bytes": 6764
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/SafetyBufferingChecks.cs",
+      "sha256": "6a479213419d7aaf944464a30731a4c71706960f40f5316fe5e6389d5c14e085",
+      "bytes": 19022
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/StrictBrowserChecks.cs",
+      "sha256": "1736d458a806362ce0876d9b968653834cd2424de75f86b3af355009e55f2558",
+      "bytes": 33650
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/StrictEgressChecks.cs",
+      "sha256": "783383db1ebd4ba85f54344ea0a98b29107be225a346d16feb24324663bc6fe6",
+      "bytes": 8828
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/TransportFailureChecks.cs",
+      "sha256": "4535ac595398b5e9efa65f4cfd64647866ce394babf80b3c27c5114a05944bb9",
+      "bytes": 15519
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/TwoStageLoginChecks.cs",
+      "sha256": "ee0a0c213cf137d0a95a60bc71b24615925a72ca91cf90df65842e477403bbcf",
+      "bytes": 10862
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/VisualResponsesChecks.cs",
+      "sha256": "837593fc3a72ecae699c859f56f0aa110f0f6cbd624f00f69df46d57f7978c1a",
+      "bytes": 11539
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Application/ChunsonSpace.Application.csproj",
+      "sha256": "780d8f246c61a6954fc04acb400150732b01e8a4d1c5ad143b06e66707b59af1",
+      "bytes": 248
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Application/Contracts.cs",
+      "sha256": "50af4dc534e8706d954d039f18f5b28c54c3a31c8cf789b9b0b28b9b1e15510a",
+      "bytes": 7346
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Application/MaintenanceService.cs",
+      "sha256": "a801e9f7e3354e8a5efdc175ba0ffdd6b1f2c9dfbb1814b828110464d1c16a25",
+      "bytes": 5561
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Application/SwitchService.cs",
+      "sha256": "63434f4b036e3876c58ba02152349d358b560eb68f961fff39a71eb99c24889d",
+      "bytes": 19926
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Application.Checks/ChunsonSpace.Application.Checks.csproj",
+      "sha256": "9e00cfa72e8e73e473552a8e6bd219278c3dafca989bae4e2e43098731365707",
+      "bytes": 227
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Application.Checks/MaintenanceChecks.cs",
+      "sha256": "1a505d99745c596cfef8fa10ea0c2eba7de3342752db3526ae14eb1ff191c381",
+      "bytes": 17412
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Application.Checks/ManagedCloneApplicationChecks.cs",
+      "sha256": "2875b88d55d975b88cc3c7c25ee4da643d7ff9627878289939553abc2954972c",
+      "bytes": 14095
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Application.Checks/Program.cs",
+      "sha256": "40db44f390cc4028eaebadb909e70a34c5b22e86b525149b1902707e28328b09",
+      "bytes": 26267
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Application.Checks/Run-Checks.ps1",
+      "sha256": "95432206c180b8960880f61cd9f9206535966c30b18e05c5d83080c124989ffe",
+      "bytes": 1451
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Application.Checks/SystemProxyApplicationChecks.cs",
+      "sha256": "e29aa27f5515a13b2a9b218a5fe50bbb90470a667edcf2f3cfd01827b040d453",
+      "bytes": 3426
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/AccountBrowserProfiles.cs",
+      "sha256": "cb50a1c42eeaad6bd970ab2ac9a64f2e8b561e6ba12ccbb80ef1b2ef08661292",
+      "bytes": 4391
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/AccountMarks.cs",
+      "sha256": "fac29052a92387785bcc7d3128e8c0dfbef7e8ac197452e8b1d73a2c079251b8",
+      "bytes": 10513
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/BackupService.cs",
+      "sha256": "86605f83d890c20325598d7508b1bc0272ea374e24ef37bd3edd8b9990a4287d",
+      "bytes": 11189
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/ChunsonSpace.Core.csproj",
+      "sha256": "e6fcb8e1e93a724d47a829cffd19d47840a5eb088e9ace43f3a34bbaf1524b07",
+      "bytes": 37
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/EnvironmentRebuild.cs",
+      "sha256": "448efe370ae512f639193598309836bb3991533a1ec3fd436a8d2e0e6ac7ea30",
+      "bytes": 11235
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/FileProfileStore.cs",
+      "sha256": "157fb0b1159089d0b889271bd897d4d9e8f4d4986db1ffa03a38b6b0bc5bf86b",
+      "bytes": 19591
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/FileStorage.cs",
+      "sha256": "470263928b3d8063eec7a3f11591dde2f9b042fe80128e6f9655057ef2a54fa3",
+      "bytes": 7010
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/FileSwitchStorage.cs",
+      "sha256": "fca62d95aa459599aeef5764e50cf4f2346f60c2e838db8cafc10ef6147e4ce0",
+      "bytes": 32316
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/ManagedClonePaths.cs",
+      "sha256": "81c5c9a1cc8928d431a57fe06702db19d286cc421e92b8b817f0e5ef243b35fd",
+      "bytes": 1124
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/ManagedCloneStorage.cs",
+      "sha256": "fde9236604937eab7cc78b2174002daf22a1f16e807391047e096fc241430475",
+      "bytes": 19297
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/ManagedRuntimeLinks.cs",
+      "sha256": "1cad26a026ca54da57e22af41303de99d2b1ace9f8b5ec361bd2c779b588317e",
+      "bytes": 3520
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/Models.cs",
+      "sha256": "1b896ba2bcf2054822006ed3e0ae7ee273f138be9ebb5bf8ed36f78393356780",
+      "bytes": 3145
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/ProfileMaintenance.cs",
+      "sha256": "bc5f8755085473e7c7b3545df207402925b878f00503c9b8269c43e6af13208d",
+      "bytes": 20138
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/ProviderConfig.cs",
+      "sha256": "db48d6dc6ad3496c0ad21fdcbb12e9027d486db002d1e7ef5233d39f59345068",
+      "bytes": 10801
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/SwitchStorageContracts.cs",
+      "sha256": "91ca28961588bd91dbff52022098d3f2441cecdf3939fadb869b46eb4fa9dfdb",
+      "bytes": 3630
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/ToolConfig.cs",
+      "sha256": "9de93d3a077f312c8ac4df0c48530738804ee5e97ff178065f701bfaa40d2171",
+      "bytes": 4245
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core/Validation.cs",
+      "sha256": "35889676b8cebd0508e4b2304fed37a5cd7a15c1e9f13962d25503eb217f59b0",
+      "bytes": 3427
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core.Checks/BackupStreamingChecks.cs",
+      "sha256": "0a3b87358e44f298ab68175b5e6ecd09d7a40d1f32d51c6b7490e0d9086b928f",
+      "bytes": 5756
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core.Checks/ChunsonSpace.Core.Checks.csproj",
+      "sha256": "0a46dc89c4789af22021ad75f05d1457a5711fb91e6c3500d4064b0fbef9b06d",
+      "bytes": 316
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core.Checks/ManagedCloneChecks.cs",
+      "sha256": "17a632d67dcfb7c795d61a001cdb82286dae9b74a7825deca110aaa5082e2ca7",
+      "bytes": 17476
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core.Checks/ManagedRuntimeLinkChecks.cs",
+      "sha256": "24732408f8b9045f3362e33cd9182c457ef5d3d1edd44a48b1c2ac1ad2fa0abf",
+      "bytes": 4680
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core.Checks/ManagedToolIsolationChecks.cs",
+      "sha256": "348814866ded6c7e3aad81bfe94a6a95a6c6c52a1a903f9fe73f1f1b34ed0044",
+      "bytes": 5366
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core.Checks/ManyAccountChecks.cs",
+      "sha256": "170f493f6ff41100937de6b9d000addd46f88880431f05e8da9d2d14495d0c05",
+      "bytes": 2552
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core.Checks/Program.cs",
+      "sha256": "e0b2930f4601e0cec545e6b60d596532bbb2cd13f3d48ecdc2cb79eecdf443ea",
+      "bytes": 20873
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core.Checks/ProviderEditingChecks.cs",
+      "sha256": "420f9cc32a3980ce828b74b3b76f523114ef2d8fc7a3996699acaa22f91c6cf8",
+      "bytes": 5967
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Core.Checks/SwitchStorageChecks.cs",
+      "sha256": "26621ce86ab1e3d54b18222fc4c7c0a3932105d61c58e76c8725fdd244b0c0cf",
+      "bytes": 23841
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountContextVerification.cs",
+      "sha256": "1b99874f79327113f5c0c486218321a9a55822ead0cebb468e9cee0a8918cb50",
+      "bytes": 7119
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountFreezePresentation.cs",
+      "sha256": "da57b632d4e6f59080e473256108f9ba18c4ad38d05dabaab7d09f499cf096f8",
+      "bytes": 1714
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountFreezeVerification.cs",
+      "sha256": "5531e94210218d8294019e6533544dca1294e7c8b7efea7ab704f9973933c75f",
+      "bytes": 7660
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountHealthParallelVerification.cs",
+      "sha256": "012e3fe93a33398ff02562f5c604dbaeea7892ee2362181dad6fc7a1159addb2",
+      "bytes": 14915
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountHealthPresentation.cs",
+      "sha256": "6c0809e667af602f80cc17097739aa16a56e41bd40c148e7ee7ce97db0d85692",
+      "bytes": 7829
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountHealthVerification.cs",
+      "sha256": "cf57fa57695631cda3e34c0999d672b13498b7341b1c97c1074d0acb752c45c1",
+      "bytes": 14200
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountIpChangeVerification.cs",
+      "sha256": "a196024804cdf6b3f92cae87cab162a4bbd9c25b1c5aa98ceb4a361378c9f26f",
+      "bytes": 6439
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountLayoutVerification.cs",
+      "sha256": "c96e67728289a9acc57a1e7d2312335b631ff55c9a3c6bbca5d6f4a935d375e7",
+      "bytes": 15829
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountMarksPresentation.cs",
+      "sha256": "57934917c10ad2e04a97385dd9a4816da6045941d98b019e1d8229dde33731c2",
+      "bytes": 8131
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountMarksVerification.cs",
+      "sha256": "0d6833c6c7776c9da4f92c964837b96dd44d29c21f357f600f90b15d36c38386",
+      "bytes": 18679
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountNetworkModes.cs",
+      "sha256": "75cd958559cbce2f4bbfe5988a7760b72fcb55f19128f4a100090f9e7d3b34fc",
+      "bytes": 5694
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountNetworkModeVerification.cs",
+      "sha256": "82e042931bf56671b53da8776d9a53252d28e552c49b6b439ae2a4103065d9ad",
+      "bytes": 10616
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountOnboardingViewModel.cs",
+      "sha256": "6e8ab51d883434d72762d1f879df78eecc35ec88e4659d1204277d128f8a07c4",
+      "bytes": 5557
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountPresentation.cs",
+      "sha256": "3b04520a56c95fd4cb447e6b683fb2e5ae40ece2e5609a9fa608109562074430",
+      "bytes": 28247
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountTestQueue.cs",
+      "sha256": "1d089d8227d16a44d45d28eed198ac8972563ff9bee0649155d4097816df1410",
+      "bytes": 2495
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AgentCli.cs",
+      "sha256": "ba445d46390ef40f8e04261d5a8621cff1a76bbd2e709408fd6f7008b6cadc4c",
+      "bytes": 24284
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AgentLoginVerification.cs",
+      "sha256": "353780d49cf01ea5fd94c8750407d33effea8bcfd5263dceaa873ef4d0070c64",
+      "bytes": 8471
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/App.xaml",
+      "sha256": "0109146490e0e8adcefcb79fa44f140cf56fc26c235e8ad7a6ad062b453876c4",
+      "bytes": 33925
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/App.xaml.cs",
+      "sha256": "24c619741669245b91c85060ac32ab1fc33c5a3e9aa276363067939cd832ad50",
+      "bytes": 12515
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ArtworkCanvas.cs",
+      "sha256": "3feec7b89ee5ecfafe5afc1bb81c6c502c10112aaba6c6cfc2a3ca39786f573c",
+      "bytes": 3586
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ArtworkViewer.xaml",
+      "sha256": "7fb9b5af2a751a9c8f0b0892523f0a15f09c468447c3e4819e0c7001195e114e",
+      "bytes": 5651
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ArtworkViewer.xaml.cs",
+      "sha256": "a7380fbd3d973bb70ac8ce9f71cd26759ea774961d40299dea74cdc76cc8b3d7",
+      "bytes": 1399
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ArtworkViewerPresentation.cs",
+      "sha256": "bf6e80597d2c5381acafcc6db95c551cbf7f32c955dea042580655d8315641f9",
+      "bytes": 7594
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Assets/BrandIcon.ico",
+      "sha256": "4fa500218cde868bbad2055694d338b6d25df99841b382f41805a23d02b4bb21",
+      "bytes": 47615
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Assets/BrandMark.png",
+      "sha256": "6d6435e2d5d3f62a1d767ce7ed0a57a28bab2b532bb66ff32bd6ba6be2c03abf",
+      "bytes": 17836
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Assets/Cover.png",
+      "sha256": "e455b51deb3a8c48036ab21003e8d7461373ec4d43801e13a17575b89dd54a3e",
+      "bytes": 1815912
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Assets/Fonts/Inter-Bold.ttf",
+      "sha256": "288316099b1e0a47a4716d159098005eef7c0066921f34e3200393dbdb01947f",
+      "bytes": 420428
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Assets/Fonts/Inter-Regular.ttf",
+      "sha256": "40d692fce188e4471e2b3cba937be967878f631ad3ebbbdcd587687c7ebe0c82",
+      "bytes": 411640
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Assets/Fonts/Inter-SemiBold.ttf",
+      "sha256": "78a843fade9d4612a5567302fb595b56976eb5fcebf4fea5a5912d638bafcde3",
+      "bytes": 419744
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Assets/Fonts/SourceHanSansCN-Bold.otf",
+      "sha256": "62383707c086a32f3afd5e293f34c7eff64c7fea31f579fdc6cbe34d920519a6",
+      "bytes": 8569308
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Assets/Fonts/SourceHanSansCN-Regular.otf",
+      "sha256": "e2bc8a2e7f37474b774fff8db758681ece40bb6947a90d571bce9dd60671a8e4",
+      "bytes": 8429224
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Assets/GardenMotifs.svg",
+      "sha256": "a1644fd5738bd44430fa8894ff6978090262ea9f7b983dbcf75421ff3f4589eb",
+      "bytes": 5869
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Assets/HomeGarden.svg",
+      "sha256": "06f9b886219f503f95714e9f55f7b014436b685764879b5ce1230def402606eb",
+      "bytes": 12371
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Assets/Sculpture.png",
+      "sha256": "5f409e85b67e68d6794b03b7c486b2684f979c465d9a7e8809087f850b97fede",
+      "bytes": 1322349
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AutomaticLoginProxy.cs",
+      "sha256": "56cc80d7871905c84cf282e3b06d7f3e98b4b8e6d3f96cea915b151235121465",
+      "bytes": 5315
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AutomaticLoginProxyVerification.cs",
+      "sha256": "1393ddf1289524807fea7e73c6cea253ef9c434d681da30a7b05592ba000f8cc",
+      "bytes": 4825
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/BackgroundAccountTestsVerification.cs",
+      "sha256": "f6f4d89ac0c5d4aa5b4a79b145e736ba0eb52e1d82ad0e04628fd21c83b1959e",
+      "bytes": 9785
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/BackgroundTestsPresentation.cs",
+      "sha256": "a24dafcfa0ea9f044ef80221a8d0b7b341be5c4c41c6e7d3a6d5809ff31c81f6",
+      "bytes": 3300
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/BotanicalGarden.cs",
+      "sha256": "5951a34ee25bc81a8848c682e3395cb02129ba277a4441e48729ed3bfc691a92",
+      "bytes": 11484
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/BrandIcon.cs",
+      "sha256": "e83ef54258187524d9e306697ab5159ca745b6741b5762b51d1392afb225bb23",
+      "bytes": 2039
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ChunsonSpace.Desktop.csproj",
+      "sha256": "00fe51d0d6d0ff72daa42122a8d8c7691146cc04c5996d0e57d6afc44a6b305e",
+      "bytes": 2750
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/CialloCancellationVerification.cs",
+      "sha256": "c6b0c8abcf57cc9e05502f697cd3297c01fe23ce0ae389992540751bb1fcd13a",
+      "bytes": 10270
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/CialloHistoryVerification.cs",
+      "sha256": "1a59b7a75499af081f1cc090e417578b40f1d86eff9c685336b94af57e119f63",
+      "bytes": 8920
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/CialloPresentation.cs",
+      "sha256": "c314b560448e2d046b45ca067bee740535d864c770d8926098a189dad35e121d",
+      "bytes": 13957
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/CliHost.cs",
+      "sha256": "4080540acd828ccf3392c9ae8496fe0d3d5ca7b3f4091f5f52da9181b4378b53",
+      "bytes": 5279
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/DesktopAccountServices.cs",
+      "sha256": "8bf284455adae1e668994c955f4f5bf3f7fd3dd75c8395d945964b4e238e5856",
+      "bytes": 13344
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/DesktopLifetime.cs",
+      "sha256": "ea4b866f8b3c9e658bce08e2bfea53fc43940d0e28a9794122c26298decec5b7",
+      "bytes": 4844
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/DesktopNodeServices.cs",
+      "sha256": "bcbee5cf6262b485aeed4915d77cdc2dfe226ada1634411fb93efc3a23ee3e4f",
+      "bytes": 9929
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/DesktopProxyServices.cs",
+      "sha256": "6839266fed8715443287389f4759ada81038f841892fc6abe206a6ce64a4a6b5",
+      "bytes": 11077
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/DesktopWorkspace.cs",
+      "sha256": "d1d3785abdce7a5d77a780c40865f6a7325c422424aaa3438cc34422de163dec",
+      "bytes": 11720
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/EditorAccessibilityVerification.cs",
+      "sha256": "50b8169f0efb1b85842e88fab7614a82c1bba9c5509621ba9aa385d281377bf4",
+      "bytes": 7478
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/EmbeddedFonts.cs",
+      "sha256": "29f9e51789caca1828a7bc3cec264f987919080d5fe630386027a730fc9fe424",
+      "bytes": 2288
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ExitTasksPresentation.cs",
+      "sha256": "d61c68701f88727653c9e20c0ecb93f0c5142da7ec0219d94c9d52bfa07132ee",
+      "bytes": 2616
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/HomeMotionVerification.cs",
+      "sha256": "cc5f39c570c445dfdc748da6424b37aa90636303337071f0594cf526766ff7a6",
+      "bytes": 6314
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/InfrastructurePresentation.cs",
+      "sha256": "aa14ad7a036ee11ea96e799621bc53cf83d2a241125492b0a366dcfe63eb4912",
+      "bytes": 5774
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/KeyboardRoutingVerification.cs",
+      "sha256": "80b599ece548bf51978784dcb8bc32ea91c2dfdb3e20a09439aac8edaea3bba7",
+      "bytes": 8244
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/LocalAccountImportVerification.cs",
+      "sha256": "7215546564d7aab43080e5ed2afd4f4b9e49b290ab0d4246cd6d16f6fa1fd4c0",
+      "bytes": 2629
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/LocalEnvironmentService.cs",
+      "sha256": "ae049e95496b83ce38ee3a46f6f4548076d3117fc377db5015b086aa57728ad2",
+      "bytes": 9386
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/LocalEnvironmentVerification.cs",
+      "sha256": "0d08586cd6ee348bf73930282ae6f96a026d6cfeed226605b71ff1c5df877e02",
+      "bytes": 14004
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/LoginStartVerification.cs",
+      "sha256": "004fa14bdc6e9ea349425a60a85a125dbac06664ac0c6aa56ab190e5509f1065",
+      "bytes": 6905
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/MainWindow.xaml",
+      "sha256": "b93ee3ed4747ddc23bf3ad923c214147c734885f8a1164cb1d0d2059af290b80",
+      "bytes": 150498
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/MainWindow.xaml.cs",
+      "sha256": "f2f08903d9d6d2032d8af08eda6c3b1ee3280264675b9bf44155864f050255d4",
+      "bytes": 11463
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ManagedRouteTransport.cs",
+      "sha256": "99c5357517dbcec1f6b09f62e891759af43d5aa7cd90090bff4d1578540a5d5a",
+      "bytes": 603
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ModelAccessibilityVerification.cs",
+      "sha256": "bf770b3112ca937e2b660195ca87901acba470e951bf29c119f41c3ea1777250",
+      "bytes": 7631
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ModelTestPresentation.cs",
+      "sha256": "f42c46c3321bf1216d196dd326c980f21a3f8b9af8d1dd431da8a1b0bf411a34",
+      "bytes": 4840
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/NodeTestingPresentation.cs",
+      "sha256": "bb95aa629c6945863c7e5c73cf62f868a9ef0ba351eaf23fa81d17614b9421d4",
+      "bytes": 21083
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/OfflineAccountServices.cs",
+      "sha256": "31288c8358a89c4c9b7932b8ea12232577793f080a97008b7346f1596ad3f90d",
+      "bytes": 14652
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/OfflineRegionSystem.cs",
+      "sha256": "3f145c6439bbda762cb1a70b66c8fcd8bddbdce8f89c8167f07310f5a0d5adbd",
+      "bytes": 1217
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/OfflineRuntimeOperations.cs",
+      "sha256": "ccbb9e8aa4d65844801756bc08254b05379abee044f2da4e11d66ff7d10f053a",
+      "bytes": 3414
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/OfflineVisualTestRuntime.cs",
+      "sha256": "0a84b523ce8ded8af4008af4fac628bd976eeffa8d9445e16a020c7be8ee0834",
+      "bytes": 2645
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Presentation.cs",
+      "sha256": "4bf7d86154630077aedfe2aec29504b0b41e33d39e0c179983289f6dac5971ba",
+      "bytes": 15691
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ProfileEditorNetwork.cs",
+      "sha256": "37db8df10ba638e18a31e9d093aca48b4e65f11aa1c554c6fcbed41755d89fe1",
+      "bytes": 1725
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ProfileEditorViewModel.cs",
+      "sha256": "dc9708b5eaa928c3c37af3d17e28fc11672cda074097bd2288f4bc5d81101831",
+      "bytes": 6564
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ProxyAccessibilityVerification.cs",
+      "sha256": "8ed90cfbaf9fbbe51b07b11124d94549d4a3ec4e1d082021d712c16063448d6a",
+      "bytes": 15429
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ProxyPresentation.cs",
+      "sha256": "415dfb5c889a6eb706c67151efd80671dafcd505d741f788e2b8c0751a112d6d",
+      "bytes": 29065
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/RegionPresentation.cs",
+      "sha256": "5b1f8d81bbe485a389344c89b1381a6073c4eadcbe666051a8959e1e3bac9b5a",
+      "bytes": 3775
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ResidentialExemptionVerification.cs",
+      "sha256": "39ca242f2667fbfb2d577ee5d2c6e37100a9b2ab6470d7e4f4eebf629db25aa7",
+      "bytes": 6173
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ResultsGallery.xaml",
+      "sha256": "65e62a654c44de8c08b70bd2032d93c779099d77041efc4ad5fd735daee12511",
+      "bytes": 6230
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ResultsGallery.xaml.cs",
+      "sha256": "84404cfc82591b8dc77eafb56496ddafada04cde4730db828e7242bd2f9cb1db",
+      "bytes": 171
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ResultsGalleryPresentation.cs",
+      "sha256": "e109ac90bbf6a610fa4d2279f08354d3137f3bd71196861db3c625a5953efdbb",
+      "bytes": 21074
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ResultsGalleryVerification.cs",
+      "sha256": "253097cbfb7c11b7f19591319f170c096955dfd0ab01b90f779660e0ca09616b",
+      "bytes": 30649
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ReviewLifecycleVerification.cs",
+      "sha256": "14702e536f99a2a7169e3c4b1086a586c0df8f8ea3cf058c81bce9f2ab2855fc",
+      "bytes": 11553
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ReviewRecoveryVerification.cs",
+      "sha256": "eb71cbf9f59bc02269bf2d1473039fe516076e1c1a80562adf1444d1bc483547",
+      "bytes": 8056
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/SafetyBufferingVerification.cs",
+      "sha256": "c02ad20db9f394f84ffcf7abc49da87c79465893261ddac06f2456647eb8d318",
+      "bytes": 12457
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/SimpleActionsPresentation.cs",
+      "sha256": "519b0dca88768f10f207eebcafc4fad8e2e4b4c2d0b92844b48037dae9357fd2",
+      "bytes": 8197
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/StoragePresentation.cs",
+      "sha256": "39de5ee7abfcd2444ce3d20286a677081a587e02d175bb71d4effc7692499e4e",
+      "bytes": 33184
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/StorageUiVerification.cs",
+      "sha256": "d7a74ace121d064129cfb479db19506930c8d676d73679e9b6a5062438377270",
+      "bytes": 195348
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/SupportReport.cs",
+      "sha256": "f45f42c6932f3a8ca9653250e8757e77cc37694a3d62bb6fa167d91c444dffd6",
+      "bytes": 2975
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/SupportReportVerification.cs",
+      "sha256": "f0d679485ab8d394cdab486d42721e8d441fec31b19528f3f9c079549b9b7cb2",
+      "bytes": 4369
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/TestDiagnosticsExport.cs",
+      "sha256": "b1a72ae17324573a2a83efe27ad56fa10c1c2ecdff6d85a20eebfaff527d729b",
+      "bytes": 3079
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/TestElapsedClock.cs",
+      "sha256": "a3d3ba3c9841bac6c4b6c5a08a7d494cfe977c77a5791f46b3f79bf4e89fe0dd",
+      "bytes": 1244
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/TestHistoryClearVerification.cs",
+      "sha256": "fb61cee03ac5a9283483ce499c3501eb1925bae8dbefaf2174cca695c36ed2ed",
+      "bytes": 6826
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/TwoStageLoginVerification.cs",
+      "sha256": "607b928887480cc1c36ef60f73a3c569104a4b512cd5b17c10b595a3f35ad957",
+      "bytes": 969
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/UiVerification.cs",
+      "sha256": "2a94965ca158a0915499d0d51526ef4ed81ffe595aecd836356b8ac81083ada9",
+      "bytes": 33639
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/VisualRuntimeVerification.cs",
+      "sha256": "4ba961efbe060791d3866e6c618b191a936de59f90d35196b7019d81df614b6e",
+      "bytes": 21058
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/VisualTestPresentation.cs",
+      "sha256": "58d8b4d6f4011268b44127d3b4492f67682d755a8e396901c3c6366ad0059fd4",
+      "bytes": 19378
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/VisualTestVerification.cs",
+      "sha256": "4b5b718a1aa3866de0da98a48604a1048317c9fed96613c8b6dc236c8cdb0419",
+      "bytes": 27957
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/VisualTestViewer.cs",
+      "sha256": "22c8787adeb5016da17601fa713d736b3a4926defdddafa4458af6e1fb441528",
+      "bytes": 4765
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/WindowsTrayHost.cs",
+      "sha256": "d2d4b3d8d67c4a4ff9afdcb087d2390953f169d4644c89b97a2aeda9087e45fd",
+      "bytes": 1248
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/WorkspacePresentation.cs",
+      "sha256": "fac4f57e00f68ceabab5c33fa199f16062059e6c5321852c4891a2126747d34d",
+      "bytes": 11241
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/WorkspaceTheme.cs",
+      "sha256": "1621c21787c6adc2473e632436e7232f27d5c96434868402da2cfd7535a077ea",
+      "bytes": 4491
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Fingerprint/Challenges.cs",
+      "sha256": "767b14ea03954df1bc27815a761883e833689b2acad60f7e8d20ccccd3e17350",
+      "bytes": 3859
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Fingerprint/ChunsonSpace.Fingerprint.csproj",
+      "sha256": "41d4d19500bbd39e62e1f8ec41c5d92fba099c2e657ed6b4bc4576522a9e474a",
+      "bytes": 510
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Fingerprint/Contracts.cs",
+      "sha256": "a689593a6487653888657478cc37389b4597b39cce6e3b0cb9bc332a0b49bd47",
+      "bytes": 1472
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Fingerprint/FingerprintEngine.cs",
+      "sha256": "0bd51db3107a79033d853bd70de6ef4c9bd495949aee5e473fd965d98a93f8b8",
+      "bytes": 18247
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Fingerprint/Resources/unified_bank.json",
+      "sha256": "6a678e6c73eb015c1c507d61cdd1313b41916d55186bb65920d1bf119ec5009e",
+      "bytes": 863457
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Fingerprint.Checks/ChunsonSpace.Fingerprint.Checks.csproj",
+      "sha256": "8d87621933e41ee8697704df6f8be0aea8c27243595eceb0cf2cfee294037b41",
+      "bytes": 227
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Fingerprint.Checks/Program.cs",
+      "sha256": "3a5ce3914c5b1744bdeff25372dbde19eaab1e3b82defd8e9401fc47bfb34061",
+      "bytes": 9028
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Fingerprint.Checks/Run-Checks.ps1",
+      "sha256": "a59329fb01f6e0a7257e16683891cb7b4f7a6029e48943c2235fc561a2ed5755",
+      "bytes": 1725
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.IpQuality.Checks/ChunsonSpace.IpQuality.Checks.csproj",
+      "sha256": "83597543514dc5bd324ffcc85a145dfed47f2be69ce62546b52ff2f9e3da1502",
+      "bytes": 221
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.IpQuality.Checks/NetCoffeeChecks.cs",
+      "sha256": "4c2863e23631fc1f4eb4d7bb5eddbc75b0825355fbf2c72282eedabe6af024f4",
+      "bytes": 3701
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.IpQuality.Checks/Program.cs",
+      "sha256": "0c0844536534b19bf22b6000efd58329464f6e407a95a6f14cf8873db9066777",
+      "bytes": 13219
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting/AssemblyInfo.cs",
+      "sha256": "bd2887027cadaf85366998eb89e8c706180eb261662dab6010283b7d1a1c5196",
+      "bytes": 107
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting/BatchNodeProbeService.cs",
+      "sha256": "abf55c7ca89c3e39b9b39ac6af57f015c41fab84d7d8e9b9d023611382c93e9a",
+      "bytes": 8338
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting/ChunsonSpace.NodeTesting.csproj",
+      "sha256": "14356d778d7dfdff5577b4b43b733e9de2d10e07d9a20b529078d21b0fb6858a",
+      "bytes": 252
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting/Contracts.cs",
+      "sha256": "0674c6d99e5317b79082f2c1a51607a31b9454a252e1997c3ca99fff878384d7",
+      "bytes": 4492
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting/IpScoreCache.cs",
+      "sha256": "c991c6eb3c4dd6f4acda4974e0af757446939c843d105cde031622a988f3f15d",
+      "bytes": 4982
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting/ManagedNodeRoutes.cs",
+      "sha256": "5113647187d26871af435f405f8fd3d45f8097e8b425d5f8d94da0c24d87aadb",
+      "bytes": 10770
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting/NodeCatalogImporter.cs",
+      "sha256": "202c970530453df35bc5418178c0612fdf65c3b07311c3d5887dd8d82b3c6c9e",
+      "bytes": 4388
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting/NodeProbeHistory.cs",
+      "sha256": "ec10ab7a3aeb2a7a1b4ea9d1e60f4084fc0727313ed3a6b069baa0957655d0f7",
+      "bytes": 1768
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting/NodeScreeningRules.cs",
+      "sha256": "108328f97c4b8e8033e9683787a813d3e6e7f7d94aa092b03fff365d3c9b97b4",
+      "bytes": 1509
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting/ProbeConfiguration.cs",
+      "sha256": "cf027bd3428f4ed8fd68e81d64b81871ee8563d56eddf3ea9efd08154dd833fe",
+      "bytes": 2442
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting/SubscriptionCatalog.cs",
+      "sha256": "f3c3143814d2944f93ddb6592df5c2d259615d3a8c6b761aad95e1121a6511e3",
+      "bytes": 8437
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting/WindowsMihomoProbeRuntime.cs",
+      "sha256": "096abecbe85aba892d8ff669fb4a6eba4101b8f537045a19de72a78955f2cb5b",
+      "bytes": 18169
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting.Checks/ChunsonSpace.NodeTesting.Checks.csproj",
+      "sha256": "19a17a7fa4552091f970b479986a115710f4f90ca0d26def885444e8b14d314a",
+      "bytes": 330
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting.Checks/DirectoryCleanupChecks.cs",
+      "sha256": "e2d4e3486c0272e707dae5794b872b01b656398b8411a797fbb6393869cc3f8d",
+      "bytes": 1444
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting.Checks/ManagedRoutesChecks.cs",
+      "sha256": "f5950a0544c4c3b0612b903c529e3522fe60133b9286396cb26debb6c973d1c1",
+      "bytes": 8550
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting.Checks/NativeManagedRouteAcceptance.cs",
+      "sha256": "5705b3cef2722b6f7671cff1de10a7b7490872d8542e05dc4bab817ae958a342",
+      "bytes": 4312
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting.Checks/NativeProbeAcceptance.cs",
+      "sha256": "607f330ef5d15c2715f0a4e104da129f3c3fabfad0d97d5be6057471e5ae9340",
+      "bytes": 3221
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting.Checks/NodeHistoryChecks.cs",
+      "sha256": "d653d84c09b7656ea35107e5e3b8da9d99c7dfb706ff243cf87ba07c155c3469",
+      "bytes": 2285
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting.Checks/ParallelProbeChecks.cs",
+      "sha256": "1ab76d2a7efd4ffc6952ecf3871d7c80f18f61ec6646570e1ae42313a8fa9e37",
+      "bytes": 10209
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.NodeTesting.Checks/Program.cs",
+      "sha256": "b2cd244b2fa5b2f4e61ae32da68d09ec1fd1e993b8d4dbec9f616f43b4ca4c36",
+      "bytes": 28573
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Proxy/ChunsonSpace.Proxy.csproj",
+      "sha256": "9f8a4f33fcec047956bdb32ea87f283591e03f7b7202874d10b7c60b0e3b7d4c",
+      "bytes": 848
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Proxy/ClashVergeDnsService.cs",
+      "sha256": "de9b654f6088b73e6ac12a514fe8d694fa46463ae86e3400792266c04f331cf4",
+      "bytes": 29121
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Proxy/ClashVergeScript.cs",
+      "sha256": "ef5a32935c0fafe3c669447cb17cee5f383354bce5e836afb88a51d2bc51d6ac",
+      "bytes": 6544
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Proxy/ClashVergeState.cs",
+      "sha256": "3d1f58274a708a4feab17587f3a14d0f31cee3441c5eda4e1de087c4ee0bd215",
+      "bytes": 906
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Proxy/DnsPolicy.cs",
+      "sha256": "87d6f5d1ea158f67949d528636fcba8fa0afba86580241aa6d3c6702e6f2263c",
+      "bytes": 8282
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Proxy/MihomoInspector.cs",
+      "sha256": "e880022cdbf9ba1b898a93d14d2b85679f94cea0d5165d326b077b066b273f09",
+      "bytes": 8890
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Proxy/ProxyContracts.cs",
+      "sha256": "2797eafd8309cfafddf9c3b4d01f2d1fdd7f2ac8175dbc06da9209381c629bf1",
+      "bytes": 2330
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Proxy/ProxyYaml.cs",
+      "sha256": "305e1ccc332a1f54a88c11b782d54d88fc252598afd0b2be8759118ce2fda722",
+      "bytes": 2922
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Proxy/Resources/clash-verge-dns-v1.js",
+      "sha256": "aaaed49ec3bb5f8b0ffeef4dd44ee60bb9e6e574085916648d2d20b1ceb2227a",
+      "bytes": 3869
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Proxy/Resources/dns-policy.json",
+      "sha256": "d7ab986df4b2a2c3d52e36cac4802c53ff6eb9a9db0fb28e7c39a0f014ba1c7c",
+      "bytes": 1368
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Proxy.Checks/ChunsonSpace.Proxy.Checks.csproj",
+      "sha256": "5772b174379f17fdc158728204d959a312aac595ae19fb78e63d39fb6e48daa5",
+      "bytes": 215
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Proxy.Checks/Program.cs",
+      "sha256": "bb5d2d4a3075d640a6d50940d7f73b1a4c0f3008578fd70b23c09c5ed8b0849c",
+      "bytes": 23525
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.slnx",
+      "sha256": "a72edee5e7a0ba352a168464644ba36b222aed470a9719f07c5ab83a34a58c03",
+      "bytes": 1309
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/ApplicationLifetime.cs",
+      "sha256": "fe7af25bda84c103ceba95e627a05fc51c855a99926cbac201eed1609be58d89",
+      "bytes": 2416
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/BrowserEnvironmentVerification.cs",
+      "sha256": "e562d172e29b0da10a9accd8db9d46a7ec681e4b4076b2d3ca5f283b9a2631b5",
+      "bytes": 1267
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/BrowserUdpProtection.cs",
+      "sha256": "1e80d5e067444ab339d6b19526fba7768c2a354482f3a399615ac44eb6df1ad9",
+      "bytes": 7915
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/ChunsonSpace.Windows.csproj",
+      "sha256": "dc7c331d0817803f79b2f9bcfcc22c1ba13a45521b17cdc18c6c7354932ec422",
+      "bytes": 398
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/CodexInstallation.cs",
+      "sha256": "2b57ffec0def5479971bcbc118e4860a773f801be6e6b7398e845585e8c97737",
+      "bytes": 7939
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/Commands.cs",
+      "sha256": "36a0706ae23c05a34fac0271580ab4137eecf390870c538fe7e4d8a9115c16f9",
+      "bytes": 3324
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/DataPaths.cs",
+      "sha256": "d1896b1b39ad0fcb9f6b3b75897edf89cd8804e1258a163bc92350e83369126d",
+      "bytes": 4347
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/DesktopLaunch.cs",
+      "sha256": "4a9693ba85ca0184c6442dc4b3286e636b98a737d8b26b3c2efdfdaa92924aae",
+      "bytes": 10179
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/DirectConnectionProtection.cs",
+      "sha256": "6f57f27bcc4964da53405617177269f7fa4774375d959202e055bcaecaeaac4e",
+      "bytes": 12751
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/DirectConnectionProtection.ps1",
+      "sha256": "de868b1053e51466ece6d1b69fa03ad29792b2c0047f16f18148325fcfe8a7f7",
+      "bytes": 6715
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/FlClashDns.cs",
+      "sha256": "2ec3b426205aabbac62803e8bbfca3e3adf189773f43f0c91b9e23f224f96ebb",
+      "bytes": 13539
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/LocalProxyListeners.cs",
+      "sha256": "9703322489c416c6a1bc68678808c7836395e2544642022ef2ac16ed24065aec",
+      "bytes": 5665
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/ManagedChromeInstallation.cs",
+      "sha256": "0837520205da67740e1877f922e68eab3ba56512a9a897fee8d874c4e6943a09",
+      "bytes": 8070
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/ManagedCloneRuntime.cs",
+      "sha256": "19ef3206a30d4742f42b1cada201ad2ce663c2786b45087826a1c76717b0b49b",
+      "bytes": 8642
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/ManagedCodexRuntimeInspector.cs",
+      "sha256": "bd15954df11a55edaa986eab37eba07092f593b3c88ec2c013a124270ccb8c04",
+      "bytes": 16420
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/ManagedRuntimeCdp.cs",
+      "sha256": "77eecf13530865b45022b3e3a103684c6edb83f9eced8966a51bd15982311dea",
+      "bytes": 5480
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/ManagedWindowIcon.cs",
+      "sha256": "3ed8b5a911c3ae1110c30a0e54a847446400aa1f26e2a2df7f99f1b12cf59b8d",
+      "bytes": 4062
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/NativeMethods.cs",
+      "sha256": "aed9e6ac08aa00c87878d7de12bc223d0184e2d034362776b7ec3d4f1ac0a0cd",
+      "bytes": 3364
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/OwnedProcesses.cs",
+      "sha256": "40d14e20bda27bf0a19a18af5e8274a012752464695f4aa8caea78396363f7b7",
+      "bytes": 22620
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/PackagedLaunchScripts.cs",
+      "sha256": "12cf58edd7020e9974cb6d9cee88e79c140e648209b70c26c1d17fc7820dfd39",
+      "bytes": 6666
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/Processes.cs",
+      "sha256": "43b837460872b4eade160bdf47f479420893198c2642ca32a72de5b0f4bf3ec7",
+      "bytes": 7678
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/Regions.cs",
+      "sha256": "f2468956aeb6490096faeb6a363a1170e12703e890dd7ceac7bbe548e6a374ed",
+      "bytes": 8287
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/SilentTimezoneChannel.cs",
+      "sha256": "3bb6a8acf7394226c9fa19da1522ba773184b9b0542fbfd9885049be7b10f63b",
+      "bytes": 10473
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/SystemProxyResolver.cs",
+      "sha256": "8cac96c7cbd4156705c9f33cc0b7ea467439b31d230c4a519d1fbf677a9eee94",
+      "bytes": 3755
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/Timezones.cs",
+      "sha256": "e27811d9f3ad87dcc1fa395c92008b4c7374405676d04675ea82253de2ec5631",
+      "bytes": 9879
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/WindowsDesktopLaunchSystem.cs",
+      "sha256": "a528072d600290989a97c4f1134926f49c1f68ae0846687b9a4c7be36ec2bac9",
+      "bytes": 25794
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/WindowsLaunchPreparation.cs",
+      "sha256": "d4f42bfc7d8c7bb2799ee5396930ada1f774106725e925645f04da8f0172724c",
+      "bytes": 3496
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/WindowsProcessSystem.cs",
+      "sha256": "f2f2d86519767bf1cbedfed27e31bcbdb9243d5fcb43299bf4a81ce8a29b10f6",
+      "bytes": 4075
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows/WindowTaskbarProperties.cs",
+      "sha256": "fefb9dd7aa3bb16b6049956d4a38a5597a59d0b36232fcf015c12ee2f8cfc707",
+      "bytes": 3185
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/BrowserUdpChecks.cs",
+      "sha256": "3a7b535820ebd47ec33f5f378a5dc25e5e6fbce1b45fcc00b82fb7243e497369",
+      "bytes": 5039
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/ChunsonSpace.Windows.Checks.csproj",
+      "sha256": "70cc310924dfef1d7b7d434c1be5b265c2a0a0cb0f0dfdb22e823b9bf6108277",
+      "bytes": 322
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/FlClashAllSubscriptionsChecks.ps1",
+      "sha256": "19a5c425db173bd080df3d3bcc22932dc1fc47413ca8caffa9fec6bbe8dfc565",
+      "bytes": 14825
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/FlClashAllSubscriptionsFixture.js",
+      "sha256": "e96214292f46767ee9856022ece94bea70bbdfe008a9cd5544e400c5a3d38366",
+      "bytes": 3760
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/FlClashDnsChecks.cs",
+      "sha256": "07b10a6f8bcbe3ff4e750d4edb4cca4174dbab762376e97a6722d375c1a0fb81",
+      "bytes": 8405
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/FlClashDnsLegacyV3.txt",
+      "sha256": "1d0e9c19a7f9b3e6f30466e5a1a0af04a2e2df386102cce45d1c61db0b07deed",
+      "bytes": 1150
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/FlClashDnsRuntimeFixture.js",
+      "sha256": "9646d202d4b923d959ff35a56f4ae44d70cf8e8e98ac247346569ef2bb312998",
+      "bytes": 3455
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/FlClashDnsScriptChecks.ps1",
+      "sha256": "5b29c40a3e73c3085e1d44c330284847c49fcd862876d96d60b10e5d2d22ce06",
+      "bytes": 59621
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/FlClashDnsStandaloneChecks.ps1",
+      "sha256": "12e2e5c76b44cf6937639cdc0f90f74db78786917a820fc73bbb700d739f5665",
+      "bytes": 41982
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/ManagedBrowserProgramChecks.cs",
+      "sha256": "76fc2428357f42b81e9d853ee27810f1523eb4dec16e4fcce2abd0fb78e0d14d",
+      "bytes": 3721
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/ManagedCloneChecks.cs",
+      "sha256": "52967afcbbbf8cfdfc583f5b90d1537238ff3d65a21592dd6401f6223a4bb127",
+      "bytes": 26187
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/ManagedLaunchRecoveryChecks.cs",
+      "sha256": "a332acd8afbb9337d080b4cad12f45fefc7266ebe2d4eb7a65ef6db48ab97ec0",
+      "bytes": 8727
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/ManagedRuntimeCdpChecks.cs",
+      "sha256": "49edd75b43f07929513033279a8190ef414b7e7e608bdebfa76eb7f9090fdd5d",
+      "bytes": 18725
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/Program.cs",
+      "sha256": "a6b3833f73fd90db6413e50988f01ef82641b8ff5848bcc4956f2ee76a3b0596",
+      "bytes": 46425
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/RegionChecks.cs",
+      "sha256": "d92c3182382e3b13835bffb584ce3348c9aaed7d88b85a65487ea3ee713a80cc",
+      "bytes": 12032
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/Run-Checks.ps1",
+      "sha256": "b9ccd8695782db6efe64bb74c1d4f480af8912c1d4701706ddffa605cff71ed3",
+      "bytes": 2193
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/Run-DirectConnectionProtectionChecks.ps1",
+      "sha256": "3400dc56a31c5fbcbfd4e7002d89033618457642ee83ff206d797ddcd168bf35",
+      "bytes": 6116
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/Run-FlClashDnsChecks.ps1",
+      "sha256": "40833a7f2f8779d6f5ed15376c0722d90ae2c25280bc58c4dc8f8287e2c0ecdc",
+      "bytes": 2802
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/SystemProxyChecks.cs",
+      "sha256": "de8de4f2222555178981ea217cd283cb3a87e713b060c41ac6fa4924b8c4fbb6",
+      "bytes": 3590
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/Validate-PowerShell.ps1",
+      "sha256": "f36f3d31f21f07a1e4ff66ba64b5689a59c3bbb13ff907e0fdd788a099b22d2b",
+      "bytes": 631
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Windows.Checks/WindowIconChecks.cs",
+      "sha256": "861838bcb5585bef27685c3b9fab4d4ae1552e0face1b4c5a9bb162372a57b98",
+      "bytes": 2872
+    },
+    {
+      "file": "ChunsonSpace/windows/Directory.Build.props",
+      "sha256": "2a39d5e477348b345fb9d3f716e827e639ca0bdb13c140a84c712d17dfbf16e0",
+      "bytes": 450
+    },
+    {
+      "file": "ChunsonSpace/windows/global.json",
+      "sha256": "a7cde81abd2bab0e0384749653635f971d2d52c78610bb7be553ac3895d1452d",
+      "bytes": 74
+    },
+    {
+      "file": "ChunsonSpace/windows/NuGet.Config",
+      "sha256": "aec93b5637ab6d62470979a008990a4a336a287ab83a3f2541849ae735674055",
+      "bytes": 197
+    },
+    {
+      "file": "ChunsonSpace/windows/ThirdParty/Fonts/Inter/LICENSE.txt",
+      "sha256": "b3195af0fb14368d1b3b10fb9d3fe503b7163ea083859d2ee553bc74da07c320",
+      "bytes": 4472
+    },
+    {
+      "file": "ChunsonSpace/windows/ThirdParty/Fonts/README.md",
+      "sha256": "4f992715ac88b0f9017f5b8c3e2e37dbc5f3ab5145dac0cd2d204c909fd8addb",
+      "bytes": 1999
+    },
+    {
+      "file": "ChunsonSpace/windows/ThirdParty/Fonts/SourceHanSans/LICENSE.txt",
+      "sha256": "1953855bf1927e7214385bbdd8adb04cc5e8a0ecd0e6eaedeb1bdc281b009481",
+      "bytes": 4559
+    },
+    {
+      "file": "ChunsonSpace/windows/ThirdParty/Fonts/SOURCES.json",
+      "sha256": "5badc1a7220abd0b417e69d8710c48ae29703b70c55badd3a22ca98428f50353",
+      "bytes": 2710
+    },
+    {
+      "file": "ChunsonSpace/windows/ThirdParty/GeoTimeZone/LICENSE.txt",
+      "sha256": "8bd81da0babc9f6003b2b5aea1cb3e472deffe7736607f811f94e40cfa5aed42",
+      "bytes": 2161
+    },
+    {
+      "file": "ChunsonSpace/windows/ThirdParty/GeoTimeZone/SOURCE.md",
+      "sha256": "30447d8f730e58153cea26f3e53b04f0886f64ea262f7ddae0bf17b3a7ea17c5",
+      "bytes": 583
+    },
+    {
+      "file": "ChunsonSpace/windows/ThirdParty/Mihomo/LICENSE.txt",
+      "sha256": "230184f60bae2feaf244f10a8bac053c8ff33a183bcc365b4d8b876d2b7f4809",
+      "bytes": 35823
+    },
+    {
+      "file": "ChunsonSpace/windows/ThirdParty/Mihomo/SOURCE.json",
+      "sha256": "7421233eeca776d0b89000cfa288f535e86830fea0eb1b7d0ba134693a978297",
+      "bytes": 875
+    },
+    {
+      "file": "ChunsonSpace/windows/ThirdParty/ModelTrace/challenge-browser.js",
+      "sha256": "5ec55b13ecca5bb7baea59d559dfd3e7324ae12b331957676d540c28bed06885",
+      "bytes": 2615
+    },
+    {
+      "file": "ChunsonSpace/windows/ThirdParty/ModelTrace/fingerprint-core.js",
+      "sha256": "adff55637f6c0534c2c10703e028d4d1970d325e8daecb55efaa7f95a1938d5c",
+      "bytes": 9200
+    },
+    {
+      "file": "ChunsonSpace/windows/ThirdParty/ModelTrace/LICENSE.txt",
+      "sha256": "4812aaf2fc8971c97c8e054f7cecb16486f903d5c5b181ea48304c12182a11e7",
+      "bytes": 1085
+    },
+    {
+      "file": "ChunsonSpace/windows/ThirdParty/ModelTrace/SOURCE.json",
+      "sha256": "eeba8382ce9eb86782beb66acfb34bd179f2165d59d872a7ca70505ae97480d2",
+      "bytes": 1062
+    },
+    {
+      "file": "ChunsonSpace/windows/ThirdParty/YamlDotNet/LICENSE.txt",
+      "sha256": "556ab734f87bd3a2de1150cfc446524721405aa5d7667c22766a6995ecbc6689",
+      "bytes": 1129
+    },
+    {
+      "file": "ChunsonSpace/windows/ThirdParty/YamlDotNet/SOURCE.md",
+      "sha256": "3eae19b351fafde588caf3583cfcb74d52c5627bd0f3e03f973bfd177c38fa8a",
+      "bytes": 426
     },
     {
       "file": "docs/assets/download-full.svg",
-      "sha256": "0e612b7f8138652fa8f24218c2c65e346bf126d98a9e9c501177ac80959c1658",
-      "bytes": 749
+      "sha256": "eb0b8be0e18e8ac6bb8a7619d206fb65518b9d5486c68fbd26db6a7f48e9558e",
+      "bytes": 768
     },
     {
       "file": "docs/assets/readme-cover.svg",
-      "sha256": "1b2ba2327566079095bcf7a92f77d9bdc25dbd0ef9c89298db9ef836782b3889",
-      "bytes": 2555
+      "sha256": "f6fbf30701d9f5332caca4658b44dcd9e02f96e82ee2da37c62b9836d1210283",
+      "bytes": 2584
     },
     {
       "file": "docs/assets/screenshot-account-freeze.png",
@@ -66,8 +1658,8 @@
     },
     {
       "file": "docs/assets/screenshot-model-tests.png",
-      "sha256": "961bd06e4a10169f33a78655fd681eb8d032d0dbe4b1c05e373a2ac25b1b00dd",
-      "bytes": 99741
+      "sha256": "5156e4a9f0f9ac2ab6defec4fdefeed87b868989123027dd076774a604fc6607",
+      "bytes": 126487
     },
     {
       "file": "docs/assets/screenshot-network.png",
@@ -76,8 +1668,8 @@
     },
     {
       "file": "docs/assets/screenshot-test-progress.png",
-      "sha256": "365f92f47e30a393c63eac06176449f5026b98ac586919a92e48b085c5372eae",
-      "bytes": 112716
+      "sha256": "dac0e9dbb2c438ad25f6c71db104d5a6b6f590ed59ca8b94e8105075e0ea2379",
+      "bytes": 94187
     },
     {
       "file": "docs/assets/wechat-appreciation.jpg",
@@ -91,1403 +1683,23 @@
     },
     {
       "file": "FlClashSetup/FlClashSetupChecks.cs",
-      "sha256": "ff688dfa56146ab86f9e5fb228c1b94e18f56a56d0c3dc731d24598857dd6d6e",
-      "bytes": 6499
+      "sha256": "70437de12ccdab75544c033df315d45e510300a33b5c583c8dd31576f882b234",
+      "bytes": 6321
     },
     {
       "file": "FlClashSetup/FlClashSetupService.cs",
-      "sha256": "698ef2227e8d72bb844b0a82d2dd4a20de6e012c8214cb8e4b61a55a44d18926",
-      "bytes": 4600
+      "sha256": "057aced401a3a6f5e8a7cf245346262c3b05ae664acdf05320399617a27d8dcb",
+      "bytes": 3581
     },
     {
       "file": "FlClashSetup/FlClashSetupWindow.cs",
-      "sha256": "42b497e26bbb8b296becfce4b78fa8fa29d281b455a8ede80678e9ee39378656",
-      "bytes": 6270
+      "sha256": "50294ef4be52836933bfd125732ac456e5608469d44bb2e25ddcd5dae4048ed0",
+      "bytes": 3867
     },
     {
       "file": "FlClashSetup/README.md",
-      "sha256": "bb0f85c844a4331f383244012b763a27bae2b9841e1d796b0ee1a0a033905ad3",
-      "bytes": 1554
-    },
-    {
-      "file": "full/scripts/proxy/FlClash-AllSubscriptions.ps1",
-      "sha256": "6a4e40e6f61d3d7276421da55c0828108d3cde99ab8c9183ad370b871b750a34",
-      "bytes": 18406
-    },
-    {
-      "file": "full/scripts/proxy/FlClash-DNS.ps1",
-      "sha256": "b3f44366d004e4a7fdd697b064f74568ad66759c02b8d04df614db7070476ebc",
-      "bytes": 63052
-    },
-    {
-      "file": "full/scripts/proxy/lib/FlDns.cs",
-      "sha256": "6d7723056dd867aaa1e2bfd5ee0939769803399838cfbc3ba48a27a1ff898d64",
-      "bytes": 9840
-    },
-    {
-      "file": "full/scripts/Set-BrowserUdpProtection.ps1",
-      "sha256": "11567b07eac12343a56bfc722ebdcbfb289c911759b05829cb991704eda506f3",
-      "bytes": 6291
-    },
-    {
-      "file": "full/windows/CheckSupport/LinkFixtures.cs",
-      "sha256": "fcd7954e597635e77b66bf3d0a5c589c1ef8b78aa39064a843b778b264ec8aad",
-      "bytes": 4613
-    },
-    {
-      "file": "full/windows/Directory.Build.props",
-      "sha256": "2a39d5e477348b345fb9d3f716e827e639ca0bdb13c140a84c712d17dfbf16e0",
-      "bytes": 450
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/AccountCli.cs",
-      "sha256": "74cd075f6a30aba8a6ea855053859d930451a001eec547cdeb68691a789bfd30",
-      "bytes": 9478
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/AccountContracts.cs",
-      "sha256": "b5037ea976717051a243fbfa3929fbe11d790f8e8c23c456f86f44960c95455d",
-      "bytes": 3422
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/AccountNetwork.cs",
-      "sha256": "d41e3d99f7419aa923adba09a90e6324e2a1ef0091adc7605c3033fcd2e98fd0",
-      "bytes": 10273
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/AccountRepository.cs",
-      "sha256": "65018c8399c38f9677d6dc5a52989c1284656ea176d4ec812edeb69b6aa49c7d",
-      "bytes": 15965
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/AccountService.cs",
-      "sha256": "7e4e4cbb21fa79de65503f845694b7989a861108f1d7dcfd292bce6c7001ddb9",
-      "bytes": 20223
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/AssemblyInfo.cs",
-      "sha256": "a78e9d7066ab4ef1fc1489fff03492f35b56a9bd8bc2b90d76126f7fd232f237",
-      "bytes": 92
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/BrowserTimezone.cs",
-      "sha256": "85e9041b30d2772beb51084e6259961c0562ce8bf073b5da8f5420b3b38a507e",
-      "bytes": 12134
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/CdpConnection.cs",
-      "sha256": "2a0337f2f6af754d174332e5061ef29b611b8e1ac797b8a24e43e139387048ea",
-      "bytes": 5208
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/ChromeBrowser.cs",
-      "sha256": "98e3d94a7ce9d1454cc966a551cc017d6652fcff8c46d3b41a0e9ad7f982354d",
-      "bytes": 52172
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/CialloTest.cs",
-      "sha256": "457797cd6282632e5ff14df83fd49ba0bb97e219e333fdb8a39646808e46d347",
-      "bytes": 5132
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/CountryNames.cs",
-      "sha256": "bf4aae175e28586c8f7f2dec6b703304e68276b297d19fd2a2fe89859d3f8a16",
-      "bytes": 9819
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/DefaultLoginBrowser.cs",
-      "sha256": "4487c87ab8c1c067eb1620325b25538af1ca1cbfc77628e73980ba5396e7c799",
-      "bytes": 2162
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/EgressService.cs",
-      "sha256": "54011c60c92115a5ca63fdcf45df76c2718da9d6d82f594f153c9afbdf6bef7c",
-      "bytes": 18375
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/FAswitch.Accounts.csproj",
-      "sha256": "53462ab65592a577ff7e056cf023272a1c3e326b6f627e445c8a6ee3394d9ae2",
-      "bytes": 678
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/FingerprintAccounts.cs",
-      "sha256": "e9823f716c2462683cdbedb97d45753614e31fb1e70e2274bfa57b081614f455",
-      "bytes": 7491
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/InstalledBrowser.cs",
-      "sha256": "5a6d0d95da8256a27bd0b36e02f64b7b30cf62bbaf21006ec38778c7495fb92f",
-      "bytes": 18632
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/IpAdmissionPolicy.cs",
-      "sha256": "1c379ae2e75e11b5486a2e61bb5a4ab33b27e81e4ced2b1afa9c784312fd87bb",
-      "bytes": 2338
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/IpQualityService.cs",
-      "sha256": "f709c54c93e03b867d3b2c2abdadcd889b2998d9461ecd35bbbadfcec4e2ed4b",
-      "bytes": 10671
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/LocalVisualRenderer.cs",
-      "sha256": "c7fac0ec1ea55c5c7d2d94ff918432d65272c44cedd0173cc456c9e94083ee47",
-      "bytes": 5272
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/LoginService.cs",
-      "sha256": "443fb7b842b9cba599801064d1551eb2c52d29073402ed8f2ff022f9849a0f9d",
-      "bytes": 22685
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/LoopbackCallback.cs",
-      "sha256": "ccdc0ce7ae48bb6ba5c705417aaedfaf2d9485d648e3f7d3864a176cd843b977",
-      "bytes": 5567
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/NetCoffeeService.cs",
-      "sha256": "bcfa8ac85759666382716337e098ef384559ea1614e0f5d0611c50aceb10fa1f",
-      "bytes": 6898
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/OnboardingProxyBrowser.cs",
-      "sha256": "68de31c527a35d618b33e7cd566839ec5e8a9d0678e04a65cafe4d837663c6d3",
-      "bytes": 9038
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/ProxyLatencyService.cs",
-      "sha256": "9cf94c18eaa65f5065cb4372821192a45c674f68b8689eb57a7fc1599d9a08c4",
-      "bytes": 1662
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/ResponsesVisualTestRuntime.cs",
-      "sha256": "d7274d67546ba72035da0ef1e8f333d327372de8c7a4133f0899f1bdd7e89852",
-      "bytes": 3217
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/VisualTestRuntime.cs",
-      "sha256": "3738188269cf971d4d07f02909dc489a08a4a900a6521265a427b2e1286c432e",
-      "bytes": 11234
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts/VisualTests.cs",
-      "sha256": "fc48d135a05859dd36bb6b9b3805ac88687481b63247e94230ba1407503c2edd",
-      "bytes": 16660
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/AccountCliChecks.cs",
-      "sha256": "c0643a605a9dc067baba44109b57cec91035c9a75242df08c625c334a843f788",
-      "bytes": 5938
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/AccountPreparationChecks.cs",
-      "sha256": "44e2cb5f5f9d4a4a5e9f9a384541ab80854b173a1abe3b143e7ffc143ae73626",
-      "bytes": 3610
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/BrowserSessionInspection.cs",
-      "sha256": "8734bb6c7f74933c2b41ab6330c9526d17549254e8d218c6a03d00f5f10ac33a",
-      "bytes": 2931
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/BrowserTimezoneTargetChecks.cs",
-      "sha256": "83e8f0067b5845c01db4e619545769b162404c59d8011517e9b9f0ad2ed036c0",
-      "bytes": 4212
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/BrowserTimezoneVerification.cs",
-      "sha256": "eb76f25319c34689daa1e47dc5249c5c1055a7cba4172de8c4eb770ec27e65bd",
-      "bytes": 10267
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/CialloChecks.cs",
-      "sha256": "d5935f018080806f53c61bb44b5c1817efe9ba56518ab6302e34f647dbd95bcb",
-      "bytes": 4824
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/DefaultLoginBrowserChecks.cs",
-      "sha256": "4d53df1cf26cf768a38f4b13f5e8573c5e1d1cd82ff8e3f95709009c207f81b3",
-      "bytes": 3363
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/FAswitch.Accounts.Checks.csproj",
-      "sha256": "34d4aab603ed972e48ac7963de0f1bd1aa90b7001bb82918b652e18579224334",
-      "bytes": 213
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/FingerprintAccountChecks.cs",
-      "sha256": "a794bb726e16937873c034b1ac95bbe2e13365feabb0e9c8638a21d44440d905",
-      "bytes": 15563
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/LocalAccountImportChecks.cs",
-      "sha256": "be07c5b7c633120ff9ee76c693cb0683317135750c2006ce6cf39f72d9c417cd",
-      "bytes": 4655
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/NativeBrowserOwnershipChecks.cs",
-      "sha256": "8db0fa76417dbdf7621abd5a1a23f3bd1a78721b6e7a2d03981d14b0abf1aeb3",
-      "bytes": 16221
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/NativeBrowserRouteFixture.cs",
-      "sha256": "41371f120705702c843bcd7a757829d4bdba4e9390dedc1f40fb174bb963a8cf",
-      "bytes": 6117
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/NewAccountLoginChecks.cs",
-      "sha256": "1c7e21d0da5ca37a09c00a10585393e357c418e5813918dcdd64382ebae4e4de",
-      "bytes": 16051
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/PersistentBrowserChecks.cs",
-      "sha256": "1880c54886a60c82431cfb91110d15e83afe303cb6e08cb6d51e29eb7eede5cc",
-      "bytes": 22247
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/Program.cs",
-      "sha256": "ea6c3a7b5d48dfd2bcf088c369ed0ef8ac8a2ec4195e20fbda162c48d70f0d6c",
-      "bytes": 38751
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/RegionEgressChecks.cs",
-      "sha256": "ec79f44a4903406c7363f5a0c4e6297449a0bc3c542f388e832cde96ea035d45",
-      "bytes": 6205
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/RendererEgressProbe.cs",
-      "sha256": "855153c1179d133660ca80b3c7f9b7e98c4f797afe278a1464782935dd565a34",
-      "bytes": 5870
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/ResponsesFailureChecks.cs",
-      "sha256": "5acc3282808975cf1fa3287b967eb1845ed07f25d3fc673690b05b95a7b9cce5",
-      "bytes": 6743
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/StrictBrowserChecks.cs",
-      "sha256": "e930aa1f98f23c69cbbb76698138a9a748aefd852730f0f4a64b3697861d89fb",
-      "bytes": 30373
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/StrictEgressChecks.cs",
-      "sha256": "2f5bb8388edb5e509519ea067d9731783398bf29f43e5089ae3536b273313752",
-      "bytes": 6725
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/TwoStageLoginChecks.cs",
-      "sha256": "ed7882233009b319331a08e1cbbb06e004170cdeccdd36a58d39b644d94c10b3",
-      "bytes": 8920
-    },
-    {
-      "file": "full/windows/FAswitch.Accounts.Checks/VisualResponsesChecks.cs",
-      "sha256": "684405da32247bcabfa6e7b66a7b7ffe8f3c79b7ad12e426474699a0f06a21e2",
-      "bytes": 7137
-    },
-    {
-      "file": "full/windows/FAswitch.Application/Contracts.cs",
-      "sha256": "8f6fa786a8a985b928985a0adada2a0bcc0fd89da167d8d3995e587cb69cec25",
-      "bytes": 7334
-    },
-    {
-      "file": "full/windows/FAswitch.Application/FAswitch.Application.csproj",
-      "sha256": "59b3d04fd7d24517593b51a7258691d29c0f12e3d73db15ba2d2735f5b98c031",
-      "bytes": 232
-    },
-    {
-      "file": "full/windows/FAswitch.Application/MaintenanceService.cs",
-      "sha256": "8adb5e7c4e7f35b8e711a62350870388084c5817f4388fe7ff563f7fd452fd41",
-      "bytes": 5549
-    },
-    {
-      "file": "full/windows/FAswitch.Application/SwitchService.cs",
-      "sha256": "c2616b5421bfef260d4137d6a698ade7f3b0a31a868196c4003666b9da9a5119",
-      "bytes": 19589
-    },
-    {
-      "file": "full/windows/FAswitch.Application.Checks/FAswitch.Application.Checks.csproj",
-      "sha256": "d4b4e58fd6b34860bcd1a3aad56cabb2e4e0b1b2f12da4f6a34bc8fcb0b2bcfc",
-      "bytes": 219
-    },
-    {
-      "file": "full/windows/FAswitch.Application.Checks/MaintenanceChecks.cs",
-      "sha256": "3cf08acc98767259580bbb6378b50f88e62a99ce87980855a8e4d68ba1539474",
-      "bytes": 16051
-    },
-    {
-      "file": "full/windows/FAswitch.Application.Checks/ManagedCloneApplicationChecks.cs",
-      "sha256": "4e79469f84936a14beef9cf4a3fdc838a2c9fa8c0791581291b34d054bde6593",
-      "bytes": 11255
-    },
-    {
-      "file": "full/windows/FAswitch.Application.Checks/Program.cs",
-      "sha256": "1778e1fdc4d4a5ceee371a60debfbb908e1985666cb0530a8a9f8ba054e34f48",
-      "bytes": 26255
-    },
-    {
-      "file": "full/windows/FAswitch.Application.Checks/Run-Checks.ps1",
-      "sha256": "3dfc8a3983a94367ce00373b596b2b43aaa7cbeebce6d8607b0811f3c0a3c73e",
-      "bytes": 1329
-    },
-    {
-      "file": "full/windows/FAswitch.Application.Checks/SystemProxyApplicationChecks.cs",
-      "sha256": "77f8b7c68e40e6adacddc2b419698ffab7f74bd4d586ec499d399772017c1f0c",
-      "bytes": 3414
-    },
-    {
-      "file": "full/windows/FAswitch.Core/AccountBrowserProfiles.cs",
-      "sha256": "9a94d45764fc787da489b89854e5fa39a3951f410502abfc4a79f172a3f1028a",
-      "bytes": 4387
-    },
-    {
-      "file": "full/windows/FAswitch.Core/BackupService.cs",
-      "sha256": "4b714cd4a2ae9daea94f3504a34999f35647cc96ad833c110befc8fdee9558f2",
-      "bytes": 11185
-    },
-    {
-      "file": "full/windows/FAswitch.Core/EnvironmentRebuild.cs",
-      "sha256": "c60f2c28b5b55b563d941c062b1503a3c74b8927246f5e0777a6e70b6065f8c8",
-      "bytes": 11231
-    },
-    {
-      "file": "full/windows/FAswitch.Core/FAswitch.Core.csproj",
-      "sha256": "e6fcb8e1e93a724d47a829cffd19d47840a5eb088e9ace43f3a34bbaf1524b07",
-      "bytes": 37
-    },
-    {
-      "file": "full/windows/FAswitch.Core/FileProfileStore.cs",
-      "sha256": "6e14c688287caf986a8ff043cee8ea00e37c5d46e5b095b16e3cdec100f0f419",
-      "bytes": 19579
-    },
-    {
-      "file": "full/windows/FAswitch.Core/FileStorage.cs",
-      "sha256": "1ccdc751cc3f591daa2baa8fc63923716ade73b29fc323f93d3641dafbf03251",
-      "bytes": 7006
-    },
-    {
-      "file": "full/windows/FAswitch.Core/FileSwitchStorage.cs",
-      "sha256": "8d1019f46e61fa0412c51c44ed5ae3afd4d1c43929a1fc791896c0d76ef08be5",
-      "bytes": 32312
-    },
-    {
-      "file": "full/windows/FAswitch.Core/ManagedClonePaths.cs",
-      "sha256": "c1864ca4f015bd3b8fbb0b19e9ce3d4894db1704d3cc6fa2625182045aadc084",
-      "bytes": 1120
-    },
-    {
-      "file": "full/windows/FAswitch.Core/ManagedCloneStorage.cs",
-      "sha256": "58476e72058cecac75b607260948114c794e60839e0c64843f7c190850bc509f",
-      "bytes": 18754
-    },
-    {
-      "file": "full/windows/FAswitch.Core/ManagedRuntimeLinks.cs",
-      "sha256": "28b8abe992c353b2dc3c643d088f17b09f97e93f5be71ee79ecf1ec0b6a04e65",
-      "bytes": 3516
-    },
-    {
-      "file": "full/windows/FAswitch.Core/Models.cs",
-      "sha256": "8769bd05bf06aaf052e1ee98353001a449ff1990847a261d434f46c044650889",
-      "bytes": 3141
-    },
-    {
-      "file": "full/windows/FAswitch.Core/ProfileMaintenance.cs",
-      "sha256": "3f1199c59a473edfcb0a32247539b165f82d896d42b2a1d6b5bbf92207a395a9",
-      "bytes": 17309
-    },
-    {
-      "file": "full/windows/FAswitch.Core/ProviderConfig.cs",
-      "sha256": "f55e95eb390da8a23cd7a6c8181c875892e23273d600ea7d4d7c02c98319b3fd",
-      "bytes": 10797
-    },
-    {
-      "file": "full/windows/FAswitch.Core/SwitchStorageContracts.cs",
-      "sha256": "e9f845d45d96de5c33a17bcef83d893bc802841c9d3fc748aca3972466f10cdb",
-      "bytes": 3626
-    },
-    {
-      "file": "full/windows/FAswitch.Core/ToolConfig.cs",
-      "sha256": "8fd601f2a3a4a0cee33f9fcf114f460528289cb9e464f6d1e2d2bd3d5047b72f",
-      "bytes": 2595
-    },
-    {
-      "file": "full/windows/FAswitch.Core/Validation.cs",
-      "sha256": "c5810b18e23f21226e36f60ca2a04e77c4f4b7c1945c123c8e72bd059b273c0a",
-      "bytes": 3423
-    },
-    {
-      "file": "full/windows/FAswitch.Core.Checks/BackupStreamingChecks.cs",
-      "sha256": "b789654ca37a89a2cc2f930c4f30fae554bfc14f4b9163d967f90b4f3f0f8be5",
-      "bytes": 5752
-    },
-    {
-      "file": "full/windows/FAswitch.Core.Checks/FAswitch.Core.Checks.csproj",
-      "sha256": "4a458cdc4558853afa16575bb968a09479e19bfa361429c7d67f70b282dc3489",
-      "bytes": 308
-    },
-    {
-      "file": "full/windows/FAswitch.Core.Checks/ManagedCloneChecks.cs",
-      "sha256": "08ee1fdc71a94d6b146ec1aacb80de670158662727441a421e791474ee045bd7",
-      "bytes": 17472
-    },
-    {
-      "file": "full/windows/FAswitch.Core.Checks/ManagedRuntimeLinkChecks.cs",
-      "sha256": "69f270de8992c199655b04597bf920961f18078a9767b55af7422f518bb84acf",
-      "bytes": 4676
-    },
-    {
-      "file": "full/windows/FAswitch.Core.Checks/ManagedToolIsolationChecks.cs",
-      "sha256": "4e75b5c3ed92a384afab5bf9bff4a35997fb44718b4561cb7c62c69708cccbe7",
-      "bytes": 5336
-    },
-    {
-      "file": "full/windows/FAswitch.Core.Checks/ManyAccountChecks.cs",
-      "sha256": "f96af6d706eb2e0356c2f943b1ce9239376c743df33cdcf30db000ad304dc94c",
-      "bytes": 2548
-    },
-    {
-      "file": "full/windows/FAswitch.Core.Checks/Program.cs",
-      "sha256": "40b621e1bfb1cfca9727c818da5a467a09505ba617782c04423e0840a3c21e1a",
-      "bytes": 20869
-    },
-    {
-      "file": "full/windows/FAswitch.Core.Checks/ProviderEditingChecks.cs",
-      "sha256": "27b4ec1faeda6c6833e169f698afdefce56fde528d542d58a99535144d9bee3b",
-      "bytes": 5963
-    },
-    {
-      "file": "full/windows/FAswitch.Core.Checks/SwitchStorageChecks.cs",
-      "sha256": "75806b101b72653f944a4d4fadb93182aae147882a89337e527f401351578fe3",
-      "bytes": 23837
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/AccountFreezePresentation.cs",
-      "sha256": "406045495c7fdf68e073ceb228d1d94a24685a6429407b68063dedd7bd7fc6a0",
-      "bytes": 1660
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/AccountFreezeVerification.cs",
-      "sha256": "2fd5edeb4030ae74bccdada911cbb9cf0c516f421942c19a942a1164814e3998",
-      "bytes": 7626
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/AccountIpChangeVerification.cs",
-      "sha256": "a7bab3fc45ac250f7c102e63ce9a5f7fb80300adcd9252d37e0e0883787d7546",
-      "bytes": 6419
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/AccountNetworkModes.cs",
-      "sha256": "958999234eb11f79231b8e65bbc8bd51a03e480fafa0f2911b03b873df25306c",
-      "bytes": 5678
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/AccountNetworkModeVerification.cs",
-      "sha256": "a9b1b1e949aa0decf40876a6cd425f08a58f1845edec60eeb5ac7612cfa36053",
-      "bytes": 10596
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/AccountOnboardingViewModel.cs",
-      "sha256": "a9ccbd0b60401972ae2395dfe51fdfdde2f63af5f46f244ed220dccbc6e27195",
-      "bytes": 5058
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/AccountPresentation.cs",
-      "sha256": "5ba3f41e4ab943ebefec7f13b2a2fb108857990b7442daaaad27d20053e41227",
-      "bytes": 26309
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/AccountTestQueue.cs",
-      "sha256": "867ac59b91310be5df9e29588e50ca6c741e06c06ec11be3609a9fb159791613",
-      "bytes": 1481
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/AgentCli.cs",
-      "sha256": "af005f12cd2b41e8c46443122ca9fb76d44d45c48d5f85f4ecd39d38050ade64",
-      "bytes": 19770
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/AgentLoginVerification.cs",
-      "sha256": "edb6dfdd9f0166870281c3300279b7d40289b3d4b62171bcbf4712894899dcb6",
-      "bytes": 8451
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/App.xaml",
-      "sha256": "73dfd87b0c546aa6140dc9a51d90edce957cd8fc083e32cac8eb5c48778e457b",
-      "bytes": 33282
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/App.xaml.cs",
-      "sha256": "5830523312413edef69f25358be7e8eb6f972d714a87c772fbce6e8efab7d9af",
-      "bytes": 7015
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/Assets/BrandIcon.ico",
-      "sha256": "4fa500218cde868bbad2055694d338b6d25df99841b382f41805a23d02b4bb21",
-      "bytes": 47615
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/Assets/BrandMark.png",
-      "sha256": "6d6435e2d5d3f62a1d767ce7ed0a57a28bab2b532bb66ff32bd6ba6be2c03abf",
-      "bytes": 17836
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/Assets/Cover.png",
-      "sha256": "e455b51deb3a8c48036ab21003e8d7461373ec4d43801e13a17575b89dd54a3e",
-      "bytes": 1815912
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/Assets/Fonts/Inter-Bold.ttf",
-      "sha256": "288316099b1e0a47a4716d159098005eef7c0066921f34e3200393dbdb01947f",
-      "bytes": 420428
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/Assets/Fonts/Inter-Regular.ttf",
-      "sha256": "40d692fce188e4471e2b3cba937be967878f631ad3ebbbdcd587687c7ebe0c82",
-      "bytes": 411640
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/Assets/Fonts/Inter-SemiBold.ttf",
-      "sha256": "78a843fade9d4612a5567302fb595b56976eb5fcebf4fea5a5912d638bafcde3",
-      "bytes": 419744
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/Assets/Fonts/SourceHanSansCN-Bold.otf",
-      "sha256": "62383707c086a32f3afd5e293f34c7eff64c7fea31f579fdc6cbe34d920519a6",
-      "bytes": 8569308
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/Assets/Fonts/SourceHanSansCN-Regular.otf",
-      "sha256": "e2bc8a2e7f37474b774fff8db758681ece40bb6947a90d571bce9dd60671a8e4",
-      "bytes": 8429224
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/Assets/GardenMotifs.svg",
-      "sha256": "a1644fd5738bd44430fa8894ff6978090262ea9f7b983dbcf75421ff3f4589eb",
-      "bytes": 5869
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/Assets/HomeGarden.svg",
-      "sha256": "06f9b886219f503f95714e9f55f7b014436b685764879b5ce1230def402606eb",
-      "bytes": 12371
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/Assets/Sculpture.png",
-      "sha256": "5f409e85b67e68d6794b03b7c486b2684f979c465d9a7e8809087f850b97fede",
-      "bytes": 1322349
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/AutomaticLoginProxy.cs",
-      "sha256": "6eec7fa529132d00a731acfae97a1534eb0e16e121dddcf2a7ec46c742f46117",
-      "bytes": 5295
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/AutomaticLoginProxyVerification.cs",
-      "sha256": "0344d6fbf7bf684461addcc4572b709b30dbb22f91e0be5a4071634e17399cf7",
-      "bytes": 4810
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/BackgroundAccountTestsVerification.cs",
-      "sha256": "a4c5400efa803fd5be3766bbf9a7d4ba7f45abbf6d337772dfa1d4e18d23ea46",
-      "bytes": 9769
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/BackgroundTestsPresentation.cs",
-      "sha256": "f3685383894af12e81f6156a43173510946708a97d37376b7123ea17372df938",
-      "bytes": 2813
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/BotanicalGarden.cs",
-      "sha256": "0d3381bb71d3485be6a557a49a30dac1e276ae917e8d90e18bc3c800a4bc8462",
-      "bytes": 11480
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/BrandIcon.cs",
-      "sha256": "e910dc2545ee80ade2302728c174e180dbbdef287c80f2d1c778e4d93c245d0e",
-      "bytes": 2035
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/CialloPresentation.cs",
-      "sha256": "49a64e7d7ecc1daf28ab1968be0d12abc3c079cbc0c97504a2580ab539f7e71d",
-      "bytes": 9719
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/CliHost.cs",
-      "sha256": "d5d1c1ee1e63247c940a3de51776c24c375dc0481947d1587a16201386c5b281",
-      "bytes": 5263
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/DesktopAccountServices.cs",
-      "sha256": "fb6b263f83cb015da2ee561c9f5da7d79832b35fffc4459bcd345e712be1f319",
-      "bytes": 13474
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/DesktopLifetime.cs",
-      "sha256": "86c30ac0108d7051d5c6502bbfaed57416a3ac76be80e07c35f719f5a7c81594",
-      "bytes": 4828
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/DesktopNodeServices.cs",
-      "sha256": "5f136f863d7504f4ab3a3e5d153c42549d79b1881de9fd04d9aa898f9def3ace",
-      "bytes": 9913
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/DesktopProxyServices.cs",
-      "sha256": "7db01371c424e26a5c27e2594c365a288bc4edefa27651b178dd9453411ed75a",
-      "bytes": 11065
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/DesktopWorkspace.cs",
-      "sha256": "533fdbf978a1be6ce7f693939bdc4c5c5f7cbc203fbdb83c9f325c8db8e3a8f0",
-      "bytes": 11692
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/EmbeddedFonts.cs",
-      "sha256": "1c07f6131131ad475cc54bf9408386732a9c96937ac16c8217b09a8ce01c8233",
-      "bytes": 2284
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/ExitTasksPresentation.cs",
-      "sha256": "a00a54f67b1dc7cf2d95249bf0149ae511a85de054c0953aa5d9e7e910bb7d84",
-      "bytes": 2434
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/FAswitch.Desktop.csproj",
-      "sha256": "777c3d33a275ec3edae5c743f3c211b68cf74c99780eb023310c36abf326e3d1",
-      "bytes": 2581
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/HomeMotionVerification.cs",
-      "sha256": "f5c0b59f406224ebba7bc1a74084cf32534b62ba502145e0798785bbecdd75fa",
-      "bytes": 6310
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/InfrastructurePresentation.cs",
-      "sha256": "f1820e60a24dfc639c5e5dda0914e0372fb33ce09d30b747a4238dd9e51657bc",
-      "bytes": 5766
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/LocalAccountImportVerification.cs",
-      "sha256": "e98205accec6cb9da987f450d784523f9b0bd8c22c769f57f86ac45a82025d7d",
-      "bytes": 2617
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/LocalEnvironmentService.cs",
-      "sha256": "bb5bd5e01f182d1feaa9c8b1e5a4fcfadd243118fc92088fab03d1fb6c71258c",
-      "bytes": 9366
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/LocalEnvironmentVerification.cs",
-      "sha256": "ddc803ead19619bbb2e308c958d796548a7feb732236b6b246e46ae9b62c2448",
-      "bytes": 13980
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/MainWindow.xaml",
-      "sha256": "1ea69fccabc7fb39d760a415915e20b4a46ce80813a6dc9511f03c17543322a2",
-      "bytes": 130498
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/MainWindow.xaml.cs",
-      "sha256": "dfc1aea9b0503a16f321a3d378d1ab1e73aa9e55232bb0d61f23206c1b6db850",
-      "bytes": 7829
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/ManagedRouteTransport.cs",
-      "sha256": "ce239b7ca459d76025fc86efc903d16513928f0d85f1459f68d7bfa6556f9f52",
-      "bytes": 591
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/ModelTestPresentation.cs",
-      "sha256": "0dd4f48eb4966918bd86f89f1797e98a5c74b608ffd6c46c44856c67eaa496e9",
-      "bytes": 4629
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/NodeTestingPresentation.cs",
-      "sha256": "f9d2a3c2f438a491eea7e068c27d77c9d9bbfa2dabd9d2a2c0f8dc50149f3fc9",
-      "bytes": 21059
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/OfflineAccountServices.cs",
-      "sha256": "9ed20b333eae9bf796517dee7afcce2cc4486e50acd28ea57597abc505e8bd2c",
-      "bytes": 14372
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/OfflineRegionSystem.cs",
-      "sha256": "d46e23175f2f78bf5e17d71e4d7f4ff849c50870509c56a57f4d3df9f113ff68",
-      "bytes": 1205
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/OfflineRuntimeOperations.cs",
-      "sha256": "d9a921d049646728abd098d277c4e9ed2a07a672425176b39e432b7a531f05f1",
-      "bytes": 3398
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/OfflineVisualTestRuntime.cs",
-      "sha256": "24ebcc1e44fde72d13ec9e14ad0d3d26758a79f37fa8a786606a468932218854",
-      "bytes": 2369
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/Presentation.cs",
-      "sha256": "9d7159e533f42b68f4564212842d65333388e3e7f27f12d659b05f5f0edfb00c",
-      "bytes": 14310
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/ProfileEditorNetwork.cs",
-      "sha256": "ecad1bfb3bd2dbd4f24c0abbc8b074085e58aa86b212ef1058e994cabb6f6fc8",
-      "bytes": 1713
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/ProfileEditorViewModel.cs",
-      "sha256": "a3c2cd37aba872bfab53b18e363fdaf631bac529c444c41d8698053af1c02e9b",
-      "bytes": 6552
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/ProxyPresentation.cs",
-      "sha256": "2a846795edc579fd9bfa06c9a5370a9f20dd430f660c9f2fd404c532c33bb498",
-      "bytes": 29049
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/RegionPresentation.cs",
-      "sha256": "fe826ba85c205b9ff90132eeda3b29dac9b604ca42024a0589d287dd37593cef",
-      "bytes": 3763
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/ResidentialExemptionVerification.cs",
-      "sha256": "334f993426d95c7c383dd62fdbf6040392f69ee9e11273d157cfca977b5bddd9",
-      "bytes": 6153
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/ReviewLifecycleVerification.cs",
-      "sha256": "4ff697dedf24b09b333d593565ec0cbe96a8407996a15e31e8d0b1d2540e0230",
-      "bytes": 11541
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/ReviewRecoveryVerification.cs",
-      "sha256": "591f75760aa3e7926a345849c6535f1c04dae2f3799bce24fc2991b8004c0a82",
-      "bytes": 8000
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/SimpleActionsPresentation.cs",
-      "sha256": "96789c7463c7f19c9be2194c612f35b1c42e765b02f46e4628ddf8ffcc28a65e",
-      "bytes": 7613
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/StoragePresentation.cs",
-      "sha256": "180c918412aaca59c853a87b61d47b2275fe7ea94c663ab4fe80c2ba4608c596",
-      "bytes": 32770
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/StorageUiVerification.cs",
-      "sha256": "f7251b01057a85698801e06d14fcf82e5605994e71e2a1a987b4e8777c2900ba",
-      "bytes": 190940
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/SupportReport.cs",
-      "sha256": "0db1f2318136253ef186072b2797668b40f4192b8837dcd6b5680765db6da653",
-      "bytes": 2967
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/SupportReportVerification.cs",
-      "sha256": "8b84aa0275343924805d43fe2df952daadf1aa80f27614e765f35fc5ad578505",
-      "bytes": 4361
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/TestElapsedClock.cs",
-      "sha256": "b92f0fec8a41b8933560bd6872e142d262554e69ee3d5b860b5cdd6c164f5d60",
-      "bytes": 1240
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/TwoStageLoginVerification.cs",
-      "sha256": "8953fef048dc82c67aae252fe22571e8b2c81424c009790e77e94ac70012a931",
-      "bytes": 965
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/UiVerification.cs",
-      "sha256": "18181aeab54f3f79d181410d4913b50bea9d9d89fc1e4df4b4b42ecaa9e2c177",
-      "bytes": 32090
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/VisualRuntimeVerification.cs",
-      "sha256": "a93a8eb32c9a392ceb8c3df87e3c00eaac320c6b7c3b29e1a06bb1491f5501eb",
-      "bytes": 21136
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/VisualTestPresentation.cs",
-      "sha256": "887a898679ca380b975350cd7ca7165840880f54ba87246ebf06ae78904f4c7c",
-      "bytes": 16670
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/VisualTestVerification.cs",
-      "sha256": "6b2537c0b9b4347bc7c78853247f709524cbdf19e777ace28a8a2d41f5743251",
-      "bytes": 22946
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/VisualTestViewer.cs",
-      "sha256": "78a8bdb01c9078c1e38716c566e17995fa7b60eecc66fae1f8e605d5cd8dd285",
-      "bytes": 4073
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/WindowsTrayHost.cs",
-      "sha256": "b0970866ae4ecf00212633751a10a73c75aa71100ee10d811dde6b91d44a3a8a",
-      "bytes": 1240
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/WorkspacePresentation.cs",
-      "sha256": "8568bf9dafa00b53c7eca4072fa4462ff2a66b5c636ef4a62d9dbec109355f9e",
-      "bytes": 10870
-    },
-    {
-      "file": "full/windows/FAswitch.Desktop/WorkspaceTheme.cs",
-      "sha256": "4e38821367688e5d61e3be93462a7a0cad032117250f23af2f6eaf5fb1f471b4",
-      "bytes": 4353
-    },
-    {
-      "file": "full/windows/FAswitch.Fingerprint/Challenges.cs",
-      "sha256": "c215a783357b54c7e001e6e6dfbe7fd85a37ca7d525d72602fb17114cb655ce5",
-      "bytes": 3409
-    },
-    {
-      "file": "full/windows/FAswitch.Fingerprint/Contracts.cs",
-      "sha256": "0a2c1d4d8317410409e7a0734711c6351fdc60d33089c2bb6cf2586830d955da",
-      "bytes": 1468
-    },
-    {
-      "file": "full/windows/FAswitch.Fingerprint/FAswitch.Fingerprint.csproj",
-      "sha256": "41d4d19500bbd39e62e1f8ec41c5d92fba099c2e657ed6b4bc4576522a9e474a",
-      "bytes": 510
-    },
-    {
-      "file": "full/windows/FAswitch.Fingerprint/FingerprintEngine.cs",
-      "sha256": "b24b7027a3d290bf0e341fc6bffce3780bf47b16b0c55481f1b6332d05c342de",
-      "bytes": 18175
-    },
-    {
-      "file": "full/windows/FAswitch.Fingerprint/Resources/unified_bank.json",
-      "sha256": "6a678e6c73eb015c1c507d61cdd1313b41916d55186bb65920d1bf119ec5009e",
-      "bytes": 863457
-    },
-    {
-      "file": "full/windows/FAswitch.Fingerprint.Checks/FAswitch.Fingerprint.Checks.csproj",
-      "sha256": "68b9e23dbde273dfaf5608484a5d7f695586d3522b5d921bc808e14c93343a85",
-      "bytes": 219
-    },
-    {
-      "file": "full/windows/FAswitch.Fingerprint.Checks/Program.cs",
-      "sha256": "bc05d5da978102572967744a850d9fb59e00f40efe976e6116d0ba4d29b8485c",
-      "bytes": 8910
-    },
-    {
-      "file": "full/windows/FAswitch.Fingerprint.Checks/Run-Checks.ps1",
-      "sha256": "6a1911e111860b25018e71aff9ff63dd4175fddc484557232ad9955a25c20fed",
-      "bytes": 1601
-    },
-    {
-      "file": "full/windows/FAswitch.IpQuality.Checks/FAswitch.IpQuality.Checks.csproj",
-      "sha256": "34d4aab603ed972e48ac7963de0f1bd1aa90b7001bb82918b652e18579224334",
-      "bytes": 213
-    },
-    {
-      "file": "full/windows/FAswitch.IpQuality.Checks/NetCoffeeChecks.cs",
-      "sha256": "cf688a6d6ebb9026633519892c5d51d9e57e607193372408984e0ffe62091fe9",
-      "bytes": 3697
-    },
-    {
-      "file": "full/windows/FAswitch.IpQuality.Checks/Program.cs",
-      "sha256": "b1649c1154857f81daef1f1255bc626f5377c69fbed6477a39c7b9f7ec34ec25",
-      "bytes": 13211
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting/AssemblyInfo.cs",
-      "sha256": "7065aa0c4d08e981772ad7a00912a03eb6d54e8cfbcac81ff4158abb759c0ba1",
-      "bytes": 103
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting/BatchNodeProbeService.cs",
-      "sha256": "7c87976f7af7e5b02414590c39ca68f959d79fb481a65a9c7c4ea75a88df1f0f",
-      "bytes": 8330
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting/Contracts.cs",
-      "sha256": "c77cc846a440fe5db1d3ac2af17eb5d34135349d547cb989afb82316ee7b18cd",
-      "bytes": 4484
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting/FAswitch.NodeTesting.csproj",
-      "sha256": "ae7462d4092f560b1de827a9d92c32ac7c10bfc9205de316ff74218f5575fb68",
-      "bytes": 236
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting/IpScoreCache.cs",
-      "sha256": "a9c115bfcafa4d813e940c2b58152ec69a4977a08a88ed74d9c6bf8cac5b02c7",
-      "bytes": 4970
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting/ManagedNodeRoutes.cs",
-      "sha256": "f15676683b676e824a28b316fecb376d495ec5b8bb2eb1a0aea78758bdab8498",
-      "bytes": 10758
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting/NodeCatalogImporter.cs",
-      "sha256": "9b169de96c647bd52c00459cee34b0c589a06e90bca2f0682b3301314eb441ae",
-      "bytes": 4376
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting/NodeProbeHistory.cs",
-      "sha256": "cac283aebf41f3d3bcf689a9960fe0122f582901dc37600f32abf7ab7a09c060",
-      "bytes": 1760
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting/NodeScreeningRules.cs",
-      "sha256": "0aec5757df0a25d68e322f2aea8439977af3bdc8597aee8796068c8eb6061ba3",
-      "bytes": 1497
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting/ProbeConfiguration.cs",
-      "sha256": "af318b1fc6b08e8e80131e99f8a5dff9ccd9a48529f8549e06aa0cf82acd8029",
-      "bytes": 2434
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting/SubscriptionCatalog.cs",
-      "sha256": "e68127a436444b0976124b31c596a74eebf6c29be162dcf874053e1e393e6daf",
-      "bytes": 8425
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting/WindowsMihomoProbeRuntime.cs",
-      "sha256": "4b68cd0cc81919a908f1b507aaac06637e5c797a37285345f5cea7c28d583b4c",
-      "bytes": 18157
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting.Checks/DirectoryCleanupChecks.cs",
-      "sha256": "314e0085fdb920118414cb26f44ec8af4f36f8f12378c33cd43f2af221186b8a",
-      "bytes": 1440
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting.Checks/FAswitch.NodeTesting.Checks.csproj",
-      "sha256": "3376c7f7fc8f219b9bf41acb1e10b2d6925be6f7187aa54c064433e59a8399b8",
-      "bytes": 322
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting.Checks/ManagedRoutesChecks.cs",
-      "sha256": "7e41e3aa472b2b6a9e457fd12797498d2047c3af5b057f8b675bed665501fbad",
-      "bytes": 8542
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting.Checks/NativeManagedRouteAcceptance.cs",
-      "sha256": "48b376b2dbdb2aa0b0b1bbedb548656db8dc216b3b8744028d7ca8086b0c8667",
-      "bytes": 4300
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting.Checks/NativeProbeAcceptance.cs",
-      "sha256": "6b7ad5072391504fd47b3c908b5f60e6254d499f98dbc7597ff80d327d5f9f48",
-      "bytes": 3205
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting.Checks/NodeHistoryChecks.cs",
-      "sha256": "daef44eeb7d39a3a3cf65d3768dda50813ea05a07f0445b909e2e7bc63dfbb01",
-      "bytes": 2277
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting.Checks/ParallelProbeChecks.cs",
-      "sha256": "5c141288c7ed23f1ed269730c082f39fadab12c40132d55f479720ac2c2cfc09",
-      "bytes": 10197
-    },
-    {
-      "file": "full/windows/FAswitch.NodeTesting.Checks/Program.cs",
-      "sha256": "4465e6e1eeb6381bc55ff3c1dcbe80e6983a72079eb68ceef22f7853391e09e7",
-      "bytes": 28557
-    },
-    {
-      "file": "full/windows/FAswitch.Proxy/ClashVergeDnsService.cs",
-      "sha256": "5c5fd0f5b3ef4959bc72d676fb5aabf6fe14cbf905ca9dc2c09794e03d9cfa2f",
-      "bytes": 29113
-    },
-    {
-      "file": "full/windows/FAswitch.Proxy/ClashVergeScript.cs",
-      "sha256": "eab5c4cdae1df840b68e0a6b82493308c8022562189c9b5e4e7dd20eb0776f26",
-      "bytes": 6536
-    },
-    {
-      "file": "full/windows/FAswitch.Proxy/ClashVergeState.cs",
-      "sha256": "c559e3f04ae3ceb08be947f9d5d966d83195cc89fd6476c20b0570360805a5b8",
-      "bytes": 902
-    },
-    {
-      "file": "full/windows/FAswitch.Proxy/DnsPolicy.cs",
-      "sha256": "f023a45056a7fd835147fb9612b4b4e7350f7b31292abe70f2b2b41d3356121d",
-      "bytes": 8274
-    },
-    {
-      "file": "full/windows/FAswitch.Proxy/FAswitch.Proxy.csproj",
-      "sha256": "761007ca90e8b7a8fb776bfd4ed0da1d71f466faf25dc722579e9bdb4dff628e",
-      "bytes": 840
-    },
-    {
-      "file": "full/windows/FAswitch.Proxy/MihomoInspector.cs",
-      "sha256": "99d813004a885c226977161ff450748e3ab7dd21fef5c4bf2cd2790ee7132698",
-      "bytes": 8886
-    },
-    {
-      "file": "full/windows/FAswitch.Proxy/ProxyContracts.cs",
-      "sha256": "195d8afadff3300e8e4310e70f53d8e38f42add888472a39c295ed3fa3b6918f",
-      "bytes": 2326
-    },
-    {
-      "file": "full/windows/FAswitch.Proxy/ProxyYaml.cs",
-      "sha256": "5c73e3dd3d894bb46291679687c1bfff8e2c8e83147f37d391bfd6aa9da46510",
-      "bytes": 2918
-    },
-    {
-      "file": "full/windows/FAswitch.Proxy/Resources/clash-verge-dns-v1.js",
-      "sha256": "aaaed49ec3bb5f8b0ffeef4dd44ee60bb9e6e574085916648d2d20b1ceb2227a",
-      "bytes": 3869
-    },
-    {
-      "file": "full/windows/FAswitch.Proxy/Resources/dns-policy.json",
-      "sha256": "d7ab986df4b2a2c3d52e36cac4802c53ff6eb9a9db0fb28e7c39a0f014ba1c7c",
-      "bytes": 1368
-    },
-    {
-      "file": "full/windows/FAswitch.Proxy.Checks/FAswitch.Proxy.Checks.csproj",
-      "sha256": "a1d2f17780cf4d3c99152714cabf495b59ec7495637d1a450743c2f78d84ecbe",
-      "bytes": 207
-    },
-    {
-      "file": "full/windows/FAswitch.Proxy.Checks/Program.cs",
-      "sha256": "768837918100fed7f42b442fa5bb7f397e91837a1ee9a88f1fdee39c0e265124",
-      "bytes": 23513
-    },
-    {
-      "file": "full/windows/FAswitch.slnx",
-      "sha256": "680a499f0952f61a329e51e91a45e9e67b0b7b4fd89c4b325cfa10e78da5801c",
-      "bytes": 1181
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/ApplicationLifetime.cs",
-      "sha256": "99b9f6b06e22f2ce7a603a935bded704af3b60aa5343244534dcd45201bb6105",
-      "bytes": 2408
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/BrowserEnvironmentVerification.cs",
-      "sha256": "a8d997dedeba2aaf324859c0fb7227b0500521bc92daf7859096306d24d40c43",
-      "bytes": 1263
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/BrowserUdpProtection.cs",
-      "sha256": "3790545e338be77d1d6fda099c87a3f4cf9a357b90df2967aa8de24642b7fe7a",
-      "bytes": 7907
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/CodexInstallation.cs",
-      "sha256": "90c54f65f74e18c1178127b7c7e70bf051c21ed0a352ced268d7c0613b9e648c",
-      "bytes": 7935
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/Commands.cs",
-      "sha256": "ee216df05503fbcb6f0988ce36ff2c3386884bc4bb81e71013fd3ae027de16c5",
-      "bytes": 3320
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/DataPaths.cs",
-      "sha256": "02ba4744d95f86954e4ca31af6f2f070e98458fb184143f50835e5c512efde7d",
-      "bytes": 4319
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/DesktopLaunch.cs",
-      "sha256": "a10c4ab57678855222b671d1b7d9a6fcfad2d492f28d8d2623a5d062f22646b2",
-      "bytes": 10171
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/DirectConnectionProtection.cs",
-      "sha256": "edbc4be8030577b9a23a9c91500c2ed9eb085292c349eee9e6dfccf9a076adaf",
-      "bytes": 12739
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/DirectConnectionProtection.ps1",
-      "sha256": "de868b1053e51466ece6d1b69fa03ad29792b2c0047f16f18148325fcfe8a7f7",
-      "bytes": 6715
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/FAswitch.Windows.csproj",
-      "sha256": "5a7b11d09ef4b6aeb02344a95e26fd757a2382232a3f0602ea1394505a645c04",
-      "bytes": 386
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/FlClashDns.cs",
-      "sha256": "c8f8cf4d53a553deca2b0ed60c4436bf6abc7a68b11a932431eeef7715e76bbd",
-      "bytes": 13535
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/LocalProxyListeners.cs",
-      "sha256": "3f340b9037d9bedeccf45366afca132331789624e2cb80577994a27a31558f94",
-      "bytes": 5661
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/ManagedChromeInstallation.cs",
-      "sha256": "7cbbdfff8949aeffe9bc2b8ac702cb53192cae5e4c0065e2842d7ddd17b9304d",
-      "bytes": 8062
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/ManagedCloneRuntime.cs",
-      "sha256": "17ffdb396b2b983780f784b97f46aa66a4f7c9c9f8bad0e0f2f30f2fa1db6030",
-      "bytes": 8634
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/ManagedCodexRuntimeInspector.cs",
-      "sha256": "fd9fd6a44c22bda06ee9a49359a5c7ebb7d23cb9c5c72719e5edb59159ebb42e",
-      "bytes": 16412
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/ManagedRuntimeCdp.cs",
-      "sha256": "3351e9f5279ffc59d528e0f86a6a52f79737cfac95fdfdebb5fda555cb9a953e",
-      "bytes": 5476
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/ManagedWindowIcon.cs",
-      "sha256": "5725b82fa52b0609f7057718799d084523f9ad9560e19943c41310de9a54208b",
-      "bytes": 4058
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/NativeMethods.cs",
-      "sha256": "b2c20cd16019b5e8176988654035c3c4e5662b9873198c0c8ba6ef93044063a3",
-      "bytes": 3360
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/OwnedProcesses.cs",
-      "sha256": "c6c824bfb7b7a6a65001a10656ce8b2435e9cc28ca6b85a428476f4ae2b252b2",
-      "bytes": 22612
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/PackagedLaunchScripts.cs",
-      "sha256": "4f89613f23120889d64716e18943026c0c39cfee669f9e08dae6ee7c4809b20c",
-      "bytes": 6662
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/Processes.cs",
-      "sha256": "c6a64967aa3555b51749712c5c133ad0d7906389a8179094e7c82e1a824e069b",
-      "bytes": 7674
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/Regions.cs",
-      "sha256": "36145e48ec1b0b861da6511801ef7f3bf1e77d7a7472a4a92842d32777e8f2dd",
-      "bytes": 8279
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/SilentTimezoneChannel.cs",
-      "sha256": "9df454372531d363ac2d79daef73f713c8ba9b221cd2262e3ee42dbfae5c107c",
-      "bytes": 10453
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/SystemProxyResolver.cs",
-      "sha256": "6fc0ee675ea0708bb0c535d25f370af58ef1057bda49b6a1a73bc4f3ed84fd1f",
-      "bytes": 3747
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/Timezones.cs",
-      "sha256": "953f83d03bda2cdd1fd33899a0b5166ec19ec5734d02fa4d6716b7121babe040",
-      "bytes": 9875
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/WindowsDesktopLaunchSystem.cs",
-      "sha256": "723ba78d3484b34e37ef4a549e91560d3056d905d466aa2be0a60e56fda3942d",
-      "bytes": 25770
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/WindowsLaunchPreparation.cs",
-      "sha256": "5fb254c05af94e09b7daf2f387ca1dac04d7cb293588358c12d670f681c33461",
-      "bytes": 3492
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/WindowsProcessSystem.cs",
-      "sha256": "2d53da62fb4abbb79ba562493d7233fe4c5dc302dc6b4a27eb859c2b76e35ced",
-      "bytes": 4071
-    },
-    {
-      "file": "full/windows/FAswitch.Windows/WindowTaskbarProperties.cs",
-      "sha256": "8337681b076244d5f73c1afff8a1b138f4d836619725718c4d685dd0084195d7",
-      "bytes": 3181
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/BrowserUdpChecks.cs",
-      "sha256": "d53e8ddeb6a5220b868aebcfe461a8be7ebf3c58e04fb6bd4b398cd7076c497a",
-      "bytes": 5035
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/FAswitch.Windows.Checks.csproj",
-      "sha256": "ccc008228c382e02185bc879cbd5e657e2c67623a0fe5fcefce3ddbeef0b09c0",
-      "bytes": 314
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/FlClashAllSubscriptionsChecks.ps1",
-      "sha256": "b9283f35135cd2e237d543396e563aa15a92224d970b5761c1e0fa79fe4354a9",
-      "bytes": 9662
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/FlClashAllSubscriptionsFixture.js",
-      "sha256": "03bf47c0f03e81121b4c41de0a1a5e68de92a70165244b8aa52a906d8b5a2aa7",
-      "bytes": 2919
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/FlClashDnsChecks.cs",
-      "sha256": "0d0a762a5c3d2095f24cae4cf5f6add97cd76adcd77f78c8292706ddc19945c5",
-      "bytes": 8401
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/FlClashDnsLegacyV3.txt",
-      "sha256": "1d0e9c19a7f9b3e6f30466e5a1a0af04a2e2df386102cce45d1c61db0b07deed",
-      "bytes": 1150
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/FlClashDnsRuntimeFixture.js",
-      "sha256": "9646d202d4b923d959ff35a56f4ae44d70cf8e8e98ac247346569ef2bb312998",
-      "bytes": 3455
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/FlClashDnsScriptChecks.ps1",
-      "sha256": "8ac7fe3efa078548466d4bed6bbd6a01d0ba1a9082102431b22687f5a2cda1cf",
-      "bytes": 59617
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/FlClashDnsStandaloneChecks.ps1",
-      "sha256": "12e2e5c76b44cf6937639cdc0f90f74db78786917a820fc73bbb700d739f5665",
-      "bytes": 41982
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/ManagedBrowserProgramChecks.cs",
-      "sha256": "441f4019ea14988085c32c07f39763008bd66dfdfb2008d3e3e65dc731f0315e",
-      "bytes": 3717
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/ManagedCloneChecks.cs",
-      "sha256": "402155f5f3ca0acda4d1e7d47769e8324e6f292d43809ecf1c77b0f09371a3ad",
-      "bytes": 26179
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/ManagedLaunchRecoveryChecks.cs",
-      "sha256": "aeb20c5ae69d84937f8655d9928c084611b970ee9bf22874c4ddb82ded6f4144",
-      "bytes": 8723
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/ManagedRuntimeCdpChecks.cs",
-      "sha256": "12bedf70c496b43d9e718978569dd61d6d5607fcbe3a33c0ed76225fa2a13b20",
-      "bytes": 18721
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/Program.cs",
-      "sha256": "865f0946355ebcf214034fb14ae4ce8d296f5c3eafee6c0c9b08b965289a2d40",
-      "bytes": 46397
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/RegionChecks.cs",
-      "sha256": "45992a3a3698aa1f6d1e1e7699061664e2018810025108ce87847862e10bf638",
-      "bytes": 12020
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/Run-Checks.ps1",
-      "sha256": "38dead69631fd080f06d7203cc21bcd72d6832500cd4307b6475d950600fdf6b",
-      "bytes": 2071
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/Run-DirectConnectionProtectionChecks.ps1",
-      "sha256": "3a6911150cc8cc90465643687eae2f6920d8ddb4756b74a1851be0d84c487510",
-      "bytes": 10468
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/Run-FlClashDnsChecks.ps1",
-      "sha256": "03b96e84165e39c614740547b3e7c38bb6a039cb5e89c39a10dffeed9d73e0c7",
-      "bytes": 2798
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/SystemProxyChecks.cs",
-      "sha256": "d5454ef87e831175a96281f31557ebbb8d089948d9f3c2800570a607cac24b2d",
-      "bytes": 3582
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/Validate-PowerShell.ps1",
-      "sha256": "f36f3d31f21f07a1e4ff66ba64b5689a59c3bbb13ff907e0fdd788a099b22d2b",
-      "bytes": 631
-    },
-    {
-      "file": "full/windows/FAswitch.Windows.Checks/WindowIconChecks.cs",
-      "sha256": "0fc452da7a3906164d4db1fde55f7deb30c711040262cec2921263047237bde4",
-      "bytes": 2868
-    },
-    {
-      "file": "full/windows/global.json",
-      "sha256": "a7cde81abd2bab0e0384749653635f971d2d52c78610bb7be553ac3895d1452d",
-      "bytes": 74
-    },
-    {
-      "file": "full/windows/NuGet.Config",
-      "sha256": "aec93b5637ab6d62470979a008990a4a336a287ab83a3f2541849ae735674055",
-      "bytes": 197
-    },
-    {
-      "file": "full/windows/ThirdParty/Fonts/Inter/LICENSE.txt",
-      "sha256": "b3195af0fb14368d1b3b10fb9d3fe503b7163ea083859d2ee553bc74da07c320",
-      "bytes": 4472
-    },
-    {
-      "file": "full/windows/ThirdParty/Fonts/README.md",
-      "sha256": "e2b47b2ff58c27700f846cfef8bfbe51b3432aa96dbebe50633738b6d61b68b5",
-      "bytes": 1991
-    },
-    {
-      "file": "full/windows/ThirdParty/Fonts/SourceHanSans/LICENSE.txt",
-      "sha256": "1953855bf1927e7214385bbdd8adb04cc5e8a0ecd0e6eaedeb1bdc281b009481",
-      "bytes": 4559
-    },
-    {
-      "file": "full/windows/ThirdParty/Fonts/SOURCES.json",
-      "sha256": "5badc1a7220abd0b417e69d8710c48ae29703b70c55badd3a22ca98428f50353",
-      "bytes": 2710
-    },
-    {
-      "file": "full/windows/ThirdParty/GeoTimeZone/LICENSE.txt",
-      "sha256": "8bd81da0babc9f6003b2b5aea1cb3e472deffe7736607f811f94e40cfa5aed42",
-      "bytes": 2161
-    },
-    {
-      "file": "full/windows/ThirdParty/GeoTimeZone/SOURCE.md",
-      "sha256": "30447d8f730e58153cea26f3e53b04f0886f64ea262f7ddae0bf17b3a7ea17c5",
-      "bytes": 583
-    },
-    {
-      "file": "full/windows/ThirdParty/Mihomo/LICENSE.txt",
-      "sha256": "230184f60bae2feaf244f10a8bac053c8ff33a183bcc365b4d8b876d2b7f4809",
-      "bytes": 35823
-    },
-    {
-      "file": "full/windows/ThirdParty/Mihomo/SOURCE.json",
-      "sha256": "7421233eeca776d0b89000cfa288f535e86830fea0eb1b7d0ba134693a978297",
-      "bytes": 875
-    },
-    {
-      "file": "full/windows/ThirdParty/ModelTrace/challenge-browser.js",
-      "sha256": "5ec55b13ecca5bb7baea59d559dfd3e7324ae12b331957676d540c28bed06885",
-      "bytes": 2615
-    },
-    {
-      "file": "full/windows/ThirdParty/ModelTrace/fingerprint-core.js",
-      "sha256": "adff55637f6c0534c2c10703e028d4d1970d325e8daecb55efaa7f95a1938d5c",
-      "bytes": 9200
-    },
-    {
-      "file": "full/windows/ThirdParty/ModelTrace/LICENSE.txt",
-      "sha256": "4812aaf2fc8971c97c8e054f7cecb16486f903d5c5b181ea48304c12182a11e7",
-      "bytes": 1085
-    },
-    {
-      "file": "full/windows/ThirdParty/ModelTrace/SOURCE.json",
-      "sha256": "eeba8382ce9eb86782beb66acfb34bd179f2165d59d872a7ca70505ae97480d2",
-      "bytes": 1062
-    },
-    {
-      "file": "full/windows/ThirdParty/YamlDotNet/LICENSE.txt",
-      "sha256": "556ab734f87bd3a2de1150cfc446524721405aa5d7667c22766a6995ecbc6689",
-      "bytes": 1129
-    },
-    {
-      "file": "full/windows/ThirdParty/YamlDotNet/SOURCE.md",
-      "sha256": "3eae19b351fafde588caf3583cfcb74d52c5627bd0f3e03f973bfd177c38fa8a",
-      "bytes": 426
+      "sha256": "b9406f53539cbdd87b3787219ebb444d6ee28797e8bfab74ac6dee8b7c34f3fc",
+      "bytes": 1769
     },
     {
       "file": "global.json",
@@ -1496,8 +1708,8 @@
     },
     {
       "file": "Initialize-Dependencies.ps1",
-      "sha256": "c67c6841258b46d8a83f2ccd8c606cdf12bf5de95da76d16ee85f631746dc45f",
-      "bytes": 1829
+      "sha256": "7a9481cd7254041bd5e2b09043b5bbcc66aca292493de31409effe19229bc9a9",
+      "bytes": 2523
     },
     {
       "file": "LICENSE",
@@ -1511,8 +1723,8 @@
     },
     {
       "file": "README.md",
-      "sha256": "558646c57083735dcee670b4d99bb48ad91ed03338fcb42726e783cbfa469d51",
-      "bytes": 13663
+      "sha256": "5982b689fc2245c5f4947b93364a4943f83490840c3845caf587b5b3ca6d1183",
+      "bytes": 14627
     },
     {
       "file": "taskbar-clock/Build-Clock.ps1",
