@@ -10,6 +10,108 @@ namespace ChunsonSpace.Desktop;
 
 internal static class VisualTestVerification
 {
+    internal static async Task RunPresetsAsync(string directory)
+    {
+        Directory.CreateDirectory(directory);
+        var checks = new List<object>(); var screenshots = new List<string>();
+        void Check(string name, bool passed) { checks.Add(new { name, passed }); if (!passed) throw new InvalidOperationException(name); }
+        var listener = new UiVerification.BindingListener();
+        System.Diagnostics.PresentationTraceSources.DataBindingSource.Listeners.Add(listener);
+        System.Diagnostics.PresentationTraceSources.DataBindingSource.Switch.Level = System.Diagnostics.SourceLevels.Warning;
+        var root = Path.Combine(directory, "fixture", "accounts"); Directory.CreateDirectory(root);
+        File.WriteAllText(Path.Combine(root, "ChunsonSpace-fixture.json"), "{\"fixture\":true}");
+        var store = new FileProfileStore(root);
+        const string account = "SYNTHETIC 示例";
+        store.CreateBoundAccount(account, new("http://127.0.0.1:7890"));
+        store.SaveAccount(account, new JsonObject { ["tokens"] = new JsonObject { ["access_token"] = "fixture-access", ["account_id"] = "fixture-account" } }, overwrite: true);
+        var workspace = new DesktopWorkspace(root, Path.Combine(directory, "fixture", "home"), Path.Combine(directory, "fixture", "desktop"), Path.Combine(directory, "fixture", "web"), fixture: true);
+        var model = new ShellViewModel(workspace);
+        var window = UiVerification.CreateWindow(model); var layout = window.RenderRoot;
+        var transport = new PresetTransport();
+        var runtime = workspace.Accounts!.VisualRuntimeFixture!;
+        runtime.ReplyRuntime = new ResponsesVisualTestRuntime(new AccountService(workspace.Accounts.Repository, transport), () => throw new InvalidOperationException("No model renderer in fake transport"));
+        T Control<T>(string name) where T : FrameworkElement => (T)window.FindName(name);
+        void Arrange() => UiVerification.ArrangeForCapture(layout, 1040, 670);
+        try
+        {
+            model.Selected = model.FilteredItems.Single(x => x.Name == account);
+            model.Navigate("Tests"); Arrange();
+            Check("two existing test entries use their existing commands", Control<Button>("HealthTestEntry").Command == model.TestAllAccountsCommand && Control<Button>("StaticTestEntry").Command == model.OpenVisualTestsCommand);
+            model.OpenVisualTestsCommand.Execute(null); Arrange();
+            var panel = model.VisualTests!; var picker = Control<ComboBox>("DrawingPresetPicker"); var input = Control<TextBox>("DrawingContentInput");
+            Check("startup has no selected preset, custom input stays empty and sends nothing", picker.SelectedIndex == -1 && input.Text.Length == 0 && transport.Requests.Count == 0);
+            input.Text = "My saved custom description";
+            panel.CloseCommand.Execute(null); model.Navigate("Dashboard"); model.Navigate("Tests"); model.OpenVisualTestsCommand.Execute(null); Arrange();
+            Check("navigation reuses editable custom text without sending", ReferenceEquals(panel, model.VisualTests) && input.Text == "My saved custom description" && transport.Requests.Count == 0);
+            foreach (var dark in new[] { false, true })
+            {
+                model.DarkTheme = dark; picker.SelectedIndex = dark ? 0 : 1; Arrange();
+                Check("explicit selection fills unchanged question without sending " + dark, picker.Items.Count == 2 && input.Text == ((DrawingPreset)picker.SelectedItem).Prompt && transport.Requests.Count == 0);
+                Check("preset, editable text and start button fit minimum view " + dark, UiVerification.FullyVisible(picker, layout) && UiVerification.FullyVisible(input, layout) && UiVerification.FullyVisible(Control<Button>("VisualTestStartButton"), layout));
+                UiVerification.AssertWindowsOutsideDesktop();
+                var image = new System.Windows.Media.Imaging.RenderTargetBitmap(1040, 670, 96, 96, System.Windows.Media.PixelFormats.Pbgra32); image.Render(layout);
+                var png = new System.Windows.Media.Imaging.PngBitmapEncoder(); png.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(image));
+                var path = Path.Combine(directory, "drawing-presets-" + (dark ? "night" : "paper") + "-SYNTHETIC.png");
+                using (var file = File.Create(path)) png.Save(file); screenshots.Add(path);
+            }
+            input.Text = "Custom after preset"; Arrange();
+            Check("editing a preset retains custom text and clears selection", panel.DrawingContent == input.Text && picker.SelectedIndex == -1 && transport.Requests.Count == 0);
+            for (var i = 0; i < 2; i++)
+            {
+                picker.SelectedIndex = i; Arrange(); var question = input.Text;
+                transport.Reply = i == 0 ? OfflineVisualTestRuntime.Svg : PresetTransport.Html;
+                Control<Button>("VisualTestStartButton").Command.Execute(null); await panel.CurrentOperation; Arrange();
+                var body = JsonNode.Parse(transport.Requests[^1].Body!)!;
+                Check("production request sends original editable question and unchanged instructions " + i,
+                    body["input"]![0]!["content"]![0]!["text"]!.ToString() == question && body["instructions"]!.ToString() == BuiltInTestInstructions.Helpful && body["reasoning"]!["effort"]!.ToString() == "high");
+                var result = panel.Result!; var step = result.Steps.Single();
+                Check("single request persists original reply and correct artifact " + i, result.Completed && transport.Requests.Count == i + 1 && step.Prompt == question && step.Artifact!.EndsWith(i == 0 ? ".svg" : ".html") && File.ReadAllText(Path.Combine(result.Directory, step.Artifact)) == transport.Reply);
+                var row = SavedResultRow.FromVisual(result).Single();
+                Check("history artwork readback preserves SVG or full HTML " + i, row.HasArtwork && ArtworkFiles.ReadArtwork(row) == transport.Reply && File.ReadAllText(Path.Combine(result.Directory, step.Preview!)).Contains("sandbox='allow-scripts'"));
+                File.WriteAllText(Path.Combine(directory, "payload-" + i + ".json"), body.ToJsonString());
+            }
+            var saved = panel.Result!;
+            var browser = InstalledBrowsers.Find().FirstOrDefault()?.Executable ?? throw new IOException("Existing Chromium required for local preview verification");
+            var pane = new ArtworkPaneViewModel(SavedResultRow.FromVisual(saved).Single(), () => browser);
+            pane.Start();
+            try
+            {
+                await pane.Ready.WaitAsync(TimeSpan.FromSeconds(30));
+                var first = pane.Image; var count = pane.FrameCount;
+                string Pixels(System.Windows.Media.Imaging.BitmapSource bitmap)
+                {
+                    var stride = (bitmap.PixelWidth * bitmap.Format.BitsPerPixel + 7) / 8;
+                    var pixels = new byte[stride * bitmap.PixelHeight]; bitmap.CopyPixels(pixels, stride, 0);
+                    return Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(pixels));
+                }
+                var firstHash = first is null ? "" : Pixels(first);
+                for (var i = 0; i < 60 && pane.FrameCount <= count; i++) await Task.Delay(100);
+                var secondHash = pane.Image is null ? "" : Pixels(pane.Image);
+                Check("existing artwork viewer advances animated HTML pixels locally", pane.IsInteractive && firstHash.Length > 0 && pane.FrameCount > count && secondHash.Length > 0 && firstHash != secondHash);
+                File.WriteAllText(Path.Combine(directory, "animation-pixels.json"), System.Text.Json.JsonSerializer.Serialize(new { passed = true, firstHash, secondHash, firstFrame = count, secondFrame = pane.FrameCount, source = "local synthetic HTML, existing Chromium, no model calls" }));
+            }
+            finally { pane.Stop(); await pane.Operation; }
+            Check("1.61 display, tag and normalized manifest agree", model.AppVersionLabel.EndsWith("1.61") && UpdateRules.ParseVersion("v1.61") == UpdateRules.CurrentVersion && UpdateRules.ParseVersion("1.61.0.0") == UpdateRules.CurrentVersion && UpdateRules.CurrentVersion > UpdateRules.ParseVersion("v1.6.0"));
+            Check("no binding errors", listener.Errors.Count == 0);
+            File.WriteAllText(Path.Combine(directory, "ui-verification.json"), System.Text.Json.JsonSerializer.Serialize(new { passed = true, scope = "drawing-presets-payload-preview-version", checks, screenshots, fakeRequests = transport.Requests.Count, realRequests = 0, normalAppStarts = 0 }, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+        }
+        finally { window.Close(); System.Diagnostics.PresentationTraceSources.DataBindingSource.Listeners.Remove(listener); }
+    }
+    private sealed class PresetTransport : IAccountTransport
+    {
+        internal const string Html = "<!doctype html><html><head><style>html,body{margin:0}svg{width:960px;height:600px}</style></head><body><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 960 600'><rect width='960' height='600' fill='#eee7d4'/><circle id='dot' cx='80' cy='200' r='50' fill='#b54b38'/><text x='30' y='60'>SYNTHETIC offline animation fixture</text></svg><script>function frame(t){document.getElementById('dot').setAttribute('cx',80+t/4%800);requestAnimationFrame(frame)}requestAnimationFrame(frame)</script></body></html>";
+        internal string Reply = "";
+        internal List<AccountHttpRequest> Requests { get; } = [];
+        public Task<AccountHttpResponse> SendAsync(AccountHttpRequest request, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            if (request.Url != AccountEndpoints.Responses) throw new InvalidOperationException("Unexpected fake endpoint");
+            Requests.Add(request);
+            var body = new JsonObject { ["type"] = "response.completed", ["response"] = new JsonObject { ["status"] = "completed", ["model"] = "fixture-model", ["output"] = new JsonArray(new JsonObject { ["content"] = new JsonArray(new JsonObject { ["type"] = "output_text", ["text"] = Reply }) }) } };
+            return Task.FromResult(new AccountHttpResponse(200, new MemoryStream(System.Text.Encoding.UTF8.GetBytes("data: " + body.ToJsonString() + "\n\ndata: [DONE]\n\n"))));
+        }
+    }
+
     public static async Task RunAsync(MainWindow window, string directory, Action<string, bool> check, Action<string> capture)
     {
         var root = Path.Combine(directory, "accounts"); var home = Path.Combine(directory, "home");

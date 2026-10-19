@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Security.Cryptography;
@@ -27,7 +27,7 @@ public sealed class SavedResultRow : ObservableObject
     public SafetyBufferingObservation? Safety { get; init; }
     public VisualTestResult? Visual { get; init; }
     public int StepIndex { get; init; } = -1;
-    public bool HasArtwork => Visual is not null && Visual.Kind != VisualTestKind.Animation && StepIndex >= 0 && Visual.Steps[StepIndex].Artifact is not null;
+    public bool HasArtwork => Visual is not null && StepIndex >= 0 && Visual.Steps[StepIndex].Artifact is not null;
     public string Identity => $"{Model} / 思考：{ModelTestParameters.EffortLabel(Effort)} · {Profile} · {Started.ToLocalTime():yyyy-MM-dd HH:mm:ss}";
     public string TaskLabel => TaskType + (Visual?.Kind == VisualTestKind.Variation ? " · " + Visual.Variant : "") + $" · {Stage} · {State}";
     private string? promptHash;
@@ -87,7 +87,7 @@ internal static class ArtworkFiles
         if (!row.HasArtwork) throw new IOException("这一步没有保存的作品。");
         var path = Scoped(row.Visual!, row.Visual!.Steps[row.StepIndex].Artifact!);
         if (new FileInfo(path).Length > 2_000_000) throw new IOException("作品超过本地安全预览大小限制。");
-        return VisualTestArtifact.Extract(File.ReadAllText(path), row.Visual.Kind == VisualTestKind.Animation) ?? throw new IOException("作品格式无效；可查看原始回复。");
+        return VisualTestArtifact.ExtractDrawing(File.ReadAllText(path)) ?? throw new IOException("作品格式无效；可查看原始回复。");
     }
     private static readonly SemaphoreSlim thumbnailWorkers = new(2, 2);
     internal static async Task<BitmapSource?> ThumbnailAsync(VisualTestResult result, int index)
@@ -180,7 +180,7 @@ public sealed class ResultsGalleryViewModel : ObservableObject
     }, open);
     public ICollectionView Items { get; }
     public IReadOnlyList<string> Profiles { get; private set; } = ["全部账号"];
-    public IReadOnlyList<string> Types { get; } = ["全部任务", "静态绘图", "Ciallo", "鹈鹕静态 SVG", "鹈鹕动画", "动物与机械", "检查并改进"];
+    public IReadOnlyList<string> Types { get; } = ["全部任务", "绘图", "Ciallo", "鹈鹕静态 SVG", "鹈鹕动画", "动物与机械", "检查并改进"];
     public IReadOnlyList<string> States { get; } = ["全部状态", "已完成", "未完成", "已取消"];
     public IReadOnlyList<string> Orders { get; } = ["最新优先", "最早优先"];
     public string Search { get => search; set { if (Set(ref search, value)) Filter(); } }

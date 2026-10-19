@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -9,17 +9,23 @@ using System.Xml.Linq;
 namespace ChunsonSpace.Accounts;
 
 public enum VisualTestKind { Animation, Variation, Revision, Static }
+public sealed record DrawingPreset(string Label, string Prompt);
 public static class VisualTestCatalog
 {
-    public const string Version = "visual-v5-original";
+    public const string Version = "visual-v6-drawing";
+    public static IReadOnlyList<DrawingPreset> DrawingPresets { get; } = Array.AsReadOnly(new[]
+    {
+        new DrawingPreset("鹈鹕骑自行车 · SVG", "Generate an SVG of a pelican riding a bicycle."),
+        new DrawingPreset("小猴骑自行车 · HTML 动画", "Create an HTML file with a 2D SVG animation of a cute monkey riding a bicycle. No testing is required.")
+    });
     public static string TransportLabel(string version) => version == "visual-v1" ? "Codex CLI" : "通用请求";
-    public static string Title(VisualTestKind kind) => kind switch { VisualTestKind.Static => "静态绘图", VisualTestKind.Animation => "鹈鹕动画", VisualTestKind.Variation => "动物与机械", _ => "检查并改进" };
+    public static string Title(VisualTestKind kind) => kind switch { VisualTestKind.Static => "绘图", VisualTestKind.Animation => "鹈鹕动画", VisualTestKind.Variation => "动物与机械", _ => "检查并改进" };
     public static int Requests(VisualTestKind kind) => kind == VisualTestKind.Revision ? 3 : 1;
     public static string Prompt(VisualTestKind kind, string content)
     {
-        if (kind != VisualTestKind.Static) throw new ArgumentException("仅支持静态绘图。");
+        if (kind != VisualTestKind.Static) throw new ArgumentException("请选择绘图入口。");
         if (string.IsNullOrWhiteSpace(content) || content.Length > 12000) throw new ArgumentException("请填写绘图内容（最多 12000 字）。");
-        return "Create a static SVG for the following description. Use a viewBox of 0 0 960 600. Return only SVG vector elements, without animation, scripts, embedded images, external resources or tools.\n" + content.Trim();
+        return content;
     }
     public static bool ValidModel(string model) => Regex.IsMatch(model, "^(gpt-|codex|o[134](?:-|$))[a-zA-Z0-9._-]*$", RegexOptions.CultureInvariant) && model.Length < 200;
 }
@@ -125,10 +131,10 @@ public sealed class VisualTestService(AccountRepository repository, IVisualTestR
             var validation = artwork ? "未取得有效作品" : "检查意见；不是独立评分";
             if (artwork)
             {
-                var content = VisualTestArtifact.Extract(reply.Text, false);
+                var content = VisualTestArtifact.ExtractDrawing(reply.Text);
                 if (content is not null)
                 {
-                    artifact = "step-" + (steps.Count + 1) + ".svg";
+                    artifact = "step-" + (steps.Count + 1) + (VisualTestArtifact.IsHtml(content) ? ".html" : ".svg");
                     preview = "step-" + (steps.Count + 1) + "-preview.html";
                     File.WriteAllText(Path.Combine(directory, artifact), content);
                     File.WriteAllText(Path.Combine(directory, preview), VisualTestArtifact.Wrap(content));
@@ -141,7 +147,7 @@ public sealed class VisualTestService(AccountRepository repository, IVisualTestR
         }
         try
         {
-            await Add("生成静态作品", prompt, [], true);
+            await Add("生成作品", prompt, [], true);
             Save(Snapshot(false, false, "回复已完成，正在生成本地预览…"));
             try { await runtime.RenderAsync(Path.Combine(directory, steps[^1].Preview!), Path.Combine(directory, "step-" + steps.Count + ".png"), token); }
             catch (IOException e) { throw new IOException("模型回复和作品已保存，本地预览未完成：" + e.Message, e); }
@@ -167,14 +173,25 @@ public static class VisualTestArtifact
     {
         var cards = string.Join("", result.Steps.OrderBy(s => s.Artifact is null).Select(step =>
             "<article><h2>" + WebUtility.HtmlEncode(step.Stage) + "</h2><p>" + step.Seconds.ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " s · 缓存 token " + (step.CachedTokens?.ToString() ?? "未返回") + "</p>" +
-            (step.Artifact is not null && Extract(step.Reply, false) is { } content
-                ? "<iframe sandbox='' referrerpolicy='no-referrer' srcdoc=\"" + WebUtility.HtmlEncode(Wrap(content)) + "\"></iframe>"
+            (step.Artifact is not null && ExtractDrawing(step.Reply) is { } content
+                ? "<iframe sandbox='allow-scripts' referrerpolicy='no-referrer' srcdoc=\"" + WebUtility.HtmlEncode(Wrap(content)) + "\"></iframe>"
                 : "<pre>" + WebUtility.HtmlEncode(step.Reply) + "</pre>") + "</article>"));
         return "<!doctype html><html lang='zh'><meta charset='utf-8'><title>作品对比</title><style>body{font:16px system-ui;background:#f2f7ec;color:#22362a;padding:24px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:18px}article{background:white;border:1px solid #cfddc8;border-radius:18px;padding:18px}h1{font-size:24px}h2{font-size:18px}p{color:#526a50}iframe{border:0;width:100%;height:440px}pre{white-space:pre-wrap}</style><h1>" + WebUtility.HtmlEncode(VisualTestCatalog.Title(result.Kind) + " · " + result.Profile) + "</h1><p>" + WebUtility.HtmlEncode(result.Model) + " / " + WebUtility.HtmlEncode(result.Effort) + " · 保存的作品；查看不会发送模型请求。检查意见来自受测模型，不是独立评分。</p><main>" + cards + "</main></html>";
     }
-    public static string? Extract(string text, bool html)
+    public static bool IsHtml(string content) => Regex.IsMatch(content, @"^\s*(?:<!doctype\s+html|<html\b)", RegexOptions.IgnoreCase);
+    public static bool IsAnimated(string content) => IsHtml(content) || Regex.IsMatch(content, @"<animate|<set\b|animation\s*[-:]|@keyframes", RegexOptions.IgnoreCase);
+    public static string? ExtractDrawing(string text) => Extract(text, true) ?? Extract(text, false, allowAnimation: true);
+    public static string? Extract(string text, bool html, bool allowAnimation = false)
     {
-        if (html || text.Length > 2_000_000 || Regex.IsMatch(text, @"animation\s*:|@keyframes", RegexOptions.IgnoreCase)) return null;
+        if (text.Length > 2_000_000) return null;
+        if (html)
+        {
+            var begin = Regex.Match(text, @"<!doctype\s+html\b|<html\b", RegexOptions.IgnoreCase);
+            var finish = text.LastIndexOf("</html>", StringComparison.OrdinalIgnoreCase);
+            return begin.Success && finish >= begin.Index && text.IndexOf("<svg", begin.Index, StringComparison.OrdinalIgnoreCase) >= 0
+                ? text[begin.Index..(finish + 7)] : null;
+        }
+        if (!allowAnimation && Regex.IsMatch(text, @"animation\s*:|@keyframes", RegexOptions.IgnoreCase)) return null;
         var start = text.IndexOf("<svg", StringComparison.OrdinalIgnoreCase);
         const string endTag = "</svg>";
         var end = text.LastIndexOf(endTag, StringComparison.OrdinalIgnoreCase);
@@ -184,14 +201,19 @@ public static class VisualTestArtifact
         {
             using var reader = XmlReader.Create(new StringReader(result), new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null, MaxCharactersInDocument = 2_000_000 });
             var svg = XDocument.Load(reader);
-            return svg.Root?.Name.LocalName == "svg" && svg.Descendants().All(e => e.Name.LocalName is not ("script" or "foreignObject" or "image" or "animate" or "animateMotion" or "animateTransform" or "set") && !e.Attributes().Any(a => a.Name.LocalName.StartsWith("on", StringComparison.OrdinalIgnoreCase))) ? result : null;
+            return svg.Root?.Name.LocalName == "svg" && svg.Descendants().All(e => e.Name.LocalName is not ("script" or "foreignObject" or "image") && (allowAnimation || e.Name.LocalName is not ("animate" or "animateMotion" or "animateTransform" or "set")) && !e.Attributes().Any(a => a.Name.LocalName.StartsWith("on", StringComparison.OrdinalIgnoreCase))) ? result : null;
         }
         catch (XmlException) { return null; }
     }
     public static string Wrap(string content)
     {
-        const string policy = "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src 'none'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
-        var document = "<!doctype html><html><head><meta http-equiv='Content-Security-Policy' content=\"" + policy + "\"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden}svg{max-width:100%;max-height:100%}</style></head><body>" + content + "</body></html>";
-        return "<!doctype html><html><head><meta charset='utf-8'><meta http-equiv='Content-Security-Policy' content=\"default-src 'none'; frame-src about:; style-src 'unsafe-inline'; script-src 'none'; base-uri 'none'; form-action 'none'\"><title>模型测试作品</title><style>html,body{margin:0;height:100%;background:#f3f7ef}iframe{width:100%;height:100%;border:0}</style></head><body><iframe sandbox='' referrerpolicy='no-referrer' srcdoc=\"" + WebUtility.HtmlEncode(document) + "\"></iframe></body></html>";
+        const string policy = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src 'none'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
+        var meta = "<meta http-equiv='Content-Security-Policy' content=\"" + policy + "\">";
+        var document = IsHtml(content)
+            ? Regex.Replace(content, @"<head\b[^>]*>", match => match.Value + meta, RegexOptions.IgnoreCase)
+            : "<!doctype html><html><head>" + meta + "<style>html,body{margin:0;width:100%;height:100%;overflow:hidden}svg{max-width:100%;max-height:100%}</style></head><body>" + content + "</body></html>";
+        // The outer CSP is inherited by srcdoc, including HTML without a head element.
+        // Scripts may animate only inside an opaque sandbox; network, popups and top navigation stay blocked.
+        return "<!doctype html><html><head><meta charset='utf-8'><meta http-equiv='Content-Security-Policy' content=\"default-src 'none'; frame-src about:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'\"><title>模型测试作品</title><style>html,body{margin:0;height:100%;background:#f3f7ef}iframe{width:100%;height:100%;border:0}</style></head><body><iframe sandbox='allow-scripts' referrerpolicy='no-referrer' srcdoc=\"" + WebUtility.HtmlEncode(document) + "\"></iframe></body></html>";
     }
 }

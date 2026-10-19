@@ -86,7 +86,7 @@
             <StackPanel>
               <TextBlock Text="▷  开始测试" FontSize="16" FontWeight="SemiBold" />
               <Button Content="账号正常 / 异常检测" Command="{Binding TestAllAccountsCommand}" Margin="0,18,0,10" Padding="8,12" />
-              <Button Content="静态绘图测试 →" Command="{Binding OpenVisualTestsCommand}" Padding="8,12" />
+              <Button Content="绘图测试 →" Command="{Binding OpenVisualTestsCommand}" Padding="8,12" />
               <WrapPanel Margin="0,12,0,0">
                 <Button Content="添加账号" Command="{Binding NewAccountLoginCommand}" Style="{StaticResource QuietButton}" />
                 <Button Content="结果 →" Command="{Binding NavigateCommand}" CommandParameter="Results" Style="{StaticResource QuietButton}" />
@@ -194,7 +194,7 @@
           </Border>
           <Border Grid.Column="1" Style="{StaticResource Card}" Padding="22" Margin="8,0,0,0">
             <StackPanel>
-              <TextBlock Text="▧  静态绘图测试" FontSize="20" FontWeight="SemiBold" />
+              <TextBlock Text="▧  绘图测试" FontSize="20" FontWeight="SemiBold" />
               <TextBlock Text="输入内容，查看生成作品" Foreground="{DynamicResource MutedBrush}" Margin="0,20,0,24" />
               <Button Content="开始绘图" Command="{Binding OpenVisualTestsCommand}" Style="{StaticResource PrimaryButton}" />
             </StackPanel>

@@ -27,7 +27,8 @@ public sealed class ArtworkPaneViewModel : ObservableObject
     public BitmapSource? Image { get => image; private set => Set(ref image, value); }
     public string Status { get => status; private set => Set(ref status, value); }
     public string ErrorDetails { get => errorDetails; private set => Set(ref errorDetails, value); }
-    public bool IsInteractive => false;
+    private bool animated;
+    public bool IsInteractive => animated && session is not null;
     public long FrameCount { get; private set; }
     public Task Ready => ready.Task;
     public Task Operation { get; private set; } = Task.CompletedTask;
@@ -46,6 +47,7 @@ public sealed class ArtworkPaneViewModel : ObservableObject
         {
             if (!Row.HasArtwork) { Status = "保存的文字回复 · 原文保留；下方可展开题目和详细信息。"; return; }
             var content = await Task.Run(() => ArtworkFiles.ReadArtwork(Row), stopped.Token);
+            animated = VisualTestArtifact.IsAnimated(content);
             var executable = browser();
             if (executable is null)
             {
@@ -57,14 +59,14 @@ public sealed class ArtworkPaneViewModel : ObservableObject
             do
             {
                 stopped.Token.ThrowIfCancellationRequested();
-                if (renderedScale != requestedScale)
+                if (animated || renderedScale != requestedScale)
                 {
-                    var scale = requestedScale;
+                    var scale = animated ? 1 : requestedScale;
                     // Interactive frames retain a 1:1 CSS-pixel surface. Chromium's OOPIF
                     // hit testing can lag a scaled capture; static SVGs may safely render at 2–4x.
                     var bytes = await session.CaptureAsync(scale, stopped.Token);
                     Image = await Task.Run(() => Decode(bytes), stopped.Token); renderedScale = scale; FrameCount++;
-                    Status = "矢量原稿本地显示 · 滚轮缩放，中键拖动 · 放大可看清细节";
+                    Status = animated ? "动画作品本地显示 · 可点击作品内控件，滚轮缩放，中键拖动" : "矢量原稿本地显示 · 滚轮缩放，中键拖动 · 放大可看清细节";
                     ready.TrySetResult();
                 }
                 await Task.Delay(180, stopped.Token);

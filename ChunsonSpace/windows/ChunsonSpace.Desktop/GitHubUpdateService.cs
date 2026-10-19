@@ -22,14 +22,14 @@ internal static class UpdateRules
     public const string ArchiveName = "Chunson-Full-Windows-x64.zip";
     public const string ManifestName = "Chunson-Update-Windows-x64.json";
     public static Version CurrentVersion => typeof(UpdateRules).Assembly.GetName().Version!;
-    public static string DisplayVersion(Version version) => version.ToString(version.Revision > 0 ? 4 : 3);
+    public static string DisplayVersion(Version version) => version.ToString(version.Revision > 0 ? 4 : version.Build > 0 ? 3 : 2);
     public static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, PropertyNameCaseInsensitive = false, MaxDepth = 16 };
     public static Version ParseVersion(string text)
     {
-        if (!Regex.IsMatch(text, @"^v?[0-9]{1,5}\.[0-9]{1,5}\.[0-9]{1,5}(\.[0-9]{1,5})?$", RegexOptions.CultureInvariant)) throw new InvalidDataException("版本格式无效。");
+        if (!Regex.IsMatch(text, @"^v?[0-9]{1,5}\.[0-9]{1,5}(\.[0-9]{1,5}(\.[0-9]{1,5})?)?$", RegexOptions.CultureInvariant)) throw new InvalidDataException("版本格式无效。");
         var v = Version.Parse(text.TrimStart('v'));
         if (new[] { v.Major, v.Minor, v.Build, Math.Max(0, v.Revision) }.Any(x => x > 65535)) throw new InvalidDataException("版本超出范围。");
-        return new(v.Major, v.Minor, v.Build, Math.Max(0, v.Revision));
+        return new(v.Major, v.Minor, Math.Max(0, v.Build), Math.Max(0, v.Revision));
     }
     public static bool HashValid(string? hash) => hash is not null && Regex.IsMatch(hash, "^[a-f0-9]{64}$", RegexOptions.CultureInvariant);
     // Bundled for fresh installs, but independently running and versioned during manager updates.

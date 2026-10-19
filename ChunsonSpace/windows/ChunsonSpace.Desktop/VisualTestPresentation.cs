@@ -57,7 +57,23 @@ public sealed class VisualTestPanelViewModel : ObservableObject
     private string model = "gpt-6-astra";
     private string effort = ModelTestParameters.DefaultEffort;
     private string drawingContent = "";
-    public string DrawingContent { get => drawingContent; set { if (!busy && Set(ref drawingContent, value)) Refresh(); } }
+    public string DrawingContent
+    {
+        get => drawingContent;
+        set
+        {
+            if (busy || !Set(ref drawingContent, value)) return;
+            if (selectedPreset?.Prompt != value) { selectedPreset = null; Raise(nameof(SelectedPreset)); }
+            Refresh();
+        }
+    }
+    public IReadOnlyList<DrawingPreset> DrawingPresets => VisualTestCatalog.DrawingPresets;
+    private DrawingPreset? selectedPreset;
+    public DrawingPreset? SelectedPreset
+    {
+        get => selectedPreset;
+        set { if (!busy && Set(ref selectedPreset, value) && value is not null) DrawingContent = value.Prompt; }
+    }
     private bool busy;
     private string status = "选择账号后开始测试，也可以查看已保存的结果。";
     private CancellationTokenSource? cancellation;
@@ -87,7 +103,7 @@ public sealed class VisualTestPanelViewModel : ObservableObject
         Load();
     }
     public VisualTestKind Kind { get; private set; }
-    public string DurationHint => "静态 SVG · 内容由你输入，可随时取消。";
+    public string DurationHint => "SVG / HTML 动画 · 选预设或自行输入，可随时取消。";
     public string Title => VisualTestCatalog.Title(Kind);
     public IReadOnlyList<string> Profiles { get; }
     public bool HasMultipleProfiles => Profiles.Count > 1;

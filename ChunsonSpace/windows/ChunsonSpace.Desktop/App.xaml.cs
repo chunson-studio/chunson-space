@@ -13,6 +13,13 @@ public partial class App : System.Windows.Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        if (e.Args.Length == 3 && e.Args[0] == "--verify-ui" && e.Args[2] == "drawing-presets")
+        {
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            try { await VisualTestVerification.RunPresetsAsync(Path.GetFullPath(e.Args[1])); Shutdown(0); }
+            catch (Exception error) { Directory.CreateDirectory(e.Args[1]); File.WriteAllText(Path.Combine(e.Args[1], "failure.txt"), error.ToString()); Shutdown(1); }
+            return;
+        }
         if (e.Args.Length == 3 && e.Args[0] == "--verify-ui" && e.Args[2] is "navigation-performance" or "navigation-refresh")
         {
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
