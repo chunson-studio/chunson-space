@@ -1,11 +1,11 @@
-<UserControl x:Class="ChunsonSpace.Desktop.ResultsGallery" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+﻿<UserControl x:Class="ChunsonSpace.Desktop.ResultsGallery" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <UserControl.Resources><BooleanToVisibilityConverter x:Key="BoolVisibility"/></UserControl.Resources>
   <Grid>
     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
     <DockPanel Margin="0,0,0,10"><Button x:Name="ClearAllTestHistory" Content="清除全部测试历史" Command="{Binding ClearHistoryCommand}" DockPanel.Dock="Right" Margin="8,0,0,0" ToolTip="清除所有账号的测试记录和作品；测试运行中不可用"/><Button x:Name="RefreshResults" Content="刷新结果" Command="{Binding RefreshCommand}" DockPanel.Dock="Right"/><TextBlock Text="测试结果" FontSize="26" FontWeight="SemiBold"/><TextBlock Text="所有保存记录" Foreground="{DynamicResource MutedBrush}" Margin="16,10,0,0"/></DockPanel>
-    <Grid Grid.Row="1" Margin="0,0,0,8"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="160"/><ColumnDefinition Width="150"/><ColumnDefinition Width="110"/></Grid.ColumnDefinitions>
-      <DockPanel Margin="0,0,8,0"><TextBlock Text="搜索" VerticalAlignment="Center" Margin="0,0,8,0"/><TextBox x:Name="ResultSearch" Text="{Binding Search,UpdateSourceTrigger=PropertyChanged,Delay=200}" AutomationProperties.Name="搜索模型、账号、任务、版本" ToolTip="搜索模型、账号、任务或题目版本"/></DockPanel>
-      <ComboBox x:Name="ResultAccountFilter" Grid.Column="1" ItemsSource="{Binding Profiles}" SelectedItem="{Binding Profile}" AutomationProperties.Name="结果账号范围" Margin="0,0,8,0"/>
+    <Grid Grid.Row="1" Margin="0,0,0,8"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="150"/><ColumnDefinition Width="110"/></Grid.ColumnDefinitions>
+      <DockPanel Margin="0,0,8,0"><TextBlock Text="搜索" VerticalAlignment="Center" Margin="0,0,8,0"/><TextBox x:Name="ResultSearch" Text="{Binding Search,UpdateSourceTrigger=PropertyChanged,Delay=200}" AutomationProperties.Name="搜索模型、账号、任务、版本" ToolTip="搜索模型、账号或任务"/></DockPanel>
+      <ComboBox x:Name="ResultAccountFilter" Width="160" Visibility="{Binding DataContext.IsMultiAccountMode,RelativeSource={RelativeSource AncestorType=Window},Converter={StaticResource BoolVisibility}}" Grid.Column="1" ItemsSource="{Binding Profiles}" SelectedItem="{Binding Profile}" AutomationProperties.Name="结果账号范围" Margin="0,0,8,0"/>
       <ComboBox x:Name="ResultTaskFilter" Grid.Column="2" ItemsSource="{Binding Types}" SelectedItem="{Binding Type}" AutomationProperties.Name="结果任务类型" Margin="0,0,8,0"/>
       <ComboBox x:Name="ResultStateFilter" Grid.Column="3" ItemsSource="{Binding States}" SelectedItem="{Binding State}" AutomationProperties.Name="结果完成状态"/>
     </Grid>
@@ -22,7 +22,7 @@
               <StackPanel Grid.Column="1" VerticalAlignment="Center">
                 <TextBlock Text="{Binding Identity}" TextWrapping="Wrap" FontWeight="SemiBold" FontSize="14"/>
                 <TextBlock Text="{Binding TaskLabel}" TextWrapping="Wrap" Margin="0,6,0,4"/>
-                <TextBlock Text="{Binding VersionLabel}" FontSize="11" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap"/>
+                
                 <TextBlock Style="{StaticResource AccountHealthText}" Text="{Binding SafetySummary}" FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap"/>
                 <TextBlock Text="{Binding Excerpt}" MaxHeight="34" FontSize="11" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,5,0,0"/>
               </StackPanel>

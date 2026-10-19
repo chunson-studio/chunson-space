@@ -1,4 +1,4 @@
-﻿param([string]$Root = $PSScriptRoot, [string]$ExistingExecutable)
+param([string]$Root = $PSScriptRoot, [string]$ExistingExecutable)
 $ErrorActionPreference = 'Stop'
 $metadata = Get-Content (Join-Path $Root 'ChunsonSpace/windows/ThirdParty/Mihomo/SOURCE.json') -Raw | ConvertFrom-Json
 if ($metadata.downloadUrl -notlike 'https://github.com/MetaCubeX/mihomo/releases/download/*') { throw 'Unexpected Mihomo download host/path' }

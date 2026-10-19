@@ -12,13 +12,14 @@ public sealed record IdentityState(IdentityRef? Selected = null, IdentityRef? Ac
 public sealed record EnvironmentSettings(string Proxy = "", string Timezone = "", string Locale = "", bool LocaleAuto = false, bool FollowSystemProxy = false);
 public sealed record ExitObservation(string Proxy, bool FollowSystemProxy, string Ip, string Timezone, string Location, DateTimeOffset CheckedAt)
 {
+    public ExitAddresses Addresses { get; init; } = ExitAddresses.Unknown;
     public bool Matches(EnvironmentSettings environment) => Proxy == environment.Proxy && FollowSystemProxy == environment.FollowSystemProxy;
 }
-public sealed record AccountProfile(string Name, bool HasCredentials, EnvironmentSettings Environment, bool TestsFrozen = false);
+public sealed record AccountProfile(string Name, bool HasCredentials, EnvironmentSettings Environment, bool TestsFrozen = false, DateTimeOffset? LoggedInAt = null, string? DisplayName = null);
 public sealed record ProviderProfile(string Name, string BaseUrl, string Model, string Created, bool HasKey);
 public sealed record ProviderSaveResult(ProviderProfile Profile, string? ArchivedPath);
 public sealed record ProviderUpdateResult(ProviderProfile Profile, bool ActiveUpdated, string RecoveryPath, IReadOnlyList<string> Warnings);
-public sealed record AppSettings(bool SessionIsolation = true, bool AutoSystemTimezone = true, bool QuitConfirm = true, string WorkspaceTheme = "light");
+public sealed record AppSettings(bool SessionIsolation = true, bool AutoSystemTimezone = true, bool QuitConfirm = true, string WorkspaceTheme = "light", bool CloseToTray = true, string InterfaceMode = "auto");
 public enum StorageError { Missing, Corrupt, Io, InvalidName, Conflict, InvalidValue, LoginRequired }
 public sealed class StorageException(StorageError code, string path, string message, Exception? inner = null) : Exception(message, inner)
 {

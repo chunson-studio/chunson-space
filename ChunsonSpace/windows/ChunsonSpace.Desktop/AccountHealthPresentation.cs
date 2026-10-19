@@ -62,15 +62,15 @@ public sealed class AccountHealthPanelViewModel : ObservableObject
         CancelCommand = new(_ => cancellation?.Cancel(), _ => IsBusy);
         CloseCommand = new(_ => close());
     }
-    public void Start() { if (!IsBusy && queue.Accepting) CurrentOperation = RunAsync(); }
-    private async Task RunAsync()
+    public void Start(IReadOnlyList<string>? profiles = null) { if (!IsBusy && queue.Accepting) CurrentOperation = RunAsync(profiles); }
+    private async Task RunAsync(IReadOnlyList<string>? profiles)
     {
         IsBusy = true; using var cancel = new CancellationTokenSource(); cancellation = cancel;
         Rows = [];
         Status = "正在并行检测；收起后可从后台任务查看。"; elapsed.Start(); Refresh(lifecycle: true);
         try
         {
-            var names = await Task.Run(() => services.Repository.Profiles.ListAccounts().Select(a => a.Name).ToArray());
+            var names = await Task.Run(() => services.Repository.Profiles.ListAccounts().Where(a => profiles is null || profiles.Contains(a.Name)).Select(a => a.Name).ToArray());
             Rows = names.Select(name => new AccountHealthRow(name)).ToArray();
             var rowsByName = Rows.ToDictionary(row => row.Profile, StringComparer.OrdinalIgnoreCase);
             Raise(nameof(Rows)); Refresh();
@@ -82,7 +82,7 @@ public sealed class AccountHealthPanelViewModel : ObservableObject
                 Refresh();
             });
             var result = await Task.Run(() => services.Accounts.TestAccountHealthBatchAsync(progress, cancel.Token,
-                (name, run, token) => queue.RunAsync(name, run, token)));
+                (name, run, token) => queue.RunAsync(name, run, token), profiles));
             foreach (var row in result.Results)
             {
                 if (!rowsByName.TryGetValue(row.Profile, out var target) || target.Finished) continue;
@@ -125,8 +125,9 @@ public sealed partial class ShellViewModel
             retainedHealth.PropertyChanged += BackgroundModelChanged;
             modelTestOpen = false; ciallo = null; visualTests = null; health = retainedHealth; lastBackgroundPanel = health;
             foreach (var name in new[] { nameof(IsModelTestOpen), nameof(Ciallo), nameof(IsCialloOpen), nameof(VisualTests), nameof(IsVisualTestsOpen), nameof(AccountHealth), nameof(IsAccountHealthOpen) }) Raise(name);
-            health.Start(); RefreshBackgroundModel();
+            health.Start(IsSingleAccountMode ? DisplayedAccount is { } shown ? new[] { shown.Name } : Array.Empty<string>() : null); RefreshBackgroundModel();
         }, _ => !operationBusy && !exitDraining && retainedHealth?.IsBusy != true && workspace?.Accounts is not null
-            && workspace.Profiles.ListAccounts().Any(a => a.HasCredentials && !workspace.Profiles.AreTestsFrozen(a.Name)));
+            && identities.Any(a => modelTestAccountNames.Contains(a.Name) && !a.TestsFrozen
+                && (!IsSingleAccountMode || a.Name == DisplayedAccount?.Name)));
     }
 }

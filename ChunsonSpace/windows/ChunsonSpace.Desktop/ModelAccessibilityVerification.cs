@@ -58,7 +58,7 @@ internal static class ModelAccessibilityVerification
                 Inspect("ModelTestCloseButton", "关闭模型测试", close);
                 Inspect("ModelTestAccountPicker", "测试账号");
                 check(state + ".chooser.empty-guard", model.IsModelTestOpen && model.ModelTestProfiles.Count == 0
-                    && !model.ChooseCialloCommand.CanExecute(null) && !model.ChooseVisualTestCommand.CanExecute("Variation"));
+                    && !model.ChooseVisualTestCommand.CanExecute("Variation"));
                 close.Command!.Execute(null);
                 check(state + ".chooser.close-command", !model.IsModelTestOpen);
 

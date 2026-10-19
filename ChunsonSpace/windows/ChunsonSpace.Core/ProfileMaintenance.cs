@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json.Nodes;
 
 namespace ChunsonSpace.Core;
@@ -119,39 +119,16 @@ public sealed class ProfileMaintenance
     public AccountDeleteResult DeleteAccount(string name)
     {
         name = ProfileRules.Name(name);
-        var archives = new List<string>(); var warnings = new List<FileIssue>();
-        string stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss-fffffff", System.Globalization.CultureInfo.InvariantCulture) + "-" + Guid.NewGuid().ToString("N")[..8];
-        var profile = Path.Combine(Paths.Root, "profiles", name);
-        if (!files.DirectoryExists(profile)) return new(false, [], new(0, 0, []), [], "账号档案不存在");
         try
         {
-            // The first authorization keeps its original profile path while Chrome
-            // is open. Archive this linked profile with the account, never another account.
-            var browserProfile = new AccountBrowserProfiles(Paths.Root, files).Read(name);
-            var accountBrowser = Path.Combine(Paths.Root, "browser-envs", name);
-            var extraBrowser = browserProfile is not null && !browserProfile.StartsWith(accountBrowser + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
-                ? new[] { (browserProfile, "-web") } : Array.Empty<(string, string)>();
-            files.CreateDirectory(Trash);
-            foreach (var (source, label) in new[] { (profile, ""), (accountBrowser, "-browser"), (Path.Combine(Paths.Root, "electron-envs", name), "-desktop") }.Concat(extraBrowser))
-            {
-                if (!files.DirectoryExists(source)) continue;
-                var destination = UniqueArchive(name + label + "-" + stamp);
-                try
-                {
-                    files.MoveDirectory(source, destination); archives.Add(destination);
-                    try { JsonFiles.Write(files, Path.Combine(destination, AccountArchiveMarker), new() { ["kind"] = "account-archive", ["name"] = name, ["stamp"] = stamp, ["version"] = 1 }); }
-                    catch (Exception marker) when (Io(marker)) { warnings.Add(Issue(destination, marker)); }
-                }
-                catch (Exception error) when (Io(error))
-                {
-                    warnings.Add(Issue(source, error));
-                    if (source == profile) return new(false, archives, new(0, 0, []), warnings, "账号档案归档失败，未删除");
-                }
-            }
-            var rotation = RotateAccountArchives(); warnings.AddRange(rotation.Warnings);
-            return new(true, archives.Where(files.DirectoryExists).ToArray(), rotation, warnings, warnings.Count == 0 ? "账号与独立环境已移入恢复目录" : "账号已归档，部分独立环境或归档清理未完成");
+            new FileProfileStore(Paths.Root, files).DeleteAccountPermanently(name);
+            return new(true, [], new(0, 0, []), [], "本地账号资料已删除，无法恢复。");
         }
-        catch (Exception error) when (Io(error)) { warnings.Add(Issue(Trash, error)); return new(false, archives, new(0, 0, []), warnings, "账号归档未完成"); }
+        catch (Exception error) when (Io(error))
+        {
+            return new(false, [], new(0, 0, []), [Issue(Path.Combine(Paths.Root, "profiles", name), error)],
+                error is StorageException { Code: StorageError.Missing } ? "账号已不存在，请刷新列表。" : "删除未完成，请检查文件占用或权限后重试；已删除的资料无法恢复。");
+        }
     }
 
     public AccountArchiveRotation RotateAccountArchives(int keep = AccountArchiveMaximum)

@@ -1,0 +1,206 @@
+<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="ChunsonSpace.Desktop.Dashboard">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolVisibility" />
+  </UserControl.Resources>
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="0,0,4,8">
+      <DockPanel Margin="0,0,0,18">
+        <Border x:Name="InterfaceModePicker" DockPanel.Dock="Right" VerticalAlignment="Center" Background="{DynamicResource ElevatedBrush}" CornerRadius="14" Padding="4" IsEnabled="{Binding CanChangeInterfaceMode}">
+          <StackPanel Orientation="Horizontal">
+            <Button x:Name="SingleModeButton" Content="单账号" Command="{Binding SetInterfaceModeCommand}" CommandParameter="单账号" Padding="18,8" BorderThickness="0">
+              <Button.Style><Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Background" Value="Transparent"/><Style.Triggers><DataTrigger Binding="{Binding IsSingleAccountMode}" Value="True"><Setter Property="Background" Value="{DynamicResource SelectionBrush}"/><Setter Property="FontWeight" Value="Bold"/></DataTrigger></Style.Triggers></Style></Button.Style>
+            </Button>
+            <Button x:Name="MultiModeButton" Content="多账号" Command="{Binding SetInterfaceModeCommand}" CommandParameter="多账号" Padding="18,8" BorderThickness="0">
+              <Button.Style><Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Background" Value="Transparent"/><Style.Triggers><DataTrigger Binding="{Binding IsMultiAccountMode}" Value="True"><Setter Property="Background" Value="{DynamicResource SelectionBrush}"/><Setter Property="FontWeight" Value="Bold"/></DataTrigger></Style.Triggers></Style></Button.Style>
+            </Button>
+          </StackPanel>
+        </Border>
+        <Button DockPanel.Dock="Right" Content="↻" Command="{Binding RecheckLocalEnvironmentCommand}" ToolTip="刷新出口和时区" VerticalAlignment="Center" Margin="0,0,12,0" />
+        <StackPanel>
+          <TextBlock Text="{Binding DashboardTitle}" FontSize="30" FontWeight="Bold" />
+          <TextBlock Text="{Binding DashboardSummary}" Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,0" Visibility="{Binding IsMultiAccountMode,Converter={StaticResource BoolVisibility}}" />
+        </StackPanel>
+      </DockPanel>
+      <StackPanel Visibility="{Binding IsMultiAccountMode,Converter={StaticResource BoolVisibility}}">
+        <Grid Margin="0,0,0,14">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <Border Style="{StaticResource Card}" Padding="24" Margin="0,0,7,0">
+            <StackPanel>
+              <TextBlock Text="◈  当前分身" FontSize="17" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding CurrentAccountDisplay}" FontSize="30" FontWeight="Bold" Margin="0,19,0,8" TextTrimming="CharacterEllipsis" />
+              <TextBlock Text="{Binding RunningLabel}" FontSize="15" TextWrapping="Wrap" />
+              <TextBlock Text="运行时长未知" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="0,8,0,0" />
+            </StackPanel>
+          </Border>
+          <Border Grid.Column="1" Style="{StaticResource Card}" Padding="22" Margin="7,0">
+            <StackPanel>
+              <TextBlock Text="✓  正常账号" FontSize="17" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding NormalAccounts}" FontSize="64" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" />
+              <Button Content="查看账号 →" Command="{Binding NavigateCommand}" CommandParameter="Accounts" Style="{StaticResource QuietButton}" HorizontalAlignment="Left" />
+            </StackPanel>
+          </Border>
+          <Border Grid.Column="2" Style="{StaticResource Card}" Padding="22" Margin="7,0,0,0">
+            <StackPanel>
+              <TextBlock Text="!  异常账号" FontSize="17" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding AbnormalAccounts}" FontSize="64" FontWeight="Bold" Foreground="{DynamicResource ErrorBrush}" />
+              <Button Content="查看账号 →" Command="{Binding NavigateCommand}" CommandParameter="Accounts" Style="{StaticResource QuietButton}" HorizontalAlignment="Left" />
+            </StackPanel>
+          </Border>
+        </Grid>
+        <Border Style="{StaticResource Card}" Padding="18,12" Margin="0,0,0,14">
+          <WrapPanel VerticalAlignment="Center">
+            <TextBlock Text="⚙  分身操作" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,18,0" />
+            <Button Content="启动当前" Command="{Binding LaunchCurrentCommand}" Style="{StaticResource PrimaryButton}" Margin="0,4,8,4" />
+            <Button Content="关闭" Command="{Binding CloseManagedCommand}" Margin="0,4,8,4" />
+          </WrapPanel>
+        </Border>
+        <Grid Margin="0,0,0,14">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,7,0">
+            <StackPanel>
+              <TextBlock Text="◎  出口 IP" FontSize="16" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding DashboardIpv4}" FontSize="24" FontWeight="SemiBold" Margin="0,18,0,8" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding DashboardIpv6}" TextWrapping="Wrap" FontSize="12" />
+              <TextBlock Text="{Binding DashboardScore}" Foreground="{DynamicResource MutedBrush}" Margin="0,10,0,10" FontSize="12" />
+              <Button Content="网络设置 →" Command="{Binding NavigateCommand}" CommandParameter="Settings" HorizontalAlignment="Left" Style="{StaticResource QuietButton}" />
+            </StackPanel>
+          </Border>
+          <Border Grid.Column="1" Style="{StaticResource Card}" Padding="20" Margin="7,0">
+            <StackPanel>
+              <TextBlock Text="⌖  地区与时区" FontSize="16" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding DashboardRegion}" FontSize="24" FontWeight="SemiBold" Margin="0,18,0,8" />
+              <TextBlock Text="{Binding DashboardTimezone}" TextWrapping="Wrap" FontSize="12" />
+              <TextBlock Text="{Binding DashboardEnvironmentTime}" Foreground="{DynamicResource MutedBrush}" Margin="0,10,0,10" TextWrapping="Wrap" FontSize="12" />
+              <Button Content="同步时区" Command="{Binding SyncLocalTimezoneCommand}" Style="{StaticResource PrimaryButton}" />
+            </StackPanel>
+          </Border>
+          <Border Grid.Column="2" Style="{StaticResource Card}" Padding="20" Margin="7,0,0,0">
+            <StackPanel>
+              <TextBlock Text="▷  开始测试" FontSize="16" FontWeight="SemiBold" />
+              <Button Content="账号正常 / 异常检测" Command="{Binding TestAllAccountsCommand}" Margin="0,18,0,10" Padding="8,12" />
+              <Button Content="静态绘图测试 →" Command="{Binding OpenVisualTestsCommand}" Padding="8,12" />
+              <WrapPanel Margin="0,12,0,0">
+                <Button Content="添加账号" Command="{Binding NewAccountLoginCommand}" Style="{StaticResource QuietButton}" />
+                <Button Content="结果 →" Command="{Binding NavigateCommand}" CommandParameter="Results" Style="{StaticResource QuietButton}" />
+              </WrapPanel>
+            </StackPanel>
+          </Border>
+        </Grid>
+        <Border Style="{StaticResource Card}" Padding="20">
+          <StackPanel>
+            <DockPanel Margin="0,0,0,12">
+              <Button DockPanel.Dock="Right" Content="查看全部 →" Command="{Binding NavigateCommand}" CommandParameter="Results" Style="{StaticResource QuietButton}" />
+              <TextBlock Text="▤  最近测试" FontSize="17" FontWeight="SemiBold" />
+            </DockPanel>
+            <ItemsControl ItemsSource="{Binding RecentResults}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border Background="{DynamicResource ElevatedBrush}" CornerRadius="10" Padding="12,9" Margin="0,0,0,5">
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="145" />
+                      </Grid.ColumnDefinitions>
+                      <TextBlock Text="{Binding Profile}" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Grid.Column="1" Text="{Binding TaskType}" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Grid.Column="2" Text="{Binding State}" />
+                      <TextBlock Grid.Column="3" Text="{Binding Started,StringFormat={}{0:MM-dd HH:mm}}" Foreground="{DynamicResource MutedBrush}" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Text="仅显示已保存记录；无记录时不会推断检测结果。" FontSize="11" Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,0" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+      <StackPanel Visibility="{Binding IsSingleAccountMode,Converter={StaticResource BoolVisibility}}">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="2*" />
+          </Grid.ColumnDefinitions>
+          <Border Style="{StaticResource Card}" Padding="24" Margin="0,0,8,0">
+            <StackPanel>
+              <DockPanel>
+                <Button Content="管理账号 →" Command="{Binding ManageDisplayedCommand}" DockPanel.Dock="Right" Style="{StaticResource QuietButton}" />
+                <TextBlock Text="♙  我的账号" FontSize="20" FontWeight="SemiBold" />
+              </DockPanel>
+              <TextBlock Text="{Binding DisplayedAccount.Label,TargetNullValue=尚未添加账号}" TextTrimming="CharacterEllipsis" FontSize="28" FontWeight="Bold" Margin="0,24,0,12" />
+              <TextBlock Text="{Binding DisplayedAccount.QualityLabel,TargetNullValue=未判断}" Style="{StaticResource AccountHealthText}" FontSize="17" />
+              <TextBlock Text="{Binding DisplayedAccount.LoginTimeSummary}" Margin="0,12,0,20" Foreground="{DynamicResource MutedBrush}" />
+              <TextBlock Text="{Binding RunningLabel}" FontSize="16" Margin="0,0,0,20" />
+              <WrapPanel>
+                <Button Content="启动分身" Command="{Binding LaunchDisplayedCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,10,8" />
+                <Button Content="检测账号" Command="{Binding TestAllAccountsCommand}" Margin="0,0,10,8" />
+                <Button Content="添加 / 登录" Command="{Binding NewAccountLoginCommand}" Margin="0,0,0,8" />
+              </WrapPanel>
+            </StackPanel>
+          </Border>
+          <Border Grid.Column="1" Style="{StaticResource Card}" Padding="24" Margin="8,0,0,0">
+            <StackPanel>
+              <TextBlock Text="◎  网络与时区" FontSize="20" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding DashboardIpv4}" FontSize="26" FontWeight="Bold" Margin="0,22,0,8" />
+              <TextBlock Text="{Binding DashboardIpv6}" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding DashboardScore}" Margin="0,12,0,20" Foreground="{DynamicResource MutedBrush}" />
+              <TextBlock Text="{Binding DashboardTimezone}" FontSize="17" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding DashboardEnvironmentTime}" TextWrapping="Wrap" Margin="0,12,0,20" Foreground="{DynamicResource MutedBrush}" />
+              <WrapPanel>
+                <Button Content="同步时区" Command="{Binding SyncLocalTimezoneCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,6" />
+                <Button Content="网络设置 →" Command="{Binding NavigateCommand}" CommandParameter="Settings" Margin="0,0,0,6" />
+              </WrapPanel>
+            </StackPanel>
+          </Border>
+        </Grid>
+        <Border Style="{StaticResource Card}" Padding="18" Margin="0,16,0,16">
+          <WrapPanel>
+            <TextBlock Text="⚙  分身维护" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,24,0" />
+            <Button Content="关闭分身" Command="{Binding CloseManagedCommand}" Margin="0,4,10,4" />
+          </WrapPanel>
+        </Border>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="2*" />
+          </Grid.ColumnDefinitions>
+          <Border Style="{StaticResource Card}" Padding="22" Margin="0,0,8,0">
+            <StackPanel>
+              <DockPanel>
+                <Button DockPanel.Dock="Right" Content="查看全部 →" Command="{Binding NavigateCommand}" CommandParameter="Results" Style="{StaticResource QuietButton}" />
+                <TextBlock Text="▤  最近检测" FontSize="20" FontWeight="SemiBold" />
+              </DockPanel>
+              <ItemsControl ItemsSource="{Binding SingleRecentResults}" Margin="0,15,0,0">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <DockPanel Margin="0,7">
+                      <TextBlock DockPanel.Dock="Right" Text="{Binding State}" />
+                      <TextBlock Text="{Binding TaskType}" />
+                    </DockPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Text="仅显示当前账号已有记录" FontSize="12" Foreground="{DynamicResource MutedBrush}" Margin="0,12,0,0" />
+            </StackPanel>
+          </Border>
+          <Border Grid.Column="1" Style="{StaticResource Card}" Padding="22" Margin="8,0,0,0">
+            <StackPanel>
+              <TextBlock Text="▧  静态绘图测试" FontSize="20" FontWeight="SemiBold" />
+              <TextBlock Text="输入内容，查看生成作品" Foreground="{DynamicResource MutedBrush}" Margin="0,20,0,24" />
+              <Button Content="开始绘图" Command="{Binding OpenVisualTestsCommand}" Style="{StaticResource PrimaryButton}" />
+            </StackPanel>
+          </Border>
+        </Grid>
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

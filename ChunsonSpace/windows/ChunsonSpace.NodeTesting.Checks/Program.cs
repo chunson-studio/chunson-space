@@ -5,6 +5,33 @@ using ChunsonSpace.Accounts;
 using ChunsonSpace.NodeTesting;
 using ChunsonSpace.Proxy;
 
+if (args is ["--verify-probe-config", var configReport])
+{
+    var fixture = Path.Combine(AppContext.BaseDirectory, "fixtures", "dual-stack-" + Guid.NewGuid().ToString("N"));
+    Directory.CreateDirectory(fixture);
+    var source = Path.Combine(fixture, "node.yaml");
+    File.WriteAllText(source, "proxies:\n - {name: Synthetic, type: ss, server: fixture.example.invalid, port: 443, password: fixture-secret-not-in-reports, cipher: aes-128-gcm}\n");
+    var node = new NodeCatalogImporter().Read(source, fixture).Nodes.Single();
+    var original = node.Definition.ToJsonString();
+    var yaml = ProbeConfiguration.Build(node, 17891);
+    File.WriteAllText(Path.Combine(fixture, "probe-config.yaml"), yaml);
+    var data = ProxyYaml.Parse(yaml);
+    var checks = new Dictionary<string, bool>
+    {
+        ["dual stack core and DNS"] = data["ipv6"]!.GetValue<bool>() && data["dns"]!["ipv6"]!.GetValue<bool>(),
+        ["dual proxy server resolution"] = data["proxies"]![0]!["ip-version"]!.GetValue<string>() == "dual",
+        ["selected-node-only traffic without direct fallback"] = data["rules"]!.AsArray().Select(r => r!.GetValue<string>()).SequenceEqual(["MATCH,ChunsonProbeNode"]),
+        ["target DNS uses selected node without fallback"] = data["dns"]!["nameserver"]![0]!.GetValue<string>() == "https://1.1.1.1/dns-query#ChunsonProbeNode" && !data["dns"]!.AsObject().ContainsKey("fallback"),
+        ["no TUN or public listener"] = !data["tun"]!["enable"]!.GetValue<bool>() && !data["allow-lan"]!.GetValue<bool>() && data["bind-address"]!.GetValue<string>() == "127.0.0.1",
+        ["input node definition preserved"] = node.Definition.ToJsonString() == original,
+        ["unavailability is not a leak guarantee"] = ProbeConfiguration.DnsSummary.Contains("不可用不代表已验证无泄漏")
+    };
+    if (File.Exists(configReport)) throw new IOException("Report must be new");
+    File.WriteAllText(configReport, JsonSerializer.Serialize(new { passed = checks.Values.All(v => v), checks, fixture, liveNodeCalls = 0 }, new JsonSerializerOptions { WriteIndented = true }));
+    Console.WriteLine($"{checks.Count} offline probe configuration checks; fixture root: {fixture}");
+    return checks.Values.All(v => v) ? 0 : 1;
+}
+
 if (args is ["--probe-subscription", var sourceRoot, var subscriptionId, var corePath, var evidencePath, var maximum])
     return await NativeProbeAcceptance.RunAsync(sourceRoot, subscriptionId, corePath, evidencePath, int.Parse(maximum));
 if (args is ["--probe-managed-route", var managedRoot, var managedSubscription, var managedNode, var expectedIp, var managedCore, var managedOutput])
@@ -110,8 +137,8 @@ try
     var privateKeyFile = Node("PrivateKeyFile"); privateKeyFile["private-key"] = "../../outside.key";
     Write("external-paths.yaml", new() { ["proxies"] = new JsonArray(certificateFile, privateKeyFile) });
     Check(importer.Read(Path.Combine(root, "external-paths.yaml"), root).Nodes.All(node => !node.Supported), "certificate and private-key file values cannot load outside user root");
-    Check(!config.ContainsKey("external-controller") && !config.ContainsKey("proxy-providers") && !config.ContainsKey("rule-providers") && config["rules"]!.AsArray().Select(rule => rule!.GetValue<string>()).SequenceEqual(new[] { "IP-CIDR6,::/0,REJECT,no-resolve", "MATCH,ChunsonProbeNode" }), "test config rejects IPv6 literal destinations and has no direct fallback");
-    Check(config["ipv6"]!.GetValue<bool>() == false && config["dns"]!["ipv6"]!.GetValue<bool>() == false && config["proxies"]![0]!["ip-version"]!.GetValue<string>() == "ipv4", "independent core and resolver disable IPv6 and proxy server uses IPv4");
+    Check(!config.ContainsKey("external-controller") && !config.ContainsKey("proxy-providers") && !config.ContainsKey("rule-providers") && config["rules"]!.AsArray().Select(rule => rule!.GetValue<string>()).SequenceEqual(new[] { "MATCH,ChunsonProbeNode" }), "test config routes both families to the selected node without direct fallback");
+    Check(config["ipv6"]!.GetValue<bool>() && config["dns"]!["ipv6"]!.GetValue<bool>() && config["proxies"]![0]!["ip-version"]!.GetValue<string>() == "dual", "independent core, resolver and proxy server allow both families");
     Check(config["proxies"]?.AsArray().Count == 1 && config["proxies"]?[0]?["password"]?.GetValue<string>() == "fixture-secret-not-in-reports", "only selected node credentials enter temporary configuration");
     var network = new FixtureNetwork();
     var quality = new IpQualityService(new AccountRepository(Path.Combine(root, "account-fixture")), network);

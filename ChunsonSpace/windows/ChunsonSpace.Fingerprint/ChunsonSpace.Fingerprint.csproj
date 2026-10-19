@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <EmbeddedResource Include="Resources/unified_bank.json" />
-    <Content Include="../ThirdParty/ModelTrace/LICENSE.txt" Link="ThirdParty/ModelTrace/LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="../ThirdParty/ModelTrace/SOURCE.json" Link="ThirdParty/ModelTrace/SOURCE.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-  </ItemGroup>
-</Project>

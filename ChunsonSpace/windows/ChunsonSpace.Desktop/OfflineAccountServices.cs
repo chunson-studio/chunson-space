@@ -30,7 +30,7 @@ public sealed class OfflineAccountTransport(AccountRepository repository, Offlin
     {
         cancellationToken.ThrowIfCancellationRequested(); lock (requestGate) requests.Add(request);
         RequestObserved?.Invoke(request);
-        if ((request.Url == AccountEndpoints.Egress || request.Url == NetCoffeeService.TraceEndpoint) && HoldEgressResponse is not null) await HoldEgressResponse.Task.WaitAsync(cancellationToken);
+        if ((request.Url == AccountEndpoints.Egress || request.Url == NetCoffeeService.TraceEndpoint || request.Url == IpInfoService.Ipv4Endpoint || request.Url == IpInfoService.Ipv6Endpoint) && HoldEgressResponse is not null) await HoldEgressResponse.Task.WaitAsync(cancellationToken);
         if (FailRequests) throw new AccountException(AccountError.Network, "隔离网络替身返回连接失败。");
         if (request.Url == ProxyLatencyService.Endpoint)
         {
@@ -62,6 +62,9 @@ public sealed class OfflineAccountTransport(AccountRepository repository, Offlin
             payload = ResponsesAreSse ? reply : "data: " + JsonSerializer.Serialize(new { type = "response.output_text.delta", delta = reply })
                 + "\n\ndata: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\",\"model\":\"fixture-model\",\"usage\":{\"cached_input_tokens\":128}}}\n\n";
         }
+        else if (request.Url == IpInfoService.Ipv4Endpoint) payload = "8.8.8.8";
+        else if (request.Url == IpInfoService.Ipv6Endpoint) payload = "2606:4700:4700::1111";
+        else if (request.Url.Host == "ipinfo.io") payload = JsonSerializer.Serialize(new { ip = "8.8.8.8", country = "US", city = "Fixture city", timezone = EgressTimezone });
         else if (request.Url == AccountEndpoints.Egress) payload = JsonSerializer.Serialize(new { success = true, ip = "192.0.2.10", country = "United States", country_code = "US", city = "Fixture city", timezone = new { id = EgressTimezone } });
         else if (request.Url == AccountEndpoints.Trace || request.Url == NetCoffeeService.TraceEndpoint) payload = "ip=192.0.2.10\nloc=US\n";
         else if (NetCoffeeService.IsLookup(request.Url))
@@ -79,7 +82,11 @@ public sealed class OfflineAccountTransport(AccountRepository repository, Offlin
                 asn = 64500, asOrganization = "Fixture network"
             });
         }
-        else if (request.Url == IpQualityService.ScoreEndpoint) payload = ScorePayload;
+        else if (request.Url == IpQualityService.ScoreEndpoint)
+        {
+            if (HoldQualityResponse is not null) await HoldQualityResponse.Task.WaitAsync(cancellationToken);
+            payload = ScorePayload.Replace("192.0.2.10", "8.8.8.8", StringComparison.Ordinal);
+        }
         else if (request.Url.Host == "api.ipapi.is")
         {
             if (HoldQualityResponse is not null) await HoldQualityResponse.Task.WaitAsync(cancellationToken);

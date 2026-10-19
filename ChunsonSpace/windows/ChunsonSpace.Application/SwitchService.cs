@@ -6,7 +6,7 @@ namespace ChunsonSpace.Application;
 public sealed class SwitchService(ISwitchStorage storage, IRuntimeOperations runtime, IProfilePreparation? preparation = null, IIdentityEnvironmentSource? environments = null, ISystemProxyResolver? systemProxy = null, ILaunchEgressProbe? egressProbe = null)
 {
     public LaunchEgressEvidence? LastEgressEvidence { get; private set; }
-    public async Task<OperationResult> SwitchAsync(SwitchRequest request, IProgress<OperationPhase>? progress = null, CancellationToken cancellationToken = default)
+    public async Task<OperationResult> SwitchAsync(SwitchRequest request, IProgress<OperationPhase>? progress = null, CancellationToken cancellationToken = default, bool rebuildCurrent = false)
     {
         var warnings = new List<string>();
         var recovery = new List<string>();
@@ -22,9 +22,21 @@ public sealed class SwitchService(ISwitchStorage storage, IRuntimeOperations run
             progress?.Report(OperationPhase.Preflight);
             cancellationToken.ThrowIfCancellationRequested();
             if (storage is ManagedCloneStorage managed) managed.ValidateOwnership();
-            var pending = await GuardPendingAsync(cancellationToken);
-            if (pending is not null) return Pending(current, pending, recovery, warnings);
-            current = storage.ReadActiveIdentity();
+            if (rebuildCurrent)
+            {
+                if (storage is not ManagedCloneStorage managedCurrent) throw new InvalidOperationException("重建仅适用于受管分身。");
+                launchScope = await runtime.BeginLaunchAsync(cancellationToken);
+                current = managedCurrent.ReadRuntimeReference();
+                if (current != request.Target) return Result(OperationOutcome.Failed, current, null, "当前账号已改变，请刷新后重建。", recovery, warnings);
+                var preparedMaintenance = await runtime.PrepareMaintenanceAsync(cancellationToken);
+                if (!preparedMaintenance.Success) return Result(OperationOutcome.Failed, current, null, preparedMaintenance.Message, recovery, warnings);
+            }
+            else
+            {
+                var pending = await GuardPendingAsync(cancellationToken);
+                if (pending is not null) return Pending(current, pending, recovery, warnings);
+                current = storage.ReadActiveIdentity();
+            }
             storage.Preflight(request.Target, request.Isolated);
             var environment = request.Launch ? environments?.Read(request.Target) ?? request.Environment : request.Environment;
             var launchSpec = request.Launch ? Spec(request.Target, environment, request.CodexHome) : null;
@@ -37,7 +49,7 @@ public sealed class SwitchService(ISwitchStorage storage, IRuntimeOperations run
             }
             if (storage is not ManagedCloneStorage && current == request.Target && !request.Launch) return Result(OperationOutcome.Unchanged, current, null, "当前活动身份已经是目标", recovery, warnings);
             if (storage is not ManagedCloneStorage && current == request.Target) return await LaunchCurrentAsync(new(request.AutoSystemTimezone, request.CodexHome), progress, cancellationToken);
-            launchScope = request.Launch ? await runtime.BeginLaunchAsync(cancellationToken) : null;
+            if (!rebuildCurrent) launchScope = request.Launch ? await runtime.BeginLaunchAsync(cancellationToken) : null;
             DesktopLaunchRequest? preparedRequest = null;
             if (request.Launch)
             {
@@ -56,7 +68,8 @@ public sealed class SwitchService(ISwitchStorage storage, IRuntimeOperations run
             snapshot = storage.Snapshot("switch", request.Isolated);
             recovery.Add(snapshot.Path);
             progress?.Report(OperationPhase.Archive);
-            archived = storage.ArchiveCurrent(snapshot, current, request.Isolated);
+            // A repair uses the saved account; damaged runtime credentials are never copied back.
+            archived = !rebuildCurrent && storage.ArchiveCurrent(snapshot, current, request.Isolated);
             if (preparation is not null)
             {
                 progress?.Report(OperationPhase.PrepareProfile);

@@ -27,8 +27,7 @@ public sealed class ArtworkPaneViewModel : ObservableObject
     public BitmapSource? Image { get => image; private set => Set(ref image, value); }
     public string Status { get => status; private set => Set(ref status, value); }
     public string ErrorDetails { get => errorDetails; private set => Set(ref errorDetails, value); }
-    public bool Animated => Row.Visual?.Kind == VisualTestKind.Animation;
-    public bool IsInteractive => session is not null && Animated;
+    public bool IsInteractive => false;
     public long FrameCount { get; private set; }
     public Task Ready => ready.Task;
     public Task Operation { get; private set; } = Task.CompletedTask;
@@ -51,29 +50,29 @@ public sealed class ArtworkPaneViewModel : ObservableObject
             if (executable is null)
             {
                 Image = await Task.Run(() => ArtworkFiles.SavedImage(Row.Visual!,Row.StepIndex),stopped.Token);
-                Status = "本机缺少作品显示组件。这里只显示保存的图片，动画不可交互；可使用右侧外部打开。"; return;
+                Status = "本机缺少作品显示组件。这里只显示保存的图片；可使用右侧外部打开。"; return;
             }
             session = await LocalArtworkSession.OpenAsync(executable, content, stopped.Token);
             Raise(nameof(IsInteractive));
             do
             {
                 stopped.Token.ThrowIfCancellationRequested();
-                if (Animated || renderedScale != requestedScale)
+                if (renderedScale != requestedScale)
                 {
                     var scale = requestedScale;
                     // Interactive frames retain a 1:1 CSS-pixel surface. Chromium's OOPIF
                     // hit testing can lag a scaled capture; static SVGs may safely render at 2–4x.
-                    var bytes = await session.CaptureAsync(Animated ? 1 : scale, stopped.Token);
+                    var bytes = await session.CaptureAsync(scale, stopped.Token);
                     Image = await Task.Run(() => Decode(bytes), stopped.Token); renderedScale = scale; FrameCount++;
-                    Status = Animated ? "动画可操作 · 点击画面内按钮控制播放和速度 · 滚轮缩放，中键拖动" : "矢量原稿本地显示 · 滚轮缩放，中键拖动 · 放大可看清细节";
+                    Status = "矢量原稿本地显示 · 滚轮缩放，中键拖动 · 放大可看清细节";
                     ready.TrySetResult();
                 }
-                await Task.Delay(Animated ? 120 : 180, stopped.Token);
+                await Task.Delay(180, stopped.Token);
             } while (!stopped.IsCancellationRequested);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException or AccountException or ChunsonSpace.Core.StorageException or OperationCanceledException or InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException)
         {
-            if (!stopped.IsCancellationRequested) { Image ??= await Task.Run(() => Row.Visual is null ? null : ArtworkFiles.SavedImage(Row.Visual,Row.StepIndex)); ErrorDetails = ErrorRedaction.Scrub(e.Message); Status = "作品文件无法读取、格式无效或显示组件未能启动。这里只显示保存的图片，动画不可交互；错误详情可展开查看。"; }
+            if (!stopped.IsCancellationRequested) { Image ??= await Task.Run(() => Row.Visual is null ? null : ArtworkFiles.SavedImage(Row.Visual,Row.StepIndex)); ErrorDetails = ErrorRedaction.Scrub(e.Message); Status = "作品文件无法读取、格式无效或显示组件未能启动。这里只显示保存的图片；错误详情可展开查看。"; }
         }
         finally
         {

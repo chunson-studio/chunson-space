@@ -4,6 +4,17 @@ using ChunsonSpace.Windows;
 
 var checks = 0;
 void Check(bool condition, string name) { if (!condition) throw new InvalidOperationException(name); checks++; Console.WriteLine("PASS " + name); }
+if (args is ["--ownership-only"])
+{
+    await OwnedProcessChecks.RunAsync(Check);
+    Console.WriteLine($"{checks} ownership checks passed. Synthetic storage and snapshots only; no user processes or data changed.");
+    return;
+}
+if (args is ["--ownership-snapshot", var ownershipPath, var reportPath])
+{
+    await OwnedProcessChecks.InspectAsync(ownershipPath, reportPath);
+    return;
+}
 if (args is ["--launch-recovery-only"])
 {
     await ManagedLaunchRecoveryChecks.RunAsync(Check);
@@ -529,9 +540,11 @@ sealed class FakeOwnedStore : IOwnedProcessStore
 {
     public IReadOnlyList<OwnedProcessRecord> Value { get; set; } = [];
     public bool ThrowRead { get; set; }
+    public Exception? ReadFailure { get; set; }
+    public bool FailWrite { get; set; }
     public int Writes { get; private set; }
-    public IReadOnlyList<OwnedProcessRecord> Read() => ThrowRead ? throw new JsonException("fixture corrupt") : Value;
-    public bool TryWrite(IReadOnlyList<OwnedProcessRecord> records) { Writes++; Value = records.ToArray(); return true; }
+    public IReadOnlyList<OwnedProcessRecord> Read() => ReadFailure is { } error ? throw error : ThrowRead ? throw new JsonException("fixture corrupt") : Value;
+    public bool TryWrite(IReadOnlyList<OwnedProcessRecord> records) { Writes++; if (FailWrite) return false; Value = records.ToArray(); return true; }
 }
 sealed class FakeInstallSystem : ICodexInstallSystem
 {

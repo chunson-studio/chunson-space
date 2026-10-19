@@ -66,8 +66,8 @@ public sealed partial class ShellViewModel
         var selected = input.SelectedIp;
         if (!input.FollowSystemProxy && selected is not null)
         {
-            if (!ProxyPanel.NodeTesting.LoginChoices.Contains(selected) || !selected.CanPrepareLogin || !ProfileRules.ValidTimezone(selected.Quality?.Timezone ?? ""))
-                throw new InvalidOperationException("所选 IP 已失效或时区未确认，请重新选择已达标的 IP；原配置保留。");
+            if (!ProxyPanel.NodeTesting.LoginChoices.Contains(selected) || !selected.CanPrepareLogin)
+                throw new InvalidOperationException("所选 IP 已失效，请重新选择已达标的 IP；原配置保留。");
             if (!input.Original.FollowSystemProxy && await services.Routes!.AssignedIpAsync(input.Original.Proxy) == selected.ExitIp)
                 return "已在使用所选 IP，原端口和时区保持不变。";
         }
@@ -75,7 +75,14 @@ public sealed partial class ShellViewModel
         {
             var node = selected ?? await ProxyPanel.NodeTesting.ChooseIndependentAsync(random: true);
             var proxy = await services.Routes!.BindAsync(node.SubscriptionId, node.Node, node.Quality!, token, reuseExisting: false);
-            return (proxy, node.Quality!.Timezone);
+            try
+            {
+                var region = await services.LocalEgress.ProbeProxyAsync(proxy, token);
+                if (!region.Ok || !EgressSources.SameIp(region.Ip, node.ExitIp))
+                    throw new IOException("所选 IP 的当前出口与时区尚未确认，原配置保留。" + region.Message);
+                return (proxy, region.Timezone);
+            }
+            catch { await services.ReleaseUnusedAuthorizationRouteAsync(proxy); throw; }
         }, replaceIndependent: selected is not null);
         if (!changed.ReopenBrowser) return changed.Message;
         try

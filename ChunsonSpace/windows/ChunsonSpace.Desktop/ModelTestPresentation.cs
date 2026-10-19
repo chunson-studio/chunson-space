@@ -1,4 +1,4 @@
-using ChunsonSpace.Accounts;
+﻿using ChunsonSpace.Accounts;
 
 namespace ChunsonSpace.Desktop;
 
@@ -13,11 +13,14 @@ public sealed partial class ShellViewModel
     private bool modelTestOpen;
     private string? modelTestProfile;
     public bool IsModelTestOpen => modelTestOpen;
-    public IReadOnlyList<string> ModelTestProfiles => workspace?.Profiles.ListAccounts().Where(account => account.HasCredentials).Select(account => account.Name).ToArray() ?? [];
+    private IReadOnlyList<string> modelTestAccountNames = [];
+    // Binding and CanExecute queries must use the account snapshot already loaded
+    // by ReloadProfiles, including when the legacy test panel is collapsed.
+    public IReadOnlyList<string> ModelTestProfiles => IsSingleAccountMode
+        ? modelTestAccountNames.Where(name => name == DisplayedAccount?.Name).ToArray() : modelTestAccountNames;
     public string? ModelTestProfile { get => modelTestProfile; set { if (!operationBusy && !exitDraining && value is not null && ModelTestProfiles.Contains(value) && Set(ref modelTestProfile, value)) RefreshModelTestCommands(); } }
     public bool HasModelTestProfiles => ModelTestProfiles.Count > 0;
     public DelegateCommand CloseModelTestCommand { get; private set; } = null!;
-    public DelegateCommand ChooseCialloCommand { get; private set; } = null!;
     public DelegateCommand ChooseVisualTestCommand { get; private set; } = null!;
     private void InitializeVisualTestCommands()
     {
@@ -25,9 +28,13 @@ public sealed partial class ShellViewModel
         InitializeCialloCommands();
         InitializeAccountHealth();
         accountTests.Changed += RefreshBusyState;
-        accountTests.Changed += () => { if (IsResultsPage) ResultsGallery.Enter(); };
+        accountTests.Changed += () =>
+        {
+            resultsGallery?.Invalidate();
+            if (IsResultsPage || IsDashboardPage) ResultsGallery.Enter();
+        };
         OpenBackgroundModelCommand = new(_ => ResumeBackgroundModel(), _ => !operationBusy && !exitDraining && HasBackgroundModel);
-        OpenVisualTestsCommand = new(_ => OpenVisualTests(Selected?.Kind == "Account" ? Selected.Name : null, VisualTestKind.Static), _ => !operationBusy && !exitDraining && Selected?.Kind == "Account");
+        OpenVisualTestsCommand = new(_ => OpenVisualTests(IsSingleAccountMode ? DisplayedAccount?.Name : Selected?.Kind == "Account" ? Selected.Name : null, VisualTestKind.Static), _ => !operationBusy && !exitDraining && (IsSingleAccountMode ? DisplayedAccount?.Kind : Selected?.Kind) == "Account");
         OpenModelTestCommand = new(_ =>
         {
             HideAccountHealth();
@@ -35,15 +42,14 @@ public sealed partial class ShellViewModel
             Raise(nameof(VisualTests)); Raise(nameof(IsVisualTestsOpen)); Raise(nameof(Ciallo)); Raise(nameof(IsCialloOpen));
             var selected = Selected?.Kind == "Account" ? Selected.Name : null;
             modelTestProfile = ModelTestProfiles.Contains(selected) ? selected : ModelTestProfiles.FirstOrDefault();
-            modelTestOpen = true;
+            modelTestOpen = false; Navigate("Tests");
             foreach (var property in new[] { nameof(ModelTestProfiles), nameof(ModelTestProfile), nameof(HasModelTestProfiles), nameof(IsModelTestOpen) }) Raise(property);
             RefreshModelTestCommands();
         }, _ => !operationBusy && !exitDraining);
         CloseModelTestCommand = new(_ => { modelTestOpen = false; Raise(nameof(IsModelTestOpen)); }, _ => !operationBusy && !exitDraining);
-        ChooseCialloCommand = new(_ => { CloseModelTestCommand.Execute(null); OpenCiallo(modelTestProfile); }, _ => !operationBusy && !exitDraining && ModelTestProfiles.Contains(modelTestProfile));
-        ChooseVisualTestCommand = new(value => { CloseModelTestCommand.Execute(null); OpenVisualTests(modelTestProfile, Enum.TryParse<VisualTestKind>(value?.ToString(), out var kind) ? kind : VisualTestKind.Static); }, _ => !operationBusy && !exitDraining && ModelTestProfiles.Contains(modelTestProfile));
+        ChooseVisualTestCommand = new(value => { CloseModelTestCommand.Execute(null); OpenVisualTests(modelTestProfile, VisualTestKind.Static); }, _ => !operationBusy && !exitDraining && ModelTestProfiles.Contains(modelTestProfile));
     }
-    private void RefreshModelTestCommands() { ChooseCialloCommand?.Refresh(); ChooseVisualTestCommand?.Refresh(); CloseModelTestCommand?.Refresh(); }
+    private void RefreshModelTestCommands() { ChooseVisualTestCommand?.Refresh(); CloseModelTestCommand?.Refresh(); }
     private void OpenVisualTests(string? profileName, VisualTestKind kind)
     {
         if (operationBusy || exitDraining) return;

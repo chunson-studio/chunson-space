@@ -1,0 +1,96 @@
+{
+  "visualVersion": "visual-v5-original",
+  "fingerprintVersion": "fingerprint-en-v2",
+  "prompts": {
+    "static": {
+      "text": "Generate an SVG of a pelican riding a bicycle. Make the anatomy, contact points and mechanical structure coherent. Create a static image without animation. Use a viewBox of 0 0 960 600. Use only SVG vector elements, no scripts, embedded images, external resources or tools. Return only the complete SVG.",
+      "sha256": "24c2487663d57081a584a03235b28e400f0982f6ebdcc0461896553b829efd6a"
+    },
+    "animation": {
+      "text": "Create a self-contained HTML animation of a pelican riding a bicycle. Show a recognizable pelican, a structurally coherent bicycle, rotating wheels, and feet pedaling in sync. Add pause/resume and speed controls that work. Use only inline HTML, CSS, SVG and JavaScript. No external resources, images, network requests, imports, or tools. Return only the complete HTML document.",
+      "sha256": "ac5c46d15b3d98b02b202c43c725e73b387466e61831eb48e399f6d14e6a852a"
+    },
+    "variation/octopus-organ": {
+      "text": "Generate an SVG of an octopus playing a pipe organ. Make the anatomy, contact points and mechanical structure coherent. Create a static image without animation. Use a viewBox of 0 0 960 600. Use only SVG vector elements, no scripts, embedded images, external resources or tools. Return only the complete SVG.",
+      "sha256": "036ad7670814c279eb17978b6a175c3343c5fe52d40dfe3aa5f73a9f1fbfaa84"
+    },
+    "variation/giraffe-clock": {
+      "text": "Generate an SVG of a giraffe assembling a grandfather clock. Make the anatomy, contact points and mechanical structure coherent. Create a static image without animation. Use a viewBox of 0 0 960 600. Use only SVG vector elements, no scripts, embedded images, external resources or tools. Return only the complete SVG.",
+      "sha256": "4f8c59b6ce69685b7668d15e10f1b933c154fb8c88c5329b3e9d98f08a35f0c9"
+    },
+    "variation/otter-loom": {
+      "text": "Generate an SVG of an otter operating a wooden weaving loom. Make the anatomy, contact points and mechanical structure coherent. Create a static image without animation. Use a viewBox of 0 0 960 600. Use only SVG vector elements, no scripts, embedded images, external resources or tools. Return only the complete SVG.",
+      "sha256": "1feab56ec3d27e543a0f7ebd4d56863c69f7232a571ab3445ba13b71935a80d4"
+    },
+    "variation/crab-typewriter": {
+      "text": "Generate an SVG of a crab typing a letter on a mechanical typewriter. Make the anatomy, contact points and mechanical structure coherent. Create a static image without animation. Use a viewBox of 0 0 960 600. Use only SVG vector elements, no scripts, embedded images, external resources or tools. Return only the complete SVG.",
+      "sha256": "962136cdb1033b04c7a794ef1176ff26711ce35327b7bf58a6f67b6b56343765"
+    },
+    "variation/squirrel-telescope": {
+      "text": "Generate an SVG of a squirrel adjusting a large astronomical telescope. Make the anatomy, contact points and mechanical structure coherent. Create a static image without animation. Use a viewBox of 0 0 960 600. Use only SVG vector elements, no scripts, embedded images, external resources or tools. Return only the complete SVG.",
+      "sha256": "e624b84cdab477dc995c3ac33f3e0d9796f1cac8677364a46f008151695b4853"
+    },
+    "variation/heron-sewing": {
+      "text": "Generate an SVG of a heron operating a treadle sewing machine. Make the anatomy, contact points and mechanical structure coherent. Create a static image without animation. Use a viewBox of 0 0 960 600. Use only SVG vector elements, no scripts, embedded images, external resources or tools. Return only the complete SVG.",
+      "sha256": "def1d947660bacd526d0c1f4eeb892f94f334783d9c4ca9e7f5bb9249975c13f"
+    },
+    "revision/initial": {
+      "text": "Generate an SVG of a pelican riding a bicycle. Make the anatomy, contact points and mechanical structure coherent. Create a static image without animation. Use a viewBox of 0 0 960 600. Use only SVG vector elements, no scripts, embedded images, external resources or tools. Return only the complete SVG.",
+      "sha256": "24c2487663d57081a584a03235b28e400f0982f6ebdcc0461896553b829efd6a"
+    },
+    "revision/review": {
+      "text": "Inspect the attached rendered SVG. Identify concrete problems with pelican anatomy, bicycle frame/wheels, riding contact points, and composition. Give a concise correction checklist grounded in the image. Do not give a numerical score. No tools. Original task:\nGenerate an SVG of a pelican riding a bicycle. Make the anatomy, contact points and mechanical structure coherent. Create a static image without animation. Use a viewBox of 0 0 960 600. Use only SVG vector elements, no scripts, embedded images, external resources or tools. Return only the complete SVG.",
+      "sha256": "4791e3bbd76eb5a090bc6068333f2cf76fbe8be6114ba14e823a63d194c19a86"
+    },
+    "revision/revise": {
+      "text": "Revise the original SVG using this critique. Return only the complete corrected SVG, with the same viewBox. No tools, scripts, external resources or embedded images.\nOriginal task:\nGenerate an SVG of a pelican riding a bicycle. Make the anatomy, contact points and mechanical structure coherent. Create a static image without animation. Use a viewBox of 0 0 960 600. Use only SVG vector elements, no scripts, embedded images, external resources or tools. Return only the complete SVG.\nOriginal SVG:\n<svg fixture/>\nImage-based critique:\nfixture critique",
+      "sha256": "46fa8e8ca33aac27ff5ce8aa0579d984fc276b414a62e99122517447159eb416"
+    },
+    "ciallo": {
+      "text": "ciallo",
+      "sha256": "9526cb8b4d0f1c8c5979360fac7cfff4c563fe80abb2c422dc69fd3162627070"
+    },
+    "instructions/helpful": {
+      "text": "You are a helpful assistant.",
+      "sha256": "75357d685f238b6afd7738be9786fdafde641eb6ca9a3be7471939715a68a4de"
+    },
+    "instructions/fingerprint": {
+      "text": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "fingerprint": {
+    "Openings": [
+      "This is an independent record of numerical choices.",
+      "Complete the following task of choosing integers with no semantic meaning.",
+      "Record a set of first-instinct numerical choices.",
+      "Generate a set of integer choices that carry no semantic meaning.",
+      "Perform a round of quick, item-by-item numerical choices."
+    ],
+    "Actions": [
+      "Choose independently for each position, using your first instinct, a total of",
+      "Choose, item by item, a total of",
+      "Decide only the current item at each step, giving a total of",
+      "Independently give, using your first instinct, a total of",
+      "Choose directly, one by one, a total of"
+    ],
+    "Endings": [
+      "A number may appear again; after writing each item, do not go back to sort, deduplicate, or replace it.",
+      "Incidental repeats are valid; do not rearrange or correct items you have already written.",
+      "The same value may appear again; do not organize or rewrite earlier items while producing the output.",
+      "Repeated values need not be removed; do not filter, reorder, or fill out a pattern.",
+      "Do not assign any meaning to the numbers; keep values already given unchanged."
+    ],
+    "Separators": [
+      "Separate numbers with commas or spaces.",
+      "Use one consistent, common separator.",
+      "You may separate numbers with commas, spaces, or line breaks.",
+      "Choose any format that makes the boundary of each integer clear."
+    ]
+  },
+  "fingerprintExhaustiveSha256": "d77776b246470e66dc91c5fbf0fb8adbbc15524d9852d533279371c189a20d36",
+  "fingerprintCombinations": 20500,
+  "cialloVersion": "ciallo-v3-original",
+  "policy": "Original English tasks retained; only prior added Chinese-output directives removed. Historical provenance file unchanged.",
+  "previousSha256": "e15ac808eb422778eccc16427c1af3cf6be54da411cb6e9ecc185b273f577521"
+}

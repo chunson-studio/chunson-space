@@ -18,6 +18,7 @@ public sealed class SystemWaitClock : IWaitClock
 
 public interface IProcessSystem
 {
+    IReadOnlyList<ProcessIdentity> ManagedRoots(string desktopRoot) => [];
     IReadOnlyList<ProcessIdentity> Snapshot();
     // Must recheck creation time and executable on the SAME handle used to terminate.
     bool TryStop(ProcessIdentity process, bool force);
@@ -56,21 +57,32 @@ public sealed class CodexProcessService(IProcessSystem system, IWaitClock clock,
 
     public bool IsDesktopReady() => system.HasDesktopWindow(Discover(ProcessScope.DesktopOnly));
 
-    public StopResult ConfirmStopped(ProcessScope scope)
+    public StopResult ConfirmStopped(ProcessScope scope, bool force = false)
     {
         try
         {
-            var remaining = Discover(scope);
+            if (force && cloneScope is null) return new(false, false, "未连接受管分身范围，运行资料未清理。", []);
+            var unresolved = new List<string>();
+            var remaining = force ? cloneScope!.Selected(system.Snapshot(), unresolved) : Discover(scope);
+            if (unresolved.Count > 0) return new(false, remaining.Count > 0, "部分分身进程归属未确认，运行资料未清理。", remaining.Select(p => p.Pid).ToArray());
             return new(remaining.Count == 0, remaining.Count > 0, remaining.Count == 0 ? "Codex 已退出" : "Codex 被重新打开，活动数据未修改", remaining.Select(p => p.Pid).ToArray());
         }
         catch (Exception ex) { return new(false, false, "无法复查 Codex 是否退出：" + ex.GetType().Name, []); }
     }
 
-    public Task<StopResult> StopAsync(ProcessScope scope, CancellationToken cancellationToken = default)
+    public async Task<StopResult> StopAsync(ProcessScope scope, CancellationToken cancellationToken = default, bool force = false)
     {
-        if (cloneScope is null) return StopCoreAsync(p => IsDesktop(p) || scope == ProcessScope.DesktopAndCli && p.Name.Equals("codex.exe", StringComparison.OrdinalIgnoreCase), cancellationToken);
-        try { return StopIdentitiesAsync(Discover(scope), cancellationToken); }
-        catch (Exception ex) { return Task.FromResult(new StopResult(false, false, "无法确认分身所有权：" + ex.GetType().Name, [])); }
+        if (force && cloneScope is null) return new(false, false, "未连接受管分身范围，运行资料未清理。", []);
+        if (cloneScope is null) return await StopCoreAsync(p => IsDesktop(p) || scope == ProcessScope.DesktopAndCli && p.Name.Equals("codex.exe", StringComparison.OrdinalIgnoreCase), cancellationToken);
+        try
+        {
+            var unresolved = new List<string>();
+            var targets = force ? cloneScope.Selected(system.Snapshot(), unresolved) : Discover(scope);
+            var stopped = await StopIdentitiesAsync(targets, cancellationToken);
+            return unresolved.Count == 0 ? stopped : stopped with { Success = false, Message = "已处理可确认的分身进程；仍有归属未确认，运行资料未清理。" };
+        }
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) { return new(false, false, "分身停止未完成（" + ex.GetType().Name + "），运行资料未清理。", []); }
     }
 
     public Task<StopResult> StopIdentitiesAsync(IReadOnlyList<ProcessIdentity> identities, CancellationToken cancellationToken = default)

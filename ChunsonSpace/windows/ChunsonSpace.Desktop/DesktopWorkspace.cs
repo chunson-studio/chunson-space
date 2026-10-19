@@ -24,7 +24,6 @@ public sealed class DesktopWorkspace
             throw new InvalidOperationException("隔离工作区缺少 ChunsonSpace-fixture.json 标记。请提供已创建的测试工作区。");
         Profiles = new FileProfileStore(AccountRoot);
         ProxyServices = DesktopProxyServices.Create(this);
-        BackupService = new BackupService(AccountRoot);
         StoragePaths = managedPaths?.StoragePaths ?? new(Root, ActiveHome, PackagedDesktopRoot, WebDesktopRoot);
         SwitchStorage = managedPaths is null ? new FileSwitchStorage(StoragePaths) : new ManagedCloneStorage(managedPaths);
         ProfileMaintenance = new(StoragePaths);
@@ -33,8 +32,15 @@ public sealed class DesktopWorkspace
         if (fixture) { CodexInstaller = new(new OfflineCodexInstallSystem()); SilentTimezoneChannel = new(new OfflineSilentTimezoneSystem()); }
         if (Runtime is not null)
         {
-            if (fixture) Accounts = DesktopAccountServices.CreateFixture(this);
-            Switching = new(SwitchStorage, Runtime, preparation: Accounts?.Accounts, environments: new FileIdentityEnvironmentSource(Profiles), systemProxy: Accounts?.ProxyResolver, egressProbe: managedPaths is null ? null : Accounts?.Admission); Maintenance = new(Runtime);
+            if (fixture)
+            {
+                Accounts = DesktopAccountServices.CreateFixture(this);
+                if (managedPaths is not null) LocalEnvironment = new(Accounts.ResolveLoginProxyAsync, Accounts.LocalEgress.ProbeRegionProxyAsync, Accounts.Admission);
+            }
+            Switching = new(SwitchStorage, Runtime, preparation: Accounts?.Accounts,
+                environments: (IIdentityEnvironmentSource?)LocalEnvironment ?? new FileIdentityEnvironmentSource(Profiles),
+                systemProxy: Accounts?.ProxyResolver, egressProbe: managedPaths is null ? null : (ILaunchEgressProbe?)LocalEnvironment ?? Accounts?.Admission);
+            Maintenance = new(Runtime);
         }
     }
     public string Root { get; }
@@ -47,7 +53,6 @@ public sealed class DesktopWorkspace
     public bool IsFixture { get; }
     public FileProfileStore Profiles { get; }
     public DesktopProxyServices ProxyServices { get; }
-    public BackupService BackupService { get; }
     public ISwitchStorage SwitchStorage { get; }
     public SwitchStoragePaths StoragePaths { get; }
     public ProfileMaintenance ProfileMaintenance { get; }
@@ -89,7 +94,7 @@ public sealed class DesktopWorkspace
         var clock = new SystemWaitClock();
         var commands = new WindowsCommandRunner();
         var ownedStore = new JsonOwnedProcessStore(Path.Combine(paths.DataRoot, "managed-owned-processes.json"));
-        var cloneScope = new ManagedCloneProcessScope(processSystem, ownedStore);
+        var cloneScope = new ManagedCloneProcessScope(processSystem, ownedStore, paths.DesktopRoot);
         var processes = new CodexProcessService(processSystem, clock, cloneScope);
         // System-level direct blocking is optional, never a prerequisite for normal launch.
         var cloneOptions = new ManagedCloneLaunchOptions(paths.CodexHome, paths.DesktopRoot, cloneScope,

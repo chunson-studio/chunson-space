@@ -9,6 +9,14 @@ namespace ChunsonSpace.Desktop;
 
 public partial class MainWindow : Window
 {
+    private readonly System.Windows.Threading.DispatcherTimer beijingTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private void BeijingTick(object? sender, EventArgs e) { if (DataContext is ShellViewModel model) model.RefreshBeijingTime(DateTimeOffset.UtcNow); }
+    private readonly System.Windows.Threading.DispatcherTimer loginHoursTimer = new() { Interval = TimeSpan.FromMinutes(1) };
+    private void RefreshLoginHours(object? sender, EventArgs e)
+    {
+        if (DataContext is ShellViewModel model) model.RefreshLoginTimes(DateTimeOffset.UtcNow);
+    }
+    internal bool LoginHoursClockRunning => loginHoursTimer.IsEnabled;
     private IInputElement? detailReturnFocus;
     private async void CopyErrorReport(object sender, RoutedEventArgs e)
     {
@@ -23,7 +31,18 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        Closed += (_, _) => { if (DataContext is ShellViewModel model) model.CloseArtwork(); };
+        beijingTimer.Tick += BeijingTick;
+        Loaded += (_, _) => { BeijingTick(null, EventArgs.Empty); beijingTimer.Start(); };
+        Unloaded += (_, _) => beijingTimer.Stop();
+        loginHoursTimer.Tick += RefreshLoginHours;
+        Loaded += (_, _) => { RefreshLoginHours(null, EventArgs.Empty); loginHoursTimer.Start(); };
+        Unloaded += (_, _) => loginHoursTimer.Stop();
+        Closed += (_, _) =>
+        {
+            beijingTimer.Stop(); beijingTimer.Tick -= BeijingTick;
+            loginHoursTimer.Stop(); loginHoursTimer.Tick -= RefreshLoginHours;
+            if (DataContext is ShellViewModel model) { model.CloseArtwork(); model.DisposeUpdates(); }
+        };
         Icon = BrandIcon.CreateImage();
         SelectedExitDetail.RenderTransform = new TranslateTransform();
         WorkspaceContent.SizeChanged += (_, _) => { if (DataContext is ShellViewModel model) model.UpdateViewport(WorkspaceContent.ActualWidth, RootLayout.ActualHeight); };
@@ -109,7 +128,11 @@ public partial class MainWindow : Window
         if (model.Onboarding is { } onboarding) { if (key == Key.Escape && onboarding.CloseCommand.CanExecute(null)) { onboarding.CloseCommand.Execute(null); return true; } return false; }
         if (model.VisualTests is { } fingerprint) { if (key == Key.Escape && fingerprint.CloseCommand.CanExecute(null)) { fingerprint.CloseCommand.Execute(null); return true; } return false; }
         if (model.IsModelTestOpen) { if (key == Key.Escape && model.CloseModelTestCommand.CanExecute(null)) { model.CloseModelTestCommand.Execute(null); return true; } return false; }
-        if (model.IsEditorOpen) { if (key == Key.Escape) { model.CloseEditor(); return true; } return false; }
+        if (model.IsEditorOpen)
+        {
+            if (key == Key.Escape) { if (model.Editor!.CancelCommand.CanExecute(null)) model.Editor.CancelCommand.Execute(null); return true; }
+            return key == Key.F5 || key == Key.F && modifiers == ModifierKeys.Control;
+        }
         if (model.IsDetailOpen)
         {
             if (key == Key.Escape && model.CloseDetailsCommand.CanExecute(null)) { model.CloseDetailsCommand.Execute(null); return true; }
@@ -123,8 +146,26 @@ public partial class MainWindow : Window
         return false;
     }
     private IInputElement? marksReturnFocus;
+    private IInputElement? editorReturnFocus;
     private void ModelChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName == nameof(ShellViewModel.IsEditorOpen) && sender is ShellViewModel editorModel)
+        {
+            // All earlier root children are below the existing editor layer, including the title bar.
+            foreach (var child in RootLayout.Children.OfType<UIElement>().TakeWhile(child => child != EditorOverlay))
+                child.SetCurrentValue(IsEnabledProperty, !editorModel.IsEditorOpen);
+            if (editorModel.IsEditorOpen && IsVisible && IsActive)
+            {
+                editorReturnFocus = Keyboard.FocusedElement;
+                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Input, new Action(() =>
+                { if (editorModel.IsEditorOpen && IsVisible && IsActive) EditorCancelButton.Focus(); }));
+            }
+            else if (!editorModel.IsEditorOpen)
+            {
+                if (IsVisible && IsActive && editorReturnFocus is UIElement { IsVisible: true, IsEnabled: true } previous) previous.Focus();
+                editorReturnFocus = null;
+            }
+        }
         if (e.PropertyName == nameof(ShellViewModel.IsMarksEditorOpen) && sender is ShellViewModel marksModel)
         {
             if (marksModel.IsMarksEditorOpen) { AccountMarkDetails.IsExpanded = false; AccountMarksFormScroll.ScrollToTop(); }

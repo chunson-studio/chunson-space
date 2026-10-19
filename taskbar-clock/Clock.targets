@@ -9,7 +9,7 @@
     <Content Include="$(ClockBuildOutput)" Link="Widgets/BeijingClock.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Target Name="BuildBundledBeijingClock" BeforeTargets="PrepareForBuild"
-    Inputs="$(ClockSourceDirectory)TaskbarClock.cs;$(ClockSourceDirectory)Native.cs;$(ClockSourceDirectory)ClockVisibility.cs;$(ClockSourceDirectory)ClockChecks.cs;$(ClockSourceDirectory)Build-Clock.ps1"
+    Inputs="$(ClockSourceDirectory)TaskbarClock.cs;$(ClockSourceDirectory)Native.cs;$(ClockSourceDirectory)ClockVisibility.cs;$(ClockSourceDirectory)ClockChecks.cs;$(ClockSourceDirectory)Build-Clock.ps1;$(ClockSourceDirectory)Assets/BeijingClock.ico"
     Outputs="$(ClockBuildOutput)">
     <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(ClockSourceDirectory)Build-Clock.ps1&quot; -OutputPath &quot;$(ClockBuildOutput)&quot;" />
   </Target>

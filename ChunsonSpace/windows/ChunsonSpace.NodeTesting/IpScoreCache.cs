@@ -9,11 +9,11 @@ public sealed record CachedIpScore(string Ip, IpPureScore Score, DateTimeOffset 
 {
     public IpQualityReport Apply(IpQualityReport current)
     {
-        if (Report is null) return current with { Score = Score };
-        if (current.CountryCode.Length > 0 && Report.CountryCode != current.CountryCode)
-            return current with { Success = false, Score = new(null, "当前国家与已有报告不同，需要重新确认。") { Provider = Score.Provider } };
-        return Report with { Ip = current.Ip, FetchedAt = current.FetchedAt,
-            Score = Score with { Message = Score.Message + $"\n历史评分：{CheckedAt.ToLocalTime():yyyy-MM-dd HH:mm}；本次未重新测分。" } };
+        if (!EgressSources.SameIp(Ip, current.Ip)) return current;
+        // Cached scores never replace fresh address/location evidence.
+        return current with { Company = Score.Organization, Asn = Score.Asn,
+            Score = Score with { Message = Score.Message + $"\n历史评分：{CheckedAt.ToLocalTime():yyyy-MM-dd HH:mm}；本次未重新测分。" },
+            Source = current.Source + "；" + Score.Provider + "（历史评分）" };
     }
 }
 

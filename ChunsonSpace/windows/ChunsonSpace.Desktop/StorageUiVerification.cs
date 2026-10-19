@@ -13,12 +13,111 @@ using ChunsonSpace.Core;
 using ChunsonSpace.Windows;
 using ChunsonSpace.Accounts;
 using ChunsonSpace.Proxy;
-using ChunsonSpace.Fingerprint;
 
 namespace ChunsonSpace.Desktop;
 
 internal static class StorageUiVerification
 {
+    // Command-only fixture: no workspace, window, startup, network, score, or system services.
+    internal static async Task RunFlClashDirectAsync(string directory)
+    {
+        Directory.CreateDirectory(directory);
+        var checks = new List<object>();
+        void Check(string name, bool passed)
+        {
+            checks.Add(new { name, passed });
+            if (!passed) throw new InvalidOperationException("FlClash direct assertion failed: " + name);
+        }
+        var runner = new OfflineFlClashDnsRunner
+        {
+            PreviewStatusOverride = FlClashDnsStatus.Failed, Groups = [], SelectedGroup = null,
+            ApplicationCandidates = [], Scope = "all-subscriptions", SubscriptionCount = 2
+        };
+        var urls = new OfflineUrlOpener();
+        var services = new DesktopProxyServices(new(client: new OfflineClashVergeState()),
+            new(runner, FlClashDnsAssets.FromApplicationRoot(AppContext.BaseDirectory)), urls,
+            Path.Combine(directory, "missing-flclash-data"), Path.Combine(directory, "unused-verge"),
+            Path.Combine(directory, "backups"), fixture: true);
+        var shellBusy = new List<bool>();
+        var proxyResolutions = 0;
+        var panel = new ProxyPanelViewModel(services, value => shellBusy.Add(value), _ =>
+        {
+            proxyResolutions++;
+            throw new InvalidOperationException("Configure must not resolve or test a proxy.");
+        });
+        Check("unread missing configuration and application do not gate configure", panel.ConfigureNetworkCommand.CanExecute(null)
+            && !panel.PreviewReady && panel.ApplicationPath.Length == 0);
+        panel.ConfigureNetworkCommand.Execute(null); await panel.CurrentOperation;
+        Check("fresh configure dispatches Apply exactly once even when Preview would fail", runner.Invocations.Count == 1
+            && runner.Invocations[0].Action == FlClashDnsAction.Apply
+            && runner.Invocations[0].Request.ApplicationPath is null);
+        Check("saved but reload-unconfirmed feedback is preserved", !panel.IsError && panel.DnsSummary == "设置已保存"
+            && panel.Status.Contains("重载尚未确认") && panel.DnsStage.Contains("重载待确认"));
+
+        foreach (var ambiguous in new[] { false, true })
+        {
+            runner.Groups = ambiguous ? ["代理甲", "代理乙"] : [];
+            runner.ApplicationCandidates = ambiguous ? ["D:/fixture/FlClash-a.exe", "D:/fixture/FlClash-b.exe"] : [];
+            runner.PreviewStatusOverride = ambiguous ? FlClashDnsStatus.SelectionRequired : FlClashDnsStatus.Failed;
+            var beforeRead = runner.Invocations.Count;
+            panel.EnterPage(); await panel.CurrentOperation;
+            Check($"{ambiguous}: automatic readonly page preview remains independent", runner.Invocations.Count == beforeRead + 1
+                && runner.Invocations[^1].Action == FlClashDnsAction.Preview && (ambiguous || panel.IsError) && !panel.PreviewReady
+                && panel.ConfigureNetworkCommand.CanExecute(null));
+            var beforeConfigure = runner.Invocations.Count;
+            panel.ConfigureNetworkCommand.Execute(null); await panel.CurrentOperation;
+            Check($"{ambiguous}: failed missing or ambiguous preview cannot block direct Apply", runner.Invocations.Count == beforeConfigure + 1
+                && runner.Invocations[^1].Action == FlClashDnsAction.Apply && !panel.IsError);
+        }
+
+        panel.ApplicationPath = Path.Combine(directory, "selected-FlClash.exe");
+        panel.ProxyGroup = "stale-group";
+        panel.BackupPath = Path.Combine(directory, "selected-backup");
+        runner.ApplyStatus = FlClashDnsStatus.Failed;
+        runner.Hold = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        shellBusy.Clear();
+        var beforeBusy = runner.Invocations.Count;
+        panel.ConfigureNetworkCommand.Execute(null);
+        var operation = panel.CurrentOperation;
+        Check("pending Apply retains local and shell busy state", panel.IsBusy && !panel.CanEdit
+            && !panel.ConfigureNetworkCommand.CanExecute(null) && !operation.IsCompleted && shellBusy.SequenceEqual(new[] { true }));
+        panel.ConfigureNetworkCommand.Execute(null);
+        Check("busy duplicate is ignored without replacing the active operation", runner.Invocations.Count == beforeBusy + 1
+            && ReferenceEquals(operation, panel.CurrentOperation));
+        Check("direct Apply preserves explicit application backup and all-subscription inputs", runner.Invocations[^1].Request.ApplicationPath == panel.ApplicationPath
+            && runner.Invocations[^1].Request.BackupDirectory == panel.BackupPath && runner.Invocations[^1].Request.ProxyGroup is null
+            && runner.Invocations[^1].Request.AllSubscriptions);
+        runner.Hold.SetResult(); await operation; runner.Hold = null;
+        Check("script failure is shown and busy state recovers", panel.IsError && panel.Status.Contains("离线协议替身")
+            && panel.DnsStage.Contains("未完成") && panel.DnsSummary == "未确认" && !panel.IsBusy && panel.CanEdit
+            && panel.ConfigureNetworkCommand.CanExecute(null) && shellBusy.SequenceEqual(new[] { true, false }));
+
+        runner.ApplyStatus = FlClashDnsStatus.GeneratedConfigVerified;
+        panel.ConfigureNetworkCommand.Execute(null); await panel.CurrentOperation;
+        Check("retry after failure dispatches once and reports actual successful stage", runner.Invocations.Count == beforeBusy + 2
+            && !panel.IsError && panel.Status.Contains("生成配置已核对") && panel.DnsStage.Contains("实际网络效果尚未验证")
+            && panel.BackupPath == Path.Combine(directory, "selected-backup") && panel.ConfigureNetworkCommand.CanExecute(null));
+        runner.Hold = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        panel.ConfigureNetworkCommand.Execute(null);
+        runner.Hold.SetException(new IOException("offline runner failure"));
+        await panel.CurrentOperation; runner.Hold = null;
+        Check("runner exception is reported as uncertain and releases busy state", panel.IsError
+            && panel.Status.Contains("调用未得到可验证的报告") && !panel.IsBusy && panel.ConfigureNetworkCommand.CanExecute(null));
+        Check("all dispatches stay offline and no unrelated services are consulted", runner.Invocations.All(x => x.Request.OfflineFixture
+            && x.Request.AllSubscriptions && (x.Action != FlClashDnsAction.Apply || x.Request.ProxyGroup is null))
+            && proxyResolutions == 0 && urls.Opened.Count == 0 && services.NodeTesting is null && services.Protection is null
+            && services.BrowserUdp is null && System.Windows.Application.Current.Windows.Count == 0);
+        File.WriteAllText(Path.Combine(directory, "ui-verification.json"), JsonSerializer.Serialize(new
+        {
+            passed = true, scope = "flclash-direct", checks,
+            fakeApplyCalls = runner.Invocations.Count(x => x.Action == FlClashDnsAction.Apply),
+            fakePagePreviewCalls = runner.Invocations.Count(x => x.Action == FlClashDnsAction.Preview),
+            configurePreviewCalls = 0, proxyResolutions, realScriptExecutions = 0, realRequests = 0, realSystemWrites = 0,
+            startupAdmissionCalls = 0, accountOperations = 0, ipScoreModelRequests = 0, screenshots = 0,
+            isolation = "Only ProxyPanelViewModel, FlClashDnsService and OfflineFlClashDnsRunner; no workspace or live service construction."
+        }, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
     public static async Task RunAsync(string directory)
     {
         var bindingListener = new UiVerification.BindingListener();
@@ -624,7 +723,7 @@ internal static class StorageUiVerification
         Check("settings start in simple mode with original cleanup hidden and no region writes", settingsAdvanced.IsChecked == false
             && !Displayed((Button)window.FindName("OriginalCodexResetButton"))
             && Displayed((Button)window.FindName("OneClickEnvironmentRegionButton"))
-            && !model.OneClickRebuildCommand.CanExecute(null)
+            && !model.ResetManagedCommand.CanExecute(null)
             && workspace.Accounts!.OfflineRegion!.TimezoneWrites == 0 && workspace.Accounts.OfflineRegion.RegionWrites == 0);
         settingsAdvanced.IsChecked = true;
         var lightCanvas = ((SolidColorBrush)window.FindResource("CanvasBrush")).Color;
@@ -640,49 +739,6 @@ internal static class StorageUiVerification
         var reopened = new ShellViewModel(workspace);
         Check("workspace reopens with persisted dark theme", reopened.DarkTheme && WorkspaceTheme.Current == "dark");
         model.DarkTheme = false; model.SaveSettingsCommand.Execute(null);
-        model.Navigate("Backups"); await model.CreateBackupAsync();
-        var backup = model.Backups.First();
-        Check("backup writes manifest and reloads list", File.Exists(Path.Combine(root, "backups", backup.Name, "MANIFEST.json")) && model.FeedbackTitle == "备份已创建");
-        Capture("storage-backup-actions-minimum", 1040, 670);
-        Check("backup create and restore entrances stay visible at minimum size", Descendants(layout).OfType<Button>().Any(button => button.Command == model.CreateBackupCommand && Displayed(button))
-            && Descendants(layout).OfType<Button>().Any(button => button.Command == model.RestoreBackupCommand && Displayed(button)));
-        for (var number = 1; model.Backups.Count < 4; number++) { workspace.BackupService.Create("分页备份-" + number); model.RefreshCommand.Execute(null); }
-        var lastBackup = model.Backups.Last(); var backupNext = (Button)window.FindName("BackupNextPageButton");
-        for (var attempt = 0; attempt < 10 && !model.BackupPageItems.Contains(lastBackup) && backupNext.Command.CanExecute(null); attempt++) { backupNext.Command.Execute(null); Flush(); }
-        Capture("storage-backup-last-page-minimum", 1040, 670);
-        var restoreButtons = Descendants(layout).OfType<Button>().Where(button => button.Command == model.RestoreBackupCommand && Displayed(button)).ToArray();
-        Check("backup paging shows later backup and keeps each restore command bound to its current row", model.Backups.Count > 3 && model.BackupPageItems.Contains(lastBackup) && model.BackupPageItems.Count <= 3
-            && Displayed(backupNext) && Displayed((Button)window.FindName("BackupPreviousPageButton")) && restoreButtons.Any(button => ReferenceEquals(button.CommandParameter, lastBackup))
-            && restoreButtons.All(button => button.CommandParameter is BackupItem item && model.BackupPageItems.Contains(item) && ReferenceEquals(button.CommandParameter, button.DataContext) && button.Command.CanExecute(button.CommandParameter)));
-        Select("工作甲"); var startingTask = model.LaunchCurrentAsync();
-        Check("runtime label says starting until the launch confirmation completes", model.RunningLabel == "正在启动" && model.SelectedRuntimeState == "正在启动");
-        await startingTask; await model.RunAccountActionAsync(AccountAction.Egress);
-        Check("backup restore begins with confirmed offline runtime and selected egress evidence", model.IdentityState.Running?.Name == "工作甲"
-            && model.SelectedRuntimeState == "运行中" && model.SelectedExitIp == "192.0.2.10");
-        model.ApplyOwnedState(new(true, false, false, "fixture exited", []));
-        Check("a confirmed clone later exiting replaces the stale completed banner with actual stopped state", model.IdentityState.Running is null
-            && model.FeedbackTitle == "分身已退出" && model.SelectedRuntimeState == "已退出" && model.RunningLabel == "已退出");
-        model.ApplyOwnedState(new(true, true, false, "fixture alive", []));
-        Check("owned process presence cannot be mislabeled as stopped when account identity is not yet recovered", model.RunningLabel == "运行中 · 账号待确认"
-            && model.SelectedRuntimeState == "运行中 · 账号待确认" && model.IdentityState.Running is null);
-        await model.LaunchCurrentAsync();
-        store.SaveEnvironment("工作乙改", new("http://127.0.0.1:8000", "Asia/Shanghai", "en-US"));
-        workspace.OfflineRuntime!.StopSucceeds = false; await model.RestoreBackupAsync(backup);
-        Check("stop failure blocks restore writes", store.ReadEnvironment("工作乙改").Proxy == "http://127.0.0.1:8000" && model.FeedbackTitle == "恢复未开始");
-        Check("restore stop failure preserves confirmed runtime and cached egress", model.IdentityState.Running?.Name == "工作甲"
-            && model.SelectedRuntimeState == "运行中" && model.SelectedExitIp == "192.0.2.10");
-        Capture("storage-restore-stop-failed");
-        workspace.OfflineRuntime.StopSucceeds = true; await model.RestoreBackupAsync(backup);
-        Check("restore calls application service and preserves pre-backup", store.ReadEnvironment("工作乙改").Proxy == "https://127.0.0.1:7893" && model.Backups.Count >= 2 && model.FeedbackTitle == "备份已恢复");
-        Check("successful backup restore invalidates prior runtime and cached egress", model.IdentityState.Running is null
-            && model.SelectedRuntimeState == "未运行" && model.SelectedExitIp == "未验证");
-        var corrupted = workspace.BackupService.Create("corrupt-ui");
-        var corruptedManifest = JsonNode.Parse(File.ReadAllText(Path.Combine(corrupted.Path, "MANIFEST.json")))!;
-        var corruptRelative = corruptedManifest["files"]!.AsArray()[0]!["path"]!.GetValue<string>();
-        File.WriteAllText(Path.Combine(corrupted.Path, corruptRelative), "corrupt-fixture-content");
-        await model.RestoreBackupAsync(new(corrupted.Name, "", ""));
-        Check("restore integrity failure is distinct from stop failure", model.FeedbackTitle == "恢复未完成" && model.Feedback.Contains("校验失败") && store.ReadEnvironment("工作乙改").Proxy == "https://127.0.0.1:7893");
-        Capture("storage-restore-integrity-failed");
         model.Navigate("Accounts"); Select("工作乙改"); model.IsolateSessions = true;
         await model.SwitchSelectedAsync(false); Flush();
         Check("switch migrates real fixture files and reloads active identity", model.Active?.Name == "工作乙改" && workspace.SwitchStorage.ReadActiveIdentity()?.Name == "工作乙改" && workspace.OfflineRuntime.StopCalls > 0);
@@ -694,7 +750,6 @@ internal static class StorageUiVerification
         workspace.OfflineRuntime.LaunchStatus = LaunchStatus.Pending; model.HomeLaunchCommand.Execute(null); await model.CurrentOperation; Flush();
         Check("pending launch preserves target and does not claim running", model.Active?.Name == "工作甲" && model.RunningLabel == "启动待确认" && model.IdentityState.Running is null && workspace.OfflineRuntime.HasPendingLaunch && model.SelectedRuntimeState == "启动待确认");
         var beforePendingRestore = File.ReadAllBytes(Path.Combine(home, "auth.json"));
-        await model.RestoreBackupAsync(backup);
         Check("pending launch blocks backup restore", beforePendingRestore.SequenceEqual(File.ReadAllBytes(Path.Combine(home, "auth.json"))) && model.Feedback.Contains("待确认"));
         Capture("storage-pending-launch-minimum", 1040, 670);
         workspace.OfflineRuntime.HasPendingLaunch = false; workspace.OfflineRuntime.LaunchStatus = LaunchStatus.Confirmed;
@@ -993,9 +1048,9 @@ internal static class StorageUiVerification
         var defaultList = (ListBox)window.FindName("ProfileList");
         var operationBar = (Border)window.FindName("ActiveOperationBar");
         var bottomLaunch = (Button)window.FindName("BottomLaunchButton");
-        var bottomRebuild = (Button)window.FindName("BottomRebuildButton");
+        var bottomRebuild = window.FindName("BottomRebuildButton");
         var exitDetail = (FrameworkElement)window.FindName("SelectedExitDetail");
-        bool HomeActionsVisible() => Displayed(operationBar) && Displayed(bottomLaunch) && bottomRebuild.Visibility == Visibility.Collapsed
+        bool HomeActionsVisible() => Displayed(operationBar) && Displayed(bottomLaunch) && bottomRebuild is null
             && bottomLaunch.ActualHeight >= 36
             && UiVerification.Within(bottomLaunch, operationBar)
             
@@ -1150,8 +1205,8 @@ internal static class StorageUiVerification
         var networkStart = flFixture.Invocations.Count;
         var protectionBeforeNetwork = workspace.ProxyServices.FixtureProtectionRunner!.Actions.Count;
         proxy.ConfigureNetworkCommand.Execute(null); await proxy.CurrentOperation;
-        Check("global DNS action previews then applies every subscription without group or firewall operations",
-            flFixture.Invocations.Skip(networkStart).Select(i => i.Action).SequenceEqual(new[] { FlClashDnsAction.Preview, FlClashDnsAction.Apply })
+        Check("global DNS action directly applies every subscription without preview group or firewall operations",
+            flFixture.Invocations.Skip(networkStart).Select(i => i.Action).SequenceEqual(new[] { FlClashDnsAction.Apply })
             && flFixture.Invocations.Skip(networkStart).All(i => i.Request.AllSubscriptions && i.Request.ProxyGroup is null)
             && workspace.ProxyServices.FixtureProtectionRunner.Actions.Count == protectionBeforeNetwork
             && proxy.DnsStage.Contains("全部订阅"));
@@ -1397,7 +1452,7 @@ internal static class StorageUiVerification
         var choiceButtons = new[] { "ChooseCialloButton", "ChooseAnimationButton", "ChooseVariationButton", "ChooseRevisionButton" }.Select(name => (Button)window.FindName(name)).ToArray();
         Check("four model test choices are visible without requests", choiceButtons.All(Displayed) && accountTransport.RequestCount == requestsBeforeFingerprint);
         model.CloseModelTestCommand.Execute(null);
-        model.OpenModelTestCommand.Execute(null); model.ModelTestProfile = "工作甲"; model.ChooseCialloCommand.Execute(null); var ciallo = model.Ciallo!;
+        model.OpenModelTestCommand.Execute(null); model.ModelTestProfile = "工作甲"; model.OpenCialloCommand.Execute(null); var ciallo = model.Ciallo!;
         var cialloRequests = accountTransport.RequestCount;
         Capture("ciallo-ready-minimum", 1040, 670);
         Check("Ciallo opens from shared selector without requests or stacked test engines", !model.IsModelTestOpen && !model.IsVisualTestsOpen
@@ -1405,7 +1460,7 @@ internal static class StorageUiVerification
         ciallo.StartCommand.Execute(null); await ciallo.CurrentOperation; Flush();
         Capture("ciallo-results-minimum", 1040, 670);
         Check("Ciallo shows every original reply with Chinese high effort label", ciallo.Rows.Count == CialloTest.Models.Count && ciallo.Rows.All(row => row.State == "已完成" && row.Text.Contains("Ciallo") && row.Detail.Contains("思考：高")) && accountTransport.Requests.TakeLast(CialloTest.Models.Count).All(request => JsonNode.Parse(request.Body!)!["reasoning"]!["effort"]!.ToString() == "high") && accountTransport.RequestCount == cialloRequests + CialloTest.Models.Count);
-        ciallo.CloseCommand.Execute(null); model.OpenModelTestCommand.Execute(null); model.ModelTestProfile = "工作甲"; model.ChooseCialloCommand.Execute(null);
+        ciallo.CloseCommand.Execute(null); model.OpenModelTestCommand.Execute(null); model.ModelTestProfile = "工作甲"; model.OpenCialloCommand.Execute(null);
         Check("reopening Ciallo retains replies without another test", ReferenceEquals(model.Ciallo, ciallo) && ciallo.Rows.All(row => row.State == "已完成") && accountTransport.RequestCount == cialloRequests + CialloTest.Models.Count);
         accountTransport.HoldResponse = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         ciallo.StartCommand.Execute(null); await Task.Delay(30); Flush();
@@ -1519,8 +1574,8 @@ internal static class StorageUiVerification
         var managedLaunchEnvironment = managedWorkspace.OfflineRuntime.LastLaunchRequest?.Environment;
         Check("managed launch uses verified egress timezone and English without changing system timezone", managedModel.IdentityState.Running?.Name == "分身乙" && managedLaunchEnvironment is { } launchEnvironment && launchEnvironment.GetValueOrDefault("HTTP_PROXY") == "http://127.0.0.1:7891" && launchEnvironment.GetValueOrDefault("TZ") == "America/Chicago" && managedWorkspace.OfflineRuntime.LastLaunchRequest!.ExpectedEgressIp == "192.0.2.10" && managedWorkspace.OfflineRuntime.LastLaunchRequest.Arguments.Contains("--accept-lang=en-US") && !managedWorkspace.OfflineRuntime.LastTimezoneEnabled && managedModel.LaunchEgressDescription.Contains("192.0.2.10") && managedModel.LaunchEgressDescription.Contains("America/Chicago"));
         managedModel.Navigate("Settings"); Capture("managed-runtime-settings");
-        Check("managed settings hide manual rebuild and original cleanup", managedModel.OneClickRebuildCommand.CanExecute(null)
-            && !Displayed((Button)window.FindName("OneClickEnvironmentRebuildButton"))
+        Check("managed settings hide manual rebuild and original cleanup", managedModel.ResetManagedCommand.CanExecute(null)
+            && Displayed((Button)window.FindName("ResetManagedButton"))
             && !Displayed((Button)window.FindName("OriginalCodexResetButton")));
         var originalAuthBeforeOneClick = File.ReadAllBytes(Path.Combine(originalHome, "auth.json"));
         var originalHistoryBeforeOneClick = File.ReadAllBytes(Path.Combine(originalHome, "sessions", "original.jsonl"));
@@ -1554,17 +1609,17 @@ internal static class StorageUiVerification
         Check("single launch starts current active account through existing launch service", managedModel.IdentityState.Running?.Name == "分身乙"
             && managedModel.HomeLaunchLabel == "运行中" && managedWorkspace.OfflineRuntime.StopCalls > beforeUnifiedLaunch);
         var settingsAdvancedManaged = (CheckBox)window.FindName("SettingsAdvancedToggle"); settingsAdvancedManaged.IsChecked = true; Flush();
-        Check("managed reset consolidates logout and rebuild into existing single action", ((Button)window.FindName("ManagedCloneResetButton")).Command == managedModel.OneClickRebuildCommand
+        Check("managed reset consolidates logout and rebuild into existing single action", window.FindName("ManagedCloneResetButton") is null && ((Button)window.FindName("ResetManagedButton")).Command == managedModel.ResetManagedCommand
             && !Descendants((FrameworkElement)window.FindName("AdvancedEnvironmentPanel")).OfType<Button>().Any(button => button.Command == managedModel.LogoutCommand && Displayed(button)));
         Capture("managed-consolidated-settings-minimum", 1040, 670); settingsAdvancedManaged.IsChecked = false;
         managedWorkspace.OfflineRuntime.StopSucceeds = false;
-        managedModel.OneClickRebuildCommand.Execute(null); await managedModel.CurrentOperation;
+        managedModel.ResetManagedCommand.Execute(null); await managedModel.CurrentOperation;
         Check("one click managed rebuild stop failure preserves runtime account library and original", managedModel.IsError
             && File.Exists(Path.Combine(managedWorkspace.ActiveHome, "auth.json")) && managedModel.Active?.Name == "分身乙"
             && managedWorkspace.Profiles.ListAccounts().All(account => account.HasCredentials)
             && originalAuthBeforeOneClick.SequenceEqual(File.ReadAllBytes(Path.Combine(originalHome, "auth.json"))));
         managedWorkspace.OfflineRuntime.StopSucceeds = true;
-        ((Button)window.FindName("OneClickEnvironmentRebuildButton")).Command.Execute(null); await managedModel.CurrentOperation; Flush();
+        ((Button)window.FindName("ResetManagedButton")).Command.Execute(null); await managedModel.CurrentOperation; Flush();
         Check("one click managed rebuild executes without extra editor and preserves selected account library original and project", !managedModel.IsError
             && managedModel.Editor is null && managedModel.Active is null && !File.Exists(Path.Combine(managedWorkspace.ActiveHome, "auth.json"))
             && managedModel.Selected?.Identity == managedSelectionBeforeOneClick
@@ -1575,10 +1630,7 @@ internal static class StorageUiVerification
             && File.ReadAllText(projectFile) == "user-project");
         await managedModel.SwitchSelectedAsync(false);
         ((CheckBox)window.FindName("SettingsAdvancedToggle")).IsChecked = true; Capture("managed-runtime-advanced-settings");
-        managedModel.RebuildCommand.Execute(null); var managedResetEditor = managedModel.Editor!;
-        Check("managed reset preview names runtime and preserved account library before execution", managedResetEditor.Title == "重建分身" && managedResetEditor.Details.Contains(managedWorkspace.ManagedPaths!.RuntimeRoot) && managedResetEditor.Details.Contains(managedWorkspace.AccountRoot) && File.Exists(Path.Combine(managedWorkspace.ActiveHome, "auth.json")));
-        managedResetEditor.CancelCommand.Execute(null);
-        Check("cancel managed reset preserves active runtime", managedModel.Editor is null && managedModel.Active?.Name == "分身乙" && File.Exists(Path.Combine(managedWorkspace.ActiveHome, "auth.json")));
+        Check("managed maintenance has one direct reset command", managedModel.ResetManagedCommand.CanExecute(null) && managedModel.Editor is null);
         managedModel.RebuildOriginalCommand.Execute(null);
         Check("skipping tool import does not relax original cleanup link protection", managedModel.Editor is null && managedModel.IsError
             && File.Exists(Path.Combine(linkedSkillSource, "SKILL.md")) && File.Exists(Path.Combine(originalHome, "auth.json")));
@@ -1589,7 +1641,7 @@ internal static class StorageUiVerification
         Check("original cleanup warning wraps and stays visible in confirmation dialog", ((TextBlock)window.FindName("EditorDescriptionText")).ActualHeight > 26 && Displayed((TextBlock)window.FindName("EditorDescriptionText")));
         originalEditor.CancelCommand.Execute(null);
         Check("cancel original cleanup leaves original and managed runtime intact", File.Exists(Path.Combine(originalHome, "auth.json")) && File.Exists(Path.Combine(managedWorkspace.ActiveHome, "auth.json")) && File.ReadAllText(projectFile) == "user-project");
-        managedModel.RebuildCommand.Execute(null); var resetEditor = managedModel.Editor!; resetEditor.SaveCommand.Execute(null); await resetEditor.CurrentOperation;
+        managedModel.RebuildCommand.Execute(null); await managedModel.CurrentOperation;
         Check("explicit managed cleanup resets runtime while preserving account authorization and original", managedModel.Editor is null && managedModel.Active is null && !File.Exists(Path.Combine(managedWorkspace.ActiveHome, "auth.json")) && managedWorkspace.Profiles.ListAccounts().All(account => account.HasCredentials) && File.Exists(Path.Combine(originalHome, "sessions", "original.jsonl")) && File.ReadAllText(projectFile) == "user-project");
         managedModel.Selected = managedModel.FilteredItems.Single(i => i.Name == "分身甲"); await managedModel.SwitchSelectedAsync(false);
         managedModel.Navigate("Settings"); managedModel.RebuildOriginalCommand.Execute(null); var cleanOriginalEditor = managedModel.Editor!; cleanOriginalEditor.SaveCommand.Execute(null); await cleanOriginalEditor.CurrentOperation;

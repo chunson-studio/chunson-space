@@ -44,7 +44,7 @@ internal static class AgentCli
                         readOnly = new[] { "status", "browser-status", "subscriptions", "capabilities", "dns-preview", "launch-check", "protection-status", "visual-results" },
                         publicNetwork = new[] { "exit", "screen", "screen-pending", "test-node", "test-nodes", "test-subscription" },
                         userActions = new[] { "login", "dns-apply", "ciallo", "account-health-batch", "visual-test", "text-test", "protection-disable" },
-                        visualTests = new { kinds = Enum.GetNames<VisualTestKind>(), variants = VisualTestCatalog.Variants, defaultEffort = ModelTestParameters.DefaultEffort, efforts = ModelTestParameters.Efforts, transport = "HTTP Responses", requestTimeoutSeconds = (int?)null, requests = new { Static = 1, Animation = 1, Variation = 1, Revision = 3 } },
+                        visualTests = new { kinds = new[] { "Static" }, content = "prompt", defaultEffort = ModelTestParameters.DefaultEffort, efforts = ModelTestParameters.Efforts, transport = "HTTP Responses", requestTimeoutSeconds = (int?)null, requests = new { Static = 1 } },
                         ciallo = new { prompt = CialloTest.Prompt, defaultEffort = ModelTestParameters.DefaultEffort, efforts = ModelTestParameters.Efforts, models = CialloTest.Models, usesAccountQuota = true },
                         scorePolicy = "成功分数按实际 IP 长期复用；登录不测分；通常质量至少 85；IPEqual 住宅线路免评分门槛，仍需确认出口并显示实际评分。",
                         login = "沿用当前 FlClash 出口；或提供 subscriptionId、nodeId、expectedIp 自动分配独立端口。仅复用已有评分；用户本人完成授权。",
@@ -171,8 +171,8 @@ internal static class AgentCli
                     if (string.IsNullOrWhiteSpace(request.Profile) || !workspace.Profiles.ListAccounts().Any(p => p.Name == request.Profile && p.HasCredentials))
                         throw new InvalidOperationException("请通过 profile 指定一个已授权账号。");
                     if (!Enum.TryParse<VisualTestKind>(request.TestKind, true, out var kind) || !Enum.IsDefined(kind)) throw new InvalidOperationException("testKind 需为 Static、Animation、Variation 或 Revision。");
-                    var visualModel = request.Model ?? "gpt-6-astra"; var variant = request.Variant ?? VisualTestCatalog.Variants[0].Id;
-                    if (!(command == "visual-test" ? ModelTestParameters.AllowedModel(visualModel) : VisualTestCatalog.ValidModel(visualModel)) || !VisualTestCatalog.Variants.Any(v => v.Id == variant)) throw new InvalidOperationException("模型或题目选择无效。");
+                    var visualModel = request.Model ?? "gpt-6-astra"; var variant = request.Prompt ?? request.Variant ?? "";
+                    if (!(command == "visual-test" ? ModelTestParameters.AllowedModel(visualModel) : VisualTestCatalog.ValidModel(visualModel)) || command == "visual-test" && (kind != VisualTestKind.Static || string.IsNullOrWhiteSpace(variant))) throw new InvalidOperationException("模型或题目选择无效。");
                     var visualEffort = request.Effort ?? ModelTestParameters.DefaultEffort;
                     if (command == "visual-test") ModelTestParameters.RequireEffort(visualEffort);
                     else if (!ModelTestParameters.ValidEffort(visualEffort)) throw new InvalidOperationException("历史思考档位无效。");

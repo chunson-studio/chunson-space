@@ -15,12 +15,18 @@ public sealed class AccountBrowserProfiles(string root, IFileStorage? storage = 
         var path = Path.Combine(browserRoot, PoolName, "auth-" + Guid.NewGuid().ToString("N"));
         PhysicalFileStorage.RejectLinks(path); files.CreateDirectory(path); return path;
     }
-    public string? Read(string name)
+    public string? Read(string name) => Read(name, deleting: false);
+    internal string? ReadForDeletion(string name) => Read(name, deleting: true);
+    private string? Read(string name, bool deleting)
     {
         var path = Binding(name);
         if (!files.FileExists(path)) return null;
         var relative = JsonFiles.Text(JsonFiles.Read(files, path), "directory");
         var profile = Validate(Path.Combine(browserRoot, relative));
+        // A prior permanent deletion may have finished the browser before another target failed.
+        if (deleting && !files.DirectoryExists(profile)) return null;
+        if (deleting && !files.FileExists(Path.Combine(profile, "chunson-browser-owner.json"))
+            && files.Files(profile, false).Count == 0 && files.Directories(profile).Count == 0) return profile;
         if (!files.FileExists(Path.Combine(profile, "chunson-browser-owner.json"))
             || JsonFiles.Text(JsonFiles.Read(files, Path.Combine(profile, "chunson-browser-owner.json")), "account") != name)
             throw new IOException("浏览器档案所属账号不一致。");

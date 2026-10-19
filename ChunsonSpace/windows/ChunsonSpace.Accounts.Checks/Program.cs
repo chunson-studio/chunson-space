@@ -393,7 +393,6 @@ try
         Assert(opened.Warnings.Contains("fixture ownership unconfirmed"), "ownership warnings appended during TrackRoot reach returned browser result");
     }
     count += await AccountCliChecks.Run(Path.Combine(root, "cli"));
-    count += await FingerprintAccountChecks.Run(Path.Combine(root, "fingerprint"));
     count += await NewAccountLoginChecks.Run(Path.Combine(root, "new-login"));
     count += LocalAccountImportChecks.Run(Path.Combine(root, "local-import"));
     count += await AccountPreparationChecks.Run(Path.Combine(root, "preparation"));
@@ -404,7 +403,6 @@ try
     count += await TwoStageLoginChecks.Run(Path.Combine(root, "two-stage-login"));
     count += await CialloChecks.Run(Path.Combine(root, "ciallo"));
     count += await AccountEvidenceChecks.Run(Path.Combine(root, "account-evidence"));
-    count += EnglishPromptChecks.Run(Path.Combine(root, "english-prompts"));
     count += await SafetyBufferingChecks.Run(Path.Combine(root, "safety-buffering"));
     count += await ResponsesFailureChecks.Run(Path.Combine(root, "responses-failures"));
     count += await BrowserTimezoneTargetChecks.Run();

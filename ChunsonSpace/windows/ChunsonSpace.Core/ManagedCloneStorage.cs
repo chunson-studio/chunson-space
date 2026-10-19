@@ -38,6 +38,20 @@ public sealed class ManagedCloneStorage : ISwitchStorage
         return identity;
     }
 
+    // Local reference only. Maintenance must never synchronize credentials being deleted.
+    public IdentityRef? ReadRuntimeReference()
+    {
+        ValidateOwnership();
+        var marker = Path.Combine(ClonePaths.RuntimeRoot, IdentityMarker);
+        if (!files.FileExists(marker)) return null;
+        var data = JsonFiles.Read(files, marker);
+        if (!Enum.TryParse<IdentityKind>(JsonFiles.Text(data, "kind"), out var kind) || !Enum.IsDefined(kind))
+            throw new StorageException(StorageError.Corrupt, marker, "分身账号引用未确认。");
+        return new(kind, ProfileRules.Name(JsonFiles.Text(data, "name")));
+    }
+
+    public void DiscardRuntime() => RecreateRuntime();
+
     public void PrepareProviderUpdate(IdentityRef identity)
     {
         if (identity.Kind != IdentityKind.Provider || ReadActiveIdentity() != identity) return;

@@ -181,11 +181,7 @@ public sealed class ProxyPanelViewModel : ObservableObject
     private Task ConfigureNetworkAsync() => RunAsync(async () =>
     {
         var request = Request() with { ProxyGroup = null, AllSubscriptions = true };
-        Report("正在读取全部订阅的 DNS 配置…", false);
-        var preview = await services!.FlClash.PreviewAsync(request);
-        ApplyFlResult(preview);
-        if (preview.Status != FlClashDnsStatus.PreviewReady) return;
-        request = request with { ApplicationPath = preview.ApplicationPath ?? request.ApplicationPath };
+        Report("正在运行 FlClash 配置脚本…", false);
         await ApplyFlClashChangesAsync(request);
     });
     public async Task RefreshProtectionAsync()

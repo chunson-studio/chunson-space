@@ -53,7 +53,7 @@ internal static class BackgroundAccountTestsVerification
         await Until(() => runtime.Requests.Count == 1); first.CloseCommand.Execute(null);
         model.Selected = model.FilteredItems.Single(item => item.Name == "B");
         check("account A background test leaves B browser quota and settings available", model.CanSelectIdentity && model.OpenBrowserCommand.CanExecute(null) && model.QuotaCommand.CanExecute(null) && model.EditSelectedCommand.CanExecute(null));
-        check("global restore and rebuild stay blocked across account selection", !model.CreateBackupCommand.CanExecute(null) && !model.RestoreBackupCommand.CanExecute(null) && !model.RebuildCommand.CanExecute(null));
+        check("global restore and rebuild stay blocked across account selection", !model.RebuildCommand.CanExecute(null));
         model.EditSelectedCommand.Execute(null); var editor = model.Editor;
         check("B editor opens while A test is active", editor?.Original?.Name == "B" && first.IsBusy);
         model.CloseEditor();

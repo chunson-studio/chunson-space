@@ -1,8 +1,6 @@
-<Solution>
+﻿<Solution>
   <Project Path="ChunsonSpace.Core/ChunsonSpace.Core.csproj" />
   <Project Path="ChunsonSpace.Core.Checks/ChunsonSpace.Core.Checks.csproj" />
-  <Project Path="ChunsonSpace.Fingerprint/ChunsonSpace.Fingerprint.csproj" />
-  <Project Path="ChunsonSpace.Fingerprint.Checks/ChunsonSpace.Fingerprint.Checks.csproj" />
   <Project Path="ChunsonSpace.Windows/ChunsonSpace.Windows.csproj" />
   <Project Path="ChunsonSpace.Windows.Checks/ChunsonSpace.Windows.Checks.csproj" />
   <Project Path="ChunsonSpace.Application/ChunsonSpace.Application.csproj" />

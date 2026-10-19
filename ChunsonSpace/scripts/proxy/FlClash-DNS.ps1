@@ -855,6 +855,10 @@ try {
         if(-not (Test-Path -LiteralPath (Join-Path $LibraryRoot 'YamlDotNet.dll'))) { $LibraryRoot=Join-Path $applicationRoot 'windows/ThirdParty/YamlDotNet' }
     }
     $yaml=Join-Path $LibraryRoot 'YamlDotNet.dll'
+    # Keep the Windows PowerShell reader separate from the application's runtime assembly.
+    $privateYaml=Join-Path $AssetRoot 'lib/YamlDotNet.dll'
+    if([IO.Path]::GetFullPath($yaml) -ieq (Join-Path $applicationRoot 'YamlDotNet.dll') -and (Test-Path -LiteralPath $privateYaml -PathType Leaf)) { $yaml=$privateYaml }
+    Assert-NoLinks $yaml
     if((Get-FileHash -LiteralPath $yaml -Algorithm SHA256).Hash -ine '9172f0758ed76963e0ede3b5ca9a1fb5b82f64c7e7a92cb3a6de39efa933a668') { throw 'YAML 解析库校验失败。' }
     [Reflection.Assembly]::LoadFrom($yaml) | Out-Null
     if(-not $CsHelperPath) { $CsHelperPath=Join-Path $AssetRoot 'lib/FlDns.cs' }

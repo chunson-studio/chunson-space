@@ -46,10 +46,9 @@ internal static class AccountFreezeVerification
             catch (AccountException error) when (error.Code == AccountError.Busy) { refused = true; }
             check(label, refused && services.OfflineTransport!.Requests.Count == 0);
         }
-        await Rejected("service rejects frozen visual test before runtime", () => services.VisualTests.RunAsync("A", "gpt-6-astra", VisualTestKind.Static, VisualTestCatalog.Variants[0].Id));
+        await Rejected("service rejects frozen visual test before runtime", () => services.VisualTests.RunAsync("A", "gpt-6-astra", VisualTestKind.Static, "fixture still life"));
         await Rejected("service rejects frozen Ciallo before transport", () => services.Accounts.TestCialloAsync("A"));
         await Rejected("service rejects frozen connectivity test before transport", () => services.Accounts.TestAccountAsync("A"));
-        await Rejected("service rejects frozen legacy fingerprint before transport", () => services.Accounts.TestFingerprintAsync("A", "gpt-6-astra", []));
         oldPanel.StartAllCommand.Execute(null); await oldPanel.CurrentOperation;
         check("batch skips frozen account even when panel predates freeze", runtime.Requests.Count == 1 && runtime.Requests.Single().Profile == "B" && oldPanel.BatchRows.Count == 1 && oldPanel.BatchRows[0].Profile == "B");
         model.Selected = model.FilteredItems.Single(item => item.Name == "B"); model.ToggleTestFreezeCommand.Execute(null);
@@ -57,7 +56,7 @@ internal static class AccountFreezeVerification
         model.Selected = model.FilteredItems.Single(item => item.Name == "A"); model.ToggleTestFreezeCommand.Execute(null);
         check("unfreeze enables a new manual test without automatically requesting", !workspace.Profiles.AreTestsFrozen("A") && runtime.Requests.Count == 1 && oldCiallo.StartCommand.CanExecute(null));
         runtime.ReplyFactory = (profile, _, _) => { workspace.Profiles.SetTestsFrozen(profile, true); return Task.FromResult(OfflineVisualTestRuntime.Svg); };
-        var partial = await services.VisualTests.RunAsync("A", "gpt-6-astra", VisualTestKind.Revision, VisualTestCatalog.Variants[0].Id);
+        var partial = await services.VisualTests.RunAsync("A", "gpt-6-astra", VisualTestKind.Revision, "fixture still life");
         check("freeze between stages prevents every later model request", !partial.Completed && partial.Steps.Count == 1 && partial.Message.Contains("冻结") && runtime.Requests.Count == 2);
         workspace.Profiles.SetTestsFrozen("A", false); runtime.ReplyFactory = null;
         var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);

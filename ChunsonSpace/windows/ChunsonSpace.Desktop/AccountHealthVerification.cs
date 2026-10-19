@@ -72,7 +72,7 @@ internal static class AccountHealthVerification
                     button.Command.Execute(null); Check(key+" duplicate blocked",!button.Command.CanExecute(null)&&transport.RequestCount==2);
                     Layout(); Capture("running");
                     Check(key+" cancel visible",UiVerification.FullyVisible((Button)window.FindName("HealthCancelButton"),root));
-                    Check(key+" lifecycle protects global mutations",model.IsModelTestRunning&&!model.RebuildCommand.CanExecute(null)&&!model.RestoreBackupCommand.CanExecute(null));
+                    Check(key+" lifecycle protects global mutations",model.IsModelTestRunning&&!model.RebuildCommand.CanExecute(null));
                     panel.CloseCommand.Execute(null); Check(key+" background running",!model.IsAccountHealthOpen&&model.IsModelTestRunning);
                     model.OpenBackgroundModelCommand.Execute(null); Check(key+" recover same panel",ReferenceEquals(panel,model.AccountHealth)&&transport.RequestCount==2);
                     fast.SetResult(); await BackgroundAccountTestsVerification.Until(()=>panel.Rows.Single(r=>r.Profile=="SYNTHETIC-B").Finished);

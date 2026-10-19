@@ -45,7 +45,7 @@ public sealed record ManagedCloneLaunchOptions(string CodexHome, string DesktopR
 }
 
 /// <summary>PID reuse cannot transfer ownership; descendants require a verified live parent.</summary>
-public sealed class ManagedCloneProcessScope(IProcessSystem system, IOwnedProcessStore store)
+public sealed class ManagedCloneProcessScope(IProcessSystem system, IOwnedProcessStore store, string? desktopRoot = null)
 {
     public bool OwnsPid(int pid) => Selected(system.Snapshot()).Any(process => process.Pid == pid);
     public Task<StopResult> StopOwnedAsync(CancellationToken token) => new CodexProcessService(system, new SystemWaitClock(), this).StopAsync(ProcessScope.DesktopAndCli, token);
@@ -67,23 +67,57 @@ public sealed class ManagedCloneProcessScope(IProcessSystem system, IOwnedProces
         // whose immediate parents have already exited. PID reuse is not ownership.
         return Selected(snapshot).Count == 0;
     }
-    public IReadOnlyList<ProcessIdentity> Selected(IReadOnlyList<ProcessIdentity> snapshot)
+    public IReadOnlyList<ProcessIdentity> Selected(IReadOnlyList<ProcessIdentity> snapshot, ICollection<string>? unresolved = null)
     {
-        var records = store.Read().Where(record => record.Kind is OwnedProcessKind.Desktop or OwnedProcessKind.DesktopChild).ToArray();
+        // Forced maintenance uses the same selector, but stops confirmed targets even
+        // when another target is uncertain. The caller must not discard on uncertainty.
+        void Reject(string reason, string message)
+        {
+            if (unresolved is null) throw new OwnedProcessScopeException(reason, message);
+            unresolved.Add(reason);
+        }
+        IReadOnlyList<OwnedProcessRecord> saved;
+        bool canPersist = true;
+        var fresh = desktopRoot is null ? [] : system.ManagedRoots(desktopRoot).Where(root => snapshot.Any(p => Same(p, root))).ToArray();
+        try { saved = store.Read(); }
+        catch (Exception error) when (error is System.Text.Json.JsonException or InvalidDataException)
+        {
+            var recovered = fresh.Select(p => new OwnedProcessRecord(p, OwnedProcessKind.Desktop, "受管分身", DateTimeOffset.UtcNow.ToString("O"))).ToArray();
+            if (!store.RecoverVerified(recovered, preserveDamaged: unresolved is null))
+            {
+                if (unresolved is null) throw;
+                unresolved.Add("ownership-unreadable"); canPersist = false;
+            }
+            saved = recovered;
+        }
+        catch (Exception error) when (unresolved is not null && error is IOException or UnauthorizedAccessException or StorageException)
+        { unresolved.Add("ownership-unreadable"); canPersist = false; saved = []; }
+        foreach (var root in fresh)
+            if (unresolved is null && !saved.Any(r => Same(r.Identity, root)))
+            {
+                if (!RegisterRoot(root, "受管分身")) throw new IOException("分身归属恢复未完成");
+                saved = store.Read();
+            }
+        var records = saved.Where(record => record.Kind is OwnedProcessKind.Desktop or OwnedProcessKind.DesktopChild).ToArray();
         if (records.Any(record => record.Identity.CreationTime <= 0 || record.Identity.Executable.Length == 0))
-            throw new InvalidDataException("分身所有权记录缺少创建时间或路径");
-        var selected = new Dictionary<int, ProcessIdentity>();
+        {
+            if (unresolved is null) throw new InvalidDataException("分身所有权记录缺少创建时间或路径");
+            Reject("identity-incomplete", "分身所有权记录缺少创建时间或路径");
+        }
+        var selected = unresolved is null ? new Dictionary<int, ProcessIdentity>() : fresh.ToDictionary(p => p.Pid);
         foreach (var record in records)
         {
             var live = snapshot.FirstOrDefault(process => process.Pid == record.Identity.Pid);
             if (live is null) continue;
-            if (live.CreationTime <= 0 || live.Executable.Length == 0) throw new IOException("分身进程身份不可读，停止清理");
+            if (live.CreationTime <= 0 || live.Executable.Length == 0) { Reject("identity-unreadable", "分身进程身份不可读，停止清理"); continue; }
             if (Same(live, record.Identity)) selected[live.Pid] = live;
         }
         foreach (var child in snapshot)
-            if (!selected.ContainsKey(child.Pid) && records.Any(record => record.Identity.Pid == child.ParentPid && child.CreationTime >= record.Identity.CreationTime)
+            if (!selected.ContainsKey(child.Pid) && records.Any(record => record.Identity.Pid == child.ParentPid
+                    && (child.CreationTime <= 0 || child.Executable.Length == 0 || child.CreationTime >= record.Identity.CreationTime)
+                    && !HasVerifiedReplacementParent(child, record.Identity, snapshot))
                 && !records.Any(record => Same(record.Identity, child)) && !selected.ContainsKey(child.ParentPid))
-                throw new IOException("发现尚未观测所有权的孤儿子进程，停止清理运行数据");
+                Reject("unobserved-orphan", "发现尚未观测所有权的孤儿子进程，停止清理运行数据");
         bool added;
         do
         {
@@ -91,18 +125,34 @@ public sealed class ManagedCloneProcessScope(IProcessSystem system, IOwnedProces
             foreach (var child in snapshot)
                 if (!selected.ContainsKey(child.Pid) && selected.TryGetValue(child.ParentPid, out var parent))
                 {
-                    if (child.CreationTime <= 0 || child.Executable.Length == 0) throw new IOException("分身子进程身份不可读，停止清理");
+                    if (child.CreationTime <= 0 || child.Executable.Length == 0) { Reject("child-identity-unreadable", "分身子进程身份不可读，停止清理"); continue; }
                     if (child.CreationTime >= parent.CreationTime) { selected.Add(child.Pid, child); added = true; }
                 }
         } while (added);
         // Persist children while the parent is alive, so later parent exit does not orphan ownership.
-        if (selected.Count > 0)
+        if (selected.Count > 0 && canPersist)
         {
+            try
+            {
             var update = store.Update(latest => latest.Where(record => !selected.ContainsKey(record.Identity.Pid)).Concat(selected.Values.Select(identity =>
                 records.FirstOrDefault(record => Same(record.Identity, identity)) ?? new(identity, OwnedProcessKind.DesktopChild, "受管分身", DateTimeOffset.UtcNow.ToString("O")))).ToArray());
-            if (!update.Success) throw new IOException("分身进程所有权保存失败");
+            if (!update.Success) Reject("ownership-update-failed", "分身进程所有权保存失败");
+            }
+            catch (Exception error) when (unresolved is not null && error is IOException or UnauthorizedAccessException or StorageException or System.Text.Json.JsonException)
+            { unresolved.Add("ownership-update-failed"); }
         }
         return selected.Values.ToArray();
+    }
+
+    private static bool HasVerifiedReplacementParent(ProcessIdentity child, ProcessIdentity recordedParent, IReadOnlyList<ProcessIdentity> snapshot)
+    {
+        if (child.CreationTime <= 0 || child.Executable.Length == 0) return false;
+        var parent = snapshot.FirstOrDefault(process => process.Pid == child.ParentPid);
+        // A reused PID alone is not evidence. Both identities must be readable,
+        // and this child must have started after the strictly newer live parent.
+        // An older/unknown child or a missing parent still blocks cleanup.
+        return parent is not null && parent.Executable.Length > 0
+            && parent.CreationTime > recordedParent.CreationTime && child.CreationTime >= parent.CreationTime;
     }
 
     public bool RegisterRoot(ProcessIdentity identity, string name)

@@ -34,7 +34,10 @@ public interface IResolvedProxyProfilePreparation : IProfilePreparation
     Task<IReadOnlyList<string>> PrepareWithProxyAsync(IdentityRef target, string resolvedProxy, CancellationToken cancellationToken);
 }
 
-public sealed record LaunchEgressEvidence(bool Success, string Ip, string Timezone, string Message);
+public sealed record LaunchEgressEvidence(bool Success, string Ip, string Timezone, string Message)
+{
+    public ExitAddresses Addresses { get; init; } = ExitAddresses.Unknown;
+}
 public interface ILaunchEgressProbe
 {
     Task<LaunchEgressEvidence> ProbeAsync(IdentityRef identity, string resolvedProxy, CancellationToken cancellationToken);
@@ -55,9 +58,13 @@ public interface IRuntimeOperations
     Task<DesktopLaunchPreparation> PrepareLaunchAsync(DesktopLaunchRequest request, CancellationToken cancellationToken)
         => Task.FromResult(new DesktopLaunchPreparation(true, request));
     Task<IDisposable?> BeginLaunchAsync(CancellationToken cancellationToken) => Task.FromResult<IDisposable?>(null);
+    Task<StopResult> PrepareMaintenanceAsync(CancellationToken cancellationToken) => Task.FromResult(new StopResult(true, false, "", []));
+    Task<StopResult> PrepareMaintenanceAsync(CancellationToken cancellationToken, bool discard) => PrepareMaintenanceAsync(cancellationToken);
     Task<DesktopLaunchResult?> CheckPendingAsync(CancellationToken cancellationToken);
     Task<StopResult> StopAsync(ProcessScope scope, CancellationToken cancellationToken);
+    Task<StopResult> StopAsync(ProcessScope scope, CancellationToken cancellationToken, bool force) => StopAsync(scope, cancellationToken);
     Task<StopResult> ConfirmStoppedAsync(ProcessScope scope, CancellationToken cancellationToken);
+    Task<StopResult> ConfirmStoppedAsync(ProcessScope scope, CancellationToken cancellationToken, bool force) => ConfirmStoppedAsync(scope, cancellationToken);
     Task<TimezoneResult> SwitchTimezoneAsync(IdentityRef identity, EnvironmentSettings environment, bool enabled, CancellationToken cancellationToken);
     Task<TimezoneResult> EnsureTimezoneForLaunchAsync(IdentityRef identity, EnvironmentSettings environment, bool enabled, CancellationToken cancellationToken);
     Task<TimezoneResult> RestoreTimezoneAsync(CancellationToken cancellationToken);
@@ -74,7 +81,12 @@ public sealed class WindowsRuntimeOperations(CodexProcessService processes, Desk
         var value = await launchSystem.CheckPendingAsync(cancellationToken);
         return value is null ? null : new(value.Status, false, value.Pid, value.Method, value.Message, value.StateDirectory);
     }
+    public Task<StopResult> PrepareMaintenanceAsync(CancellationToken cancellationToken) => Task.FromResult(launchSystem is WindowsDesktopLaunchSystem native ? native.CancelPendingForMaintenance(cancellationToken) : new StopResult(true, false, "", []));
+    public Task<StopResult> PrepareMaintenanceAsync(CancellationToken cancellationToken, bool discard) => Task.FromResult(launchSystem is WindowsDesktopLaunchSystem native ? native.CancelPendingForMaintenance(cancellationToken, discard) : new StopResult(true, false, "", []));
     public Task<StopResult> StopAsync(ProcessScope scope, CancellationToken cancellationToken) => processes.StopAsync(scope, cancellationToken);
+    public Task<StopResult> StopAsync(ProcessScope scope, CancellationToken cancellationToken, bool force) => processes.StopAsync(scope, cancellationToken, force);
+    public Task<StopResult> ConfirmStoppedAsync(ProcessScope scope, CancellationToken cancellationToken, bool force)
+    { cancellationToken.ThrowIfCancellationRequested(); return Task.FromResult(processes.ConfirmStopped(scope, force)); }
     public Task<StopResult> ConfirmStoppedAsync(ProcessScope scope, CancellationToken cancellationToken)
     { cancellationToken.ThrowIfCancellationRequested(); return Task.FromResult(processes.ConfirmStopped(scope)); }
     public Task<TimezoneResult> SwitchTimezoneAsync(IdentityRef identity, EnvironmentSettings environment, bool enabled, CancellationToken cancellationToken) => timezone.SwitchAsync(identity.Name, environment.Timezone, enabled, cancellationToken);

@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using ChunsonSpace.Core;
@@ -24,8 +24,23 @@ public sealed class DelegateCommand(Action<object?> execute, Func<object?, bool>
     public void Refresh() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 }
 
-public sealed record IdentityItem(string Name, string Kind, string Subtitle, string Initials, string Color, string Proxy, string Timezone, string Locale, string Model, bool FollowSystemProxy = false, bool TestsFrozen = false, AccountMarks? Marks = null)
+public sealed record IdentityItem(string Name, string Kind, string Subtitle, string Initials, string Color, string Proxy, string Timezone, string Locale, string Model, bool FollowSystemProxy = false, bool TestsFrozen = false, AccountMarks? Marks = null, DateTimeOffset? LoggedInAt = null, string? DisplayName = null) : INotifyPropertyChanged
 {
+    public string Label => DisplayName ?? Name;
+    public event PropertyChangedEventHandler? PropertyChanged;
+    private string loginTimeLabel = FormatLoginHours(LoggedInAt, DateTimeOffset.UtcNow);
+    public string LoginTimeLabel => loginTimeLabel;
+    public string LoginTimeSummary => "已登录：" + LoginTimeLabel;
+    internal static string FormatLoginHours(DateTimeOffset? first, DateTimeOffset now) => first is { } time
+        ? Math.Max(0, (now - time).TotalHours).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " 小时" : "未知";
+    internal void RefreshLoginTime(DateTimeOffset now)
+    {
+        var next = FormatLoginHours(LoggedInAt, now);
+        if (next == loginTimeLabel) return;
+        loginTimeLabel = next;
+        PropertyChanged?.Invoke(this, new(nameof(LoginTimeLabel)));
+        PropertyChanged?.Invoke(this, new(nameof(LoginTimeSummary)));
+    }
     public string Key => $"{Kind}:{Name}";
     public IdentityRef Identity => new(Kind == "Account" ? IdentityKind.Account : IdentityKind.Provider, Name);
     public EnvironmentSettings Environment => new(Proxy, Timezone, Locale, FollowSystemProxy: FollowSystemProxy);
@@ -48,7 +63,6 @@ public sealed record IdentityItem(string Name, string Kind, string Subtitle, str
     public string KindLabel => Kind == "Account" ? "账号档案" : "历史档案";
 }
 
-public sealed record BackupItem(string Name, string Created, string Contents);
 
 public static class PreviewDataSource
 {
@@ -69,7 +83,11 @@ public static class PreviewDataSource
 
 public sealed partial class ShellViewModel : ObservableObject
 {
-    private string page = "Accounts";
+    internal void RefreshLoginTimes(DateTimeOffset now)
+    {
+        foreach (var identity in identities) identity.RefreshLoginTime(now);
+    }
+    private string page = "Dashboard";
     private string search = "";
     private IdentityItem? selected;
     private IdentityItem? active = PreviewDataSource.Identities[0];
@@ -78,30 +96,29 @@ public sealed partial class ShellViewModel : ObservableObject
     private string feedbackTitle = "准备就绪";
     private string feedbackKind = "Info";
     private bool isolateSessions = true;
-    private bool closeToTray;
+    private bool closeToTray = true;
 
     public ShellViewModel(DesktopWorkspace? workspace = null)
     {
         selected = PreviewDataSource.Identities[1];
-        NavigateCommand = new(p => Navigate(p?.ToString() ?? "Accounts"), _ => !operationBusy);
+        NavigateCommand = new(p => Navigate(p?.ToString() ?? "Dashboard"), _ => !operationBusy);
         SimulateSwitchCommand = new(_ => SimulateSwitch(false), _ => Selected is not null);
         SimulateLaunchCommand = new(_ => SimulateSwitch(true), _ => Selected is not null);
         SimulateFailureCommand = new(_ => ShowError());
         ClearSearchCommand = new(_ => { AccountFilter = "全部账号"; Search = ""; });
-        SimulateBackupCommand = new(_ => ShowFeedback("模拟备份完成", "模拟备份流程已完成；没有读取或写入真实档案。", "Success"));
-        SimulateRestoreCommand = new(_ => ShowFeedback("模拟恢复完成", "演示状态已恢复；没有覆盖真实环境。", "Success"));
         SaveSettingsCommand = new(_ => SaveSettings(), _ => !busy);
         ShowClockCommand = new(_ => ShowClock(), _ => workspace is { IsFixture: false });
         UnavailableCommand = new(_ => { }, _ => false);
         InitializeWorkspace(workspace);
+        InitializeUpdateCommands();
+        RefreshBeijingTime(DateTimeOffset.UtcNow);
+        ResultsGallery.Enter();
     }
     public DelegateCommand NavigateCommand { get; }
     public DelegateCommand SimulateSwitchCommand { get; }
     public DelegateCommand SimulateLaunchCommand { get; }
     public DelegateCommand SimulateFailureCommand { get; }
     public DelegateCommand ClearSearchCommand { get; }
-    public DelegateCommand SimulateBackupCommand { get; }
-    public DelegateCommand SimulateRestoreCommand { get; }
     public DelegateCommand SaveSettingsCommand { get; }
     public DelegateCommand ShowClockCommand { get; }
     public void ShowClock()
@@ -115,13 +132,12 @@ public sealed partial class ShellViewModel : ObservableObject
     public string Page => page;
     public bool IsIdentityPage => page == "Accounts";
     public bool IsAccountsPage => page == "Accounts";
-    public bool IsBackupsPage => page == "Backups";
     public bool IsSettingsPage => page == "Settings";
-    public bool IsProxyPage => page == "Proxy";
-    public string PageTitle => page switch { "Backups" => "备份与恢复", "Settings" => "设置", "Proxy" => "代理与 DNS", _ => "账号首页" };
-    public string PageDescription => page switch { "Backups" => "创建账号库备份，恢复授权和登录配置。", "Settings" => "管理唯一受管分身与桌面行为。", "Proxy" => "配置 FlClash DNS 与订阅 IP。", _ => "授权资料独立保留，切换时载入唯一受管分身。" };
+    public bool IsProxyPage => false;
+    public string PageTitle => page switch { "Settings" => "设置", "Dashboard" => "仪表盘", "Tests" => "测试", "Results" => "结果", _ => "账号" };
+    public string PageDescription => page switch { "Settings" => "管理唯一受管分身与桌面行为。", "Proxy" => "配置 FlClash DNS 与订阅 IP。", _ => "授权资料独立保留，切换时载入唯一受管分身。" };
     public string Search { get => search; set { if (Set(ref search, value)) UpdateItems(); } }
-    public IEnumerable<IdentityItem> FilteredItems => identities.Where(i => i.Kind == "Account" && (!IsAccountsPage || accountFilter == "全部账号" || accountFilter == "当前使用" && i.Key == active?.Key || accountFilter == "待登录" && i.SavedStateLabel == "待登录") && (string.IsNullOrWhiteSpace(search) || i.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || i.Subtitle.Contains(search, StringComparison.OrdinalIgnoreCase))).ToArray();
+    public IEnumerable<IdentityItem> FilteredItems => identities.Where(i => i.Kind == "Account" && (!IsAccountsPage || accountFilter == "全部账号" || accountFilter == "当前使用" && i.Key == active?.Key || accountFilter == "待登录" && i.SavedStateLabel == "待登录") && (string.IsNullOrWhiteSpace(search) || (i.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || i.Label.Contains(search, StringComparison.OrdinalIgnoreCase)) || i.Subtitle.Contains(search, StringComparison.OrdinalIgnoreCase))).ToArray();
     public int ItemCount => FilteredItems.Count();
     public string ItemCountLabel => $"{ItemCount} 个档案";
     public bool IsEmpty => ItemCount == 0;
@@ -135,7 +151,7 @@ public sealed partial class ShellViewModel : ObservableObject
     public IdentityItem? Selected { get => selected; set { if (updatingIdentityPage && value is null) return; if (value is not null) EnsureIdentityVisible(value); if (Set(ref selected, value)) { Raise(nameof(HasSelection)); Raise(nameof(HasNoSelection)); Raise(nameof(SelectedIsActive)); Raise(nameof(IdentityState)); NotifyHomeDetails(); SimulateSwitchCommand.Refresh(); SimulateLaunchCommand.Refresh(); RefreshSelectionCommands(); } } }
     public IdentityItem? Active => active;
     public bool SelectedIsActive => selected is not null && selected.Key == active?.Key;
-    public string ActiveLabel => active is null ? "尚未载入账号" : $"{active.Name} · {active.KindLabel}";
+    public string ActiveLabel => active is null ? "尚未载入账号" : $"{active.Label} · {active.KindLabel}";
     public string RunningLabel => workspace is null ? "未运行 · 演示" : launchInProgress ? "正在启动" : lastOutcome == ChunsonSpace.Application.OperationOutcome.PendingLaunch ? "启动待确认"
         : runningIdentity is not null ? $"{runningIdentity.Name} · {(workspace.IsFixture ? "隔离替身 · " : "")}运行中" : runtimeProcessAlive ? "运行中 · 账号待确认" : runtimeExited ? "已退出" : "未运行";
     public IdentityState IdentityState => new(Selected?.Identity, Active?.Identity, runningIdentity);
@@ -147,21 +163,25 @@ public sealed partial class ShellViewModel : ObservableObject
     public string FeedbackAccent => IsError ? "#AE493C" : "#246B55";
     public bool IsolateSessions { get => isolateSessions; set { if (Set(ref isolateSessions, value)) Raise(nameof(EnvironmentSummary)); } }
     public bool CloseToTray { get => closeToTray; set => Set(ref closeToTray, value); }
-    public IReadOnlyList<BackupItem> Backups { get; private set; } = [new("演示 · 工作环境快照", "2026-10-13 09:40", "3 个账号 · 环境配置"), new("演示 · 修改前自动快照", "2026-10-12 18:20", "档案与配置 · 演示记录")];
     public void Navigate(string target)
     {
-        if (target is not ("Accounts" or "Backups" or "Settings" or "Proxy" or "Results")) return;
+        if (target is not ("Dashboard" or "Accounts" or "Tests" or "Settings" or "Results")) return;
+        if (page == target) return;
         CloseArtwork();
-        page = target; search = ""; accountFilter = "全部账号"; Raise(nameof(AccountFilter));
+        page = target;
         IsDetailOpen = false;
         diagnosticOpen = false; Raise(nameof(IsDiagnosticOpen));
-        foreach (var name in new[] { nameof(Page), nameof(IsIdentityPage), nameof(IsAccountsPage), nameof(IsBackupsPage), nameof(IsSettingsPage), nameof(IsProxyPage), nameof(PageTitle), nameof(PageDescription), nameof(Search) }) Raise(name);
+        foreach (var name in new[] { nameof(Page), nameof(IsDashboardPage), nameof(IsTestsPage), nameof(IsIdentityPage), nameof(IsAccountsPage), nameof(IsSettingsPage), nameof(IsProxyPage), nameof(PageTitle), nameof(PageDescription), nameof(Search) }) Raise(name);
         UpdateItems();
         Raise(nameof(IsResultsPage));
         Raise(nameof(IsWorkspacePage));
-        if (IsResultsPage) ResultsGallery.Enter();
-        if (IsIdentityPage) Selected = FilteredItems.FirstOrDefault();
-        if (IsProxyPage) ProxyPanel.EnterPage();
+        if (IsResultsPage || IsDashboardPage)
+        {
+            ResultsGallery.SetProfileScope(IsSingleAccountMode ? DisplayedAccount?.Name ?? "" : null);
+            ResultsGallery.Enter();
+        }
+        else resultsGallery?.Leave();
+        if (IsIdentityPage && Selected is null) Selected = FilteredItems.FirstOrDefault();
     }
     public void ShowError() => ShowFeedback("模拟切换未完成", "启动确认失败。已恢复原演示状态；恢复材料保留，当前活动身份未改变。", "Error");
     private void SimulateSwitch(bool launch)

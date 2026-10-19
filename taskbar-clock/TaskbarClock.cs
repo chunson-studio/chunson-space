@@ -12,7 +12,12 @@ using System.Windows.Interop;
 using System.Windows.Threading;
 using Microsoft.Win32;
 
+[assembly: System.Reflection.AssemblyVersion("1.0.0.0")]
+[assembly: System.Reflection.AssemblyFileVersion("1.0.0.0")]
+[assembly: System.Reflection.AssemblyProduct("Chunson Beijing Clock")]
+[assembly: System.Reflection.AssemblyTitle("北京时间")]
 public class ClockWindow : Window {
+ [System.Runtime.InteropServices.DllImport("shell32.dll", CharSet=System.Runtime.InteropServices.CharSet.Unicode)] static extern int SetCurrentProcessExplicitAppUserModelID(string appId);
  const string WindowTitle="Chun Beijing Taskbar Clock";
  readonly TextBlock time = new TextBlock();
  readonly TextBlock date = new TextBlock();
@@ -35,6 +40,7 @@ public class ClockWindow : Window {
  int lastHour=-1;
  public static DateTimeOffset Beijing(DateTimeOffset utc){return utc.ToOffset(TimeSpan.FromHours(8));}
  public ClockWindow(){
+  using(var icon=typeof(ClockWindow).Assembly.GetManifestResourceStream("Chunson.BeijingClock.ico")){if(icon!=null){Icon=System.Windows.Media.Imaging.BitmapFrame.Create(icon,System.Windows.Media.Imaging.BitmapCreateOptions.None,System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);}}
   Title=WindowTitle;Width=220;Height=38;WindowStyle=WindowStyle.None;ResizeMode=ResizeMode.NoResize;
   AllowsTransparency=true;Background=Brushes.Transparent;ShowInTaskbar=false;ShowActivated=false;Topmost=true;
   FontFamily=new FontFamily("Microsoft YaHei UI");UseLayoutRounding=true;
@@ -155,7 +161,7 @@ public class ClockWindow : Window {
   bool created;
   using(var singleton=new System.Threading.Mutex(true,"Local\\Chunson.BeijingClock",out created)){
    if(!created)return 0;
-   try{Native.Dpi();var app=new Application();app.Run(new ClockWindow());return 0;}
+   try{SetCurrentProcessExplicitAppUserModelID("Chunson.BeijingClock");Native.Dpi();var app=new Application();app.Run(new ClockWindow());return 0;}
    finally{singleton.ReleaseMutex();}
   }
  }

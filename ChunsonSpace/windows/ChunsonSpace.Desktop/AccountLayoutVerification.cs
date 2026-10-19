@@ -88,7 +88,7 @@ internal static class AccountLayoutVerification
                     && UiVerification.Bounds(table, root).Bottom <= UiVerification.Bounds((FrameworkElement)window.FindName("ActiveOperationBar"), root).Top + 1);
                 check(name + " summary and empty guidance", UiVerification.HomeDetailsFullyVisible(window, root, model, Path.Combine(directory, name + "-detail-failure.json"))
                     && (count != 0 || model.Selected is null && UiVerification.FullyVisible((FrameworkElement)window.FindName("EmptyAccountTitle"), root)
-                        && !model.QuotaCommand.CanExecute(null) && !model.RefreshAccountCommand.CanExecute(null) && !model.ChooseCialloCommand.CanExecute(null) && !model.ChooseVisualTestCommand.CanExecute(null)));
+                        && !model.QuotaCommand.CanExecute(null) && !model.RefreshAccountCommand.CanExecute(null) && !model.ChooseVisualTestCommand.CanExecute(null)));
                 check(name + " no requests from navigation layout theme or F5", transport.RequestCount == 0 && ((OfflineLoginBrowser)services.Browser).OpenCount == 0);
                 facts.Add(new { name, count, dark, size.Width, size.Height, tableHeight = table.ActualHeight,
                     tableWidth = table.ActualWidth, detailWidth = detail.ActualWidth, viewportHeight = viewport.ActualHeight, capacity, shown = list.Items.Count });

@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Security.Cryptography;
@@ -27,9 +27,9 @@ public sealed class SavedResultRow : ObservableObject
     public SafetyBufferingObservation? Safety { get; init; }
     public VisualTestResult? Visual { get; init; }
     public int StepIndex { get; init; } = -1;
-    public bool HasArtwork => Visual is not null && StepIndex >= 0 && Visual.Steps[StepIndex].Artifact is not null;
+    public bool HasArtwork => Visual is not null && Visual.Kind != VisualTestKind.Animation && StepIndex >= 0 && Visual.Steps[StepIndex].Artifact is not null;
     public string Identity => $"{Model} / 思考：{ModelTestParameters.EffortLabel(Effort)} · {Profile} · {Started.ToLocalTime():yyyy-MM-dd HH:mm:ss}";
-    public string TaskLabel => TaskType + (Visual?.Kind == VisualTestKind.Variation ? " · " + (VisualTestCatalog.Variants.FirstOrDefault(v=>v.Id==Visual.Variant)?.Title ?? Visual.Variant) : "") + $" · {Stage} · {State}";
+    public string TaskLabel => TaskType + (Visual?.Kind == VisualTestKind.Variation ? " · " + Visual.Variant : "") + $" · {Stage} · {State}";
     private string? promptHash;
     public string PromptHash => promptHash ??= Prompt.Length == 0 ? "" : Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(Prompt))).ToLowerInvariant();
     public string VersionLabel => $"题目版本 {Version} · " + (PromptHash.Length == 0 ? "题目原文未保存" : $"题目标识 {PromptHash[..12]}");
@@ -141,11 +141,13 @@ public sealed class ResultsGalleryViewModel : ObservableObject
     private readonly ResultRows rows = [];
     private string search = "", profile = "全部账号", type = "全部任务", state = "全部状态", order = "最新优先", status = "正在读取本机结果…";
     private bool loading;
-    private bool reloadAfterLoad;
+    private bool dirty = true;
+    private bool active;
+    private int generation;
     public ResultsGalleryViewModel(Func<SavedResultsSnapshot> read, Action<IReadOnlyList<SavedResultRow>> open)
     {
         this.read = read; this.open = open; Items = CollectionViewSource.GetDefaultView(rows); Items.Filter = Matches;
-        RefreshCommand = new(_ => CurrentLoad = LoadAsync(), _ => !loading);
+        RefreshCommand = new(_ => { Invalidate(); Enter(); }, _ => !loading);
         CompareCommand = new(_ => open(rows.Where(r => r.Selected).ToArray()), _ => rows.Count(r => r.Selected) == 2);
         ClearCommand = new(_ => { Search = ""; Profile = "全部账号"; Type = "全部任务"; State = "全部状态"; foreach (var row in rows) row.Selected = false; });
         Sort();
@@ -178,11 +180,18 @@ public sealed class ResultsGalleryViewModel : ObservableObject
     }, open);
     public ICollectionView Items { get; }
     public IReadOnlyList<string> Profiles { get; private set; } = ["全部账号"];
-    public IReadOnlyList<string> Types { get; } = ["全部任务", "Ciallo", "鹈鹕静态 SVG", "鹈鹕动画", "动物与机械", "检查并改进"];
+    public IReadOnlyList<string> Types { get; } = ["全部任务", "静态绘图", "Ciallo", "鹈鹕静态 SVG", "鹈鹕动画", "动物与机械", "检查并改进"];
     public IReadOnlyList<string> States { get; } = ["全部状态", "已完成", "未完成", "已取消"];
     public IReadOnlyList<string> Orders { get; } = ["最新优先", "最早优先"];
     public string Search { get => search; set { if (Set(ref search, value)) Filter(); } }
     public string Profile { get => profile; set { if (value is not null && Set(ref profile, value)) Filter(); } }
+    private string? scopeProfile;
+    internal void SetProfileScope(string? value)
+    {
+        var next = value ?? "全部账号";
+        if (scopeProfile == value && profile == next) return;
+        scopeProfile = value; profile = next; Raise(nameof(Profile)); Filter();
+    }
     public string Type { get => type; set { if (value is not null && Set(ref type, value)) Filter(); } }
     public string State { get => state; set { if (value is not null && Set(ref state, value)) Filter(); } }
     public string Order { get => order; set { if (value is not null && Set(ref order, value)) Sort(); } }
@@ -196,17 +205,25 @@ public sealed class ResultsGalleryViewModel : ObservableObject
     public DelegateCommand CompareCommand { get; }
     public DelegateCommand ClearCommand { get; }
     public DelegateCommand ClearHistoryCommand { get; internal set; } = new(_ => { }, _ => false);
-    internal void DiscardCachedResults() { rows.Replace([]); Filter(); SelectionChanged(); }
-    public void Enter() { if (loading) reloadAfterLoad=true; else CurrentLoad = LoadAsync(); }
-    private bool Matches(object item) => item is SavedResultRow row && (profile == "全部账号" || row.Profile == profile) && (type == "全部任务" || row.TaskType == type) && (state == "全部状态" || row.State == state) && (string.IsNullOrWhiteSpace(search) || (row.Identity + " " + row.TaskLabel + " " + row.VersionLabel).Contains(search.Trim(), StringComparison.OrdinalIgnoreCase));
+    internal void Invalidate() { generation++; dirty = true; }
+    internal void DiscardCachedResults() { Invalidate(); rows.Replace([]); Filter(); SelectionChanged(); }
+    internal void Leave() => active = false;
+    public void Enter() { active = true; if (!loading && dirty) CurrentLoad = LoadAsync(); }
+    private bool Matches(object item) => item is SavedResultRow row && (scopeProfile is null || row.Profile == scopeProfile) && (profile == "全部账号" || row.Profile == profile) && (type == "全部任务" || row.TaskType == type) && (state == "全部状态" || row.State == state) && (string.IsNullOrWhiteSpace(search) || (row.Identity + " " + row.TaskLabel + " " + row.VersionLabel).Contains(search.Trim(), StringComparison.OrdinalIgnoreCase));
     private void Filter() { Items.Refresh(); Raise(nameof(IsEmpty)); Raise(nameof(EmptyText)); Raise(nameof(CountLabel)); }
     private void Sort() { using (Items.DeferRefresh()) { Items.SortDescriptions.Clear(); Items.SortDescriptions.Add(new(nameof(SavedResultRow.Started), order == "最早优先" ? ListSortDirection.Ascending : ListSortDirection.Descending)); Items.SortDescriptions.Add(new(nameof(SavedResultRow.Id), ListSortDirection.Ascending)); } Raise(nameof(CountLabel)); }
     private async Task LoadAsync()
     {
+        var requestedGeneration = generation;
+        var failed = false;
+        dirty = false;
         loading = true; Raise(nameof(IsLoading)); Raise(nameof(IsEmpty)); RefreshCommand.Refresh(); Status = "正在读取本机保存的结果…";
         try
         {
             var snapshot = await Task.Run(() => { var loaded = read(); foreach (var row in loaded.Rows) _ = row.PromptHash; return loaded; });
+            // A clear, account removal or newer result can invalidate an in-flight
+            // snapshot. Never republish that older result after the UI has cleared it.
+            if (requestedGeneration != generation) return;
             var selection = rows.Where(r => r.Selected).Select(r => r.Id).ToHashSet(StringComparer.Ordinal);
             foreach (var row in snapshot.Rows)
             {
@@ -218,8 +235,13 @@ public sealed class ResultsGalleryViewModel : ObservableObject
             if (!Profiles.Contains(profile)) Profile = "全部账号";
             Status = snapshot.Warning.Length == 0 ? "全部保存结果 · 仅本机读取；冻结账号也可查看。勾选两件作品即可并排比较。" : "有些历史记录无法读取，能读取的结果已显示。原文件保留，可刷新重试。";
         }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException or StorageException or AccountException or ArgumentException) { Status = "本机结果暂时无法读取，请检查文件是否还在，再刷新重试。"; }
-        finally { loading = false; Raise(nameof(IsLoading)); RefreshCommand.Refresh(); Filter(); SelectionChanged(); if(reloadAfterLoad) { reloadAfterLoad=false; CurrentLoad=LoadAsync(); } }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or StorageException or AccountException or ArgumentException)
+        { failed = true; dirty = true; Status = "本机结果暂时无法读取，请检查文件是否还在，再刷新重试。"; }
+        finally
+        {
+            loading = false; Raise(nameof(IsLoading)); RefreshCommand.Refresh(); Filter(); SelectionChanged();
+            if (dirty && active && !failed) CurrentLoad = LoadAsync();
+        }
     }
     private void SelectionChanged() { CompareCommand.Refresh(); Raise(nameof(CountLabel)); }
 }
@@ -235,7 +257,7 @@ public sealed partial class ShellViewModel
             {
                 resultsGallery = ResultsGalleryViewModel.Create(workspace?.Accounts, OpenSavedWorks);
                 resultsGallery.ClearHistoryCommand = ClearAllTestHistoryCommand;
-                resultsGallery.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(ResultsGalleryViewModel.IsLoading)) clearAllTestHistoryCommand?.Refresh(); };
+                resultsGallery.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(ResultsGalleryViewModel.IsLoading)) { clearAllTestHistoryCommand?.Refresh(); RefreshDashboard(); } };
             }
             return resultsGallery;
         }

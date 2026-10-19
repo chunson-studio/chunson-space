@@ -184,9 +184,6 @@ internal static class AccountMarksVerification
                 Click("CloseAccountMarksButton"); File.WriteAllBytes(markPath, saved);
                 store.Rename(new(IdentityKind.Account, a), "SYNTHETIC改名");
                 Check("rename-carries-marks-and-history", store.ReadAccountMarks("SYNTHETIC改名").Recovered && File.Exists(Path.Combine(services.Repository.AccountPath("SYNTHETIC改名"), "ciallo-tests", "synthetic-history.json")));
-                var backup = workspace.BackupService.Create("SYNTHETIC"); store.SetAccountMarks("SYNTHETIC改名", AccountQuality.Normal, false, false);
-                var restored = workspace.BackupService.Restore(backup.Name);
-                Check("backup-roundtrip-preserves-explicit-marks", restored.Ok && store.ReadAccountMarks("SYNTHETIC改名") is { Quality: AccountQuality.SuspectedDegraded, Recovered: true });
                 Check("fixture-does-not-modify-auth", auth.SequenceEqual(File.ReadAllBytes(Path.Combine(services.Repository.AccountPath("SYNTHETIC改名"), "auth.json"))));
                 await reopenedWorkspace.Accounts!.DisposeAsync();
             }

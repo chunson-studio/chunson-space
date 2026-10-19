@@ -23,7 +23,10 @@ public sealed record ResetCredits(long Count, IReadOnlyList<ResetCredit> Credits
 public sealed record QuotaResult(string Email, string PlanType, bool? Allowed, bool? LimitReached, QuotaWindow? Primary, QuotaWindow? Secondary, ResetCredits ResetCredits, JsonNode? CreditsBalance, bool? HasCredits, DateTimeOffset FetchedAt, bool Refreshed);
 public sealed record ConnectivityResult(string Status, string Model, string Reply, TokenUsage Usage, TimeSpan Elapsed, bool Strict);
 public sealed record ProviderCheckResult(int Status, IReadOnlyList<string> Models, int ModelCount, TimeSpan Elapsed);
-public sealed record EgressResult(bool Ok, string Ip = "", string Country = "", string CountryCode = "", string City = "", string Timezone = "", string Message = "");
+public sealed record EgressResult(bool Ok, string Ip = "", string Country = "", string CountryCode = "", string City = "", string Timezone = "", string Message = "")
+{
+    public ExitAddresses Addresses { get; init; } = ExitAddresses.Unknown;
+}
 public sealed record TimezoneCandidate(string Timezone, string Label);
 public sealed record TimezoneSuggestion(string CountryCode, IReadOnlyList<TimezoneCandidate> Candidates, string Ip, string? Current = null);
 public sealed record EnvironmentDefaultsResult(IReadOnlyList<string> Changed, EnvironmentSettings Environment, EgressResult Egress);

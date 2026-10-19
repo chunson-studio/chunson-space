@@ -16,6 +16,16 @@ public static class PackagedLaunchScripts
 
     private const string Inner = """
         $ErrorActionPreference = 'Stop'
+        function Write-LaunchState($value) {
+            $target = [string]$d.state
+            $temp = $target + '.' + [Guid]::NewGuid().ToString('N') + '.tmp'
+            $bytes = [Text.UTF8Encoding]::new($false).GetBytes(($value | ConvertTo-Json -Depth 8 -Compress))
+            try {
+                $stream = [IO.File]::Open($temp, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+                try { $stream.Write($bytes, 0, $bytes.Length); $stream.Flush($true) } finally { $stream.Dispose() }
+                if ([IO.File]::Exists($target)) { [IO.File]::Replace($temp, $target, $null) } else { [IO.File]::Move($temp, $target) }
+            } finally { if ([IO.File]::Exists($temp)) { [IO.File]::Delete($temp) } }
+        }
         $mutex = [Threading.Mutex]::new($false, [string]$d.mutex)
         $locked = $false
         $attempted = $false
@@ -27,7 +37,7 @@ public static class PackagedLaunchScripts
             if ($s.nonce -ne $d.nonce -or $s.status -ne 'pending') { return }
             if ([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds() -ge [long]$s.deadline_ms) {
                 $s.status = 'cancelled'
-                [IO.File]::WriteAllText([string]$d.state, ($s | ConvertTo-Json -Compress), [Text.UTF8Encoding]::new($false))
+                Write-LaunchState $s
                 return
             }
             $stage = 'environment'
@@ -42,7 +52,7 @@ public static class PackagedLaunchScripts
             $start.UseShellExecute = $false
             $start.CreateNoWindow = $true
             $s.status = 'launching'
-            [IO.File]::WriteAllText([string]$d.state, ($s | ConvertTo-Json -Compress), [Text.UTF8Encoding]::new($false))
+            Write-LaunchState $s
             $attempted = $true
             $stage = 'process'
             try { $process = [Diagnostics.Process]::Start($start) }
@@ -51,18 +61,28 @@ public static class PackagedLaunchScripts
                 throw
             }
             $started = @{nonce=$d.nonce; status='started'; pid=$process.Id; creation_time=$process.StartTime.ToUniversalTime().ToFileTimeUtc(); executable=[string]$d.exe; deadline_ms=$d.deadline_ms; timezone=[string]$d.env.TZ; expected_ip=[string]$d.expected_ip}
-            [IO.File]::WriteAllText([string]$d.state, ($started | ConvertTo-Json -Compress), [Text.UTF8Encoding]::new($false))
+            Write-LaunchState $started
             $process.Dispose()
         } catch {
             if (-not $attempted -and $locked -and [IO.File]::Exists([string]$d.state)) {
                 $failed = @{nonce=$d.nonce; status='failed'; stage=$stage}
-                [IO.File]::WriteAllText([string]$d.state, ($failed | ConvertTo-Json -Compress), [Text.UTF8Encoding]::new($false))
+                Write-LaunchState $failed
             }
         } finally { if ($locked) { $mutex.ReleaseMutex() }; $mutex.Dispose() }
         """;
 
     private const string Outer = """
         $ErrorActionPreference = 'Stop'
+        function Write-LaunchState($value) {
+            $target = [string]$d.state
+            $temp = $target + '.' + [Guid]::NewGuid().ToString('N') + '.tmp'
+            $bytes = [Text.UTF8Encoding]::new($false).GetBytes(($value | ConvertTo-Json -Depth 8 -Compress))
+            try {
+                $stream = [IO.File]::Open($temp, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+                try { $stream.Write($bytes, 0, $bytes.Length); $stream.Flush($true) } finally { $stream.Dispose() }
+                if ([IO.File]::Exists($target)) { [IO.File]::Replace($temp, $target, $null) } else { [IO.File]::Move($temp, $target) }
+            } finally { if ([IO.File]::Exists($temp)) { [IO.File]::Delete($temp) } }
+        }
         $stage = 'registration'
         try {
             $p = Get-AppxPackage -Name OpenAI.Codex | Where-Object { $_.PackageFamilyName -eq $d.family } | Sort-Object Version -Descending | Select-Object -First 1
@@ -92,7 +112,7 @@ public static class PackagedLaunchScripts
                     $s = [IO.File]::ReadAllText([string]$d.state) | ConvertFrom-Json
                     if ($s.nonce -eq $d.nonce -and $s.status -eq 'pending') {
                         $failed = @{nonce=$d.nonce; status='failed'; stage=$stage}
-                        [IO.File]::WriteAllText([string]$d.state, ($failed | ConvertTo-Json -Compress), [Text.UTF8Encoding]::new($false))
+                        Write-LaunchState $failed
                     }
                 }
             } finally { if ($locked) { $mutex.ReleaseMutex() }; $mutex.Dispose() }

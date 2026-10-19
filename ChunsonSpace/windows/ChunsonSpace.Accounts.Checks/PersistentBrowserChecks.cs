@@ -58,10 +58,10 @@ internal static class PersistentBrowserChecks
         Check(refused && profiles.Read("Other") == other.ProfileDirectory, "binding cannot replace or borrow another account profile");
         chrome.Roots.Clear();
         repository.Profiles.Rename(new(IdentityKind.Account, result.Profile), "Renamed");
-        Check(profiles.Read("Renamed") == profile && File.Exists(marker) && profiles.Read(result.Profile) is null, "renaming the account preserves the same browser directory and updates ownership");
-        var deleted = new ProfileMaintenance(new(root, Path.Combine(root, "active-home"))).DeleteAccount("Renamed");
+        Check(profiles.Read(result.Profile) == profile && File.Exists(marker) && repository.Profiles.ReadDisplayName(result.Profile) == "Renamed", "renaming the display label preserves the stable browser binding");
+        var deleted = new ProfileMaintenance(new(root, Path.Combine(root, "active-home"))).DeleteAccount(result.Profile);
         Check(deleted.Success && !Directory.Exists(profile) && Directory.Exists(other.ProfileDirectory)
-            && deleted.Archives.Any(path => File.Exists(Path.Combine(path, "Default", "fixture-web-state"))), "account deletion archives its originally provisional browser and preserves other accounts");
+            && deleted.Archives.Count == 0, "account deletion permanently removes its originally provisional browser and preserves other accounts");
         var malformed = Path.Combine(root, "browser-envs", "Other", "browser-profile.json");
         File.WriteAllText(malformed, "{\"directory\":\"../../outside/auth-00000000000000000000000000000000\"}");
         refused = false; try { _ = profiles.Read("Other"); } catch (Exception error) when (error is IOException or StorageException) { refused = true; }

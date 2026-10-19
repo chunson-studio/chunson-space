@@ -1,4 +1,4 @@
-﻿param(
+param(
     [Parameter(Mandatory=$true)][string]$FixtureRoot,
     [Parameter(Mandatory=$true)][string]$EvidenceDirectory,
     [string]$ProtectionScript = ''

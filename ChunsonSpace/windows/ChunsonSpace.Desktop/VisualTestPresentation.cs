@@ -56,7 +56,8 @@ public sealed class VisualTestPanelViewModel : ObservableObject
     private string? profile;
     private string model = "gpt-6-astra";
     private string effort = ModelTestParameters.DefaultEffort;
-    private VisualTestVariant variant = VisualTestCatalog.Variants[0];
+    private string drawingContent = "";
+    public string DrawingContent { get => drawingContent; set { if (!busy && Set(ref drawingContent, value)) Refresh(); } }
     private bool busy;
     private string status = "选择账号后开始测试，也可以查看已保存的结果。";
     private CancellationTokenSource? cancellation;
@@ -68,7 +69,7 @@ public sealed class VisualTestPanelViewModel : ObservableObject
     private VisualTestHistoryRow? selectedHistory;
     public VisualTestPanelViewModel(DesktopAccountServices? services, string? profile, VisualTestKind kind, Action<bool> shellBusy, Action close, IReadOnlyList<string> profiles, AccountTestQueue? queue = null, Action<VisualTestResult, int?>? openArtwork = null)
     {
-        this.services = services; this.shellBusy = shellBusy; this.queue = queue ?? new(); Kind = kind; Profiles = profiles;
+        this.services = services; this.shellBusy = shellBusy; this.queue = queue ?? new(); Kind = VisualTestKind.Static; Profiles = profiles;
         this.openArtwork = openArtwork;
         elapsed = new(RefreshProgress);
         this.profile = profiles.Contains(profile) ? profile : profiles.FirstOrDefault();
@@ -86,22 +87,10 @@ public sealed class VisualTestPanelViewModel : ObservableObject
         Load();
     }
     public VisualTestKind Kind { get; private set; }
-    public bool IsPelican => Kind is VisualTestKind.Static or VisualTestKind.Animation;
-    public bool Animated
-    {
-        get => Kind == VisualTestKind.Animation;
-        set
-        {
-            if (busy || !IsPelican || value == Animated) return;
-            Kind = value ? VisualTestKind.Animation : VisualTestKind.Static;
-            batch = []; Load();
-            foreach (var name in new[] { nameof(Animated), nameof(Title), nameof(RequestDescription), nameof(DurationHint) }) Raise(name);
-        }
-    }
-    public string DurationHint => Kind == VisualTestKind.Animation ? "动画通常更慢，可能等待十多分钟；不设请求超时，可随时取消。"
-        : Kind == VisualTestKind.Revision ? "静态初稿、看图检查、修改稿依次执行，保留每一步结果。" : "静态 SVG 通常更快；实际耗时取决于模型响应。";
+    public string DurationHint => "静态 SVG · 内容由你输入，可随时取消。";
     public string Title => VisualTestCatalog.Title(Kind);
     public IReadOnlyList<string> Profiles { get; }
+    public bool HasMultipleProfiles => Profiles.Count > 1;
     public string? SelectedProfile { get => profile; set { if (!busy && value is not null && Profiles.Contains(value) && Set(ref profile, value)) Load(); } }
     public string Model { get => model; set { if (!busy && Set(ref model, ModelTestParameters.AllowedModel(value) ? value : "gpt-6-astra")) Load(); } }
     public IReadOnlyList<string> Models => CialloTest.Models;
@@ -109,20 +98,17 @@ public sealed class VisualTestPanelViewModel : ObservableObject
     public string Effort { get => effort; set { if (!busy && value == ModelTestParameters.DefaultEffort && Set(ref effort, value)) Load(); } }
     public string? DiagnosticDirectory => result?.Directory;
     public bool CanExportDiagnostics => !busy && TestDiagnosticsExport.HasData(DiagnosticDirectory);
-    public IReadOnlyList<VisualTestVariant> Variants => VisualTestCatalog.Variants;
-    public VisualTestVariant Variant { get => variant; set { if (!busy && value is not null && Set(ref variant, value)) Load(); } }
-    public bool IsVariation => Kind == VisualTestKind.Variation;
-    public string Prompt => result?.Steps.FirstOrDefault()?.Prompt ?? VisualTestCatalog.Prompt(Kind, variant.Id);
+    public string Prompt => result?.Steps.FirstOrDefault()?.Prompt ?? DrawingContent;
     public bool IsBusy => busy;
     public bool CanEdit => !busy;
     private IReadOnlyList<string> EligibleProfiles => Profiles.Where(name => services is not null && !services.Repository.Profiles.AreTestsFrozen(name)).ToArray();
-    private bool CanRunAll => !busy && queue.Accepting && services is not null && EligibleProfiles.Count > 0 && ModelTestParameters.AllowedModel(model) && effort == ModelTestParameters.DefaultEffort;
+    private bool CanRunAll => !busy && !string.IsNullOrWhiteSpace(drawingContent) && drawingContent.Length <= 12000 && queue.Accepting && services is not null && EligibleProfiles.Count > 0 && ModelTestParameters.AllowedModel(model) && effort == ModelTestParameters.DefaultEffort;
     private bool CanRun => CanRunAll && profile is not null && EligibleProfiles.Contains(profile);
     public string RequestDescription => $"通用请求 · 思考：{ModelTestParameters.EffortLabel(effort)} · 不设请求总超时 · 每账号 {VisualTestCatalog.Requests(Kind)} 次请求；全部 {EligibleProfiles.Count * VisualTestCatalog.Requests(Kind)} 次。" + (Profiles.Count > EligibleProfiles.Count ? $" 冻结 {Profiles.Count - EligibleProfiles.Count} 个，自动跳过。" : "");
     public bool IsSelectedFrozen => profile is not null && services?.Repository.Profiles.AreTestsFrozen(profile) == true;
     public string Status => !busy && result is not null ? result.Completed ? "测试结束" : "本次没判断成功" : status;
     public string ErrorReport => SupportReport.Create(Title,
-        $"模型：{result?.Model ?? model} / {result?.Effort ?? effort}\n调用方式：{VisualTestCatalog.TransportLabel(result?.Version ?? VisualTestCatalog.Version)}\n题目：{result?.Variant ?? variant.Id}\n状态：{Summary}\n{ProgressSummary}\n错误：{result?.Message ?? status}\n显示信息：{status}", result?.Started, profile);
+        $"模型：{result?.Model ?? model} / {result?.Effort ?? effort}\n调用方式：{VisualTestCatalog.TransportLabel(result?.Version ?? VisualTestCatalog.Version)}\n题目：{result?.Variant ?? drawingContent}\n状态：{Summary}\n{ProgressSummary}\n错误：{result?.Message ?? status}\n显示信息：{status}", result?.Started, profile);
     public string Summary => result is null ? (busy ? "测试准备中" : "尚无结果") : $"{(result.Completed ? "已完成" : result.Cancelled ? "已取消" : busy && runRows.Any(r => r.Profile == profile && !r.IsFinished) ? "进行中" : "未完成")} · {result.Steps.Count}/{VisualTestCatalog.Requests(Kind)} 次回复 · {result.Started.ToLocalTime():MM-dd HH:mm}";
     public int CompletedReplies => elapsed.Started ? runRows.Sum(r => r.Result?.Steps.Count ?? 0) : result?.Steps.Count ?? 0;
     public int ExpectedReplies => Math.Max(1, elapsed.Started ? runRows.Count : 1) * VisualTestCatalog.Requests(Kind);
@@ -142,8 +128,7 @@ public sealed class VisualTestPanelViewModel : ObservableObject
         {
             if (busy || value is null || !history.Contains(value) || !Set(ref selectedHistory, value)) return;
             var saved = value.Result;
-            model = ModelTestParameters.AllowedModel(saved.Model) ? saved.Model : "gpt-6-astra"; effort = ModelTestParameters.DefaultEffort; Kind = saved.Kind;
-            variant = VisualTestCatalog.Variants.FirstOrDefault(v => v.Id == saved.Variant) ?? variant;
+            model = ModelTestParameters.AllowedModel(saved.Model) ? saved.Model : "gpt-6-astra"; effort = ModelTestParameters.DefaultEffort; Kind = VisualTestKind.Static;
             batch = []; runRows = []; elapsed.Reset(); Show(saved); SetStatus($"历史结果（{VisualTestCatalog.TransportLabel(saved.Version)}）· " + saved.Message);
         }
     }
@@ -171,7 +156,7 @@ public sealed class VisualTestPanelViewModel : ObservableObject
     private void Load()
     {
         runRows = []; elapsed.Reset();
-        result = profile is null || services is null ? null : services.VisualTests.Load(profile, model, Kind, variant.Id, effort);
+        result = profile is null || services is null ? null : services.VisualTests.Load(profile, model, Kind, drawingContent, effort);
         LoadHistory();
         steps = result?.Steps.Select((step, index) => new VisualTestStepViewModel(result, step, index, SetStatus, openArtwork)).ToArray() ?? [];
         status = result is null ? "当前配置暂无结果；可从历史记录选择，或点击测试。" : $"历史结果（{VisualTestCatalog.TransportLabel(result.Version)}）· " + result.Message;
@@ -179,7 +164,7 @@ public sealed class VisualTestPanelViewModel : ObservableObject
     }
     private void LoadHistory()
     {
-        history = profile is null || services is null ? [] : services.VisualTests.History(profile).Select(r => new VisualTestHistoryRow(r)).ToArray();
+        history = profile is null || services is null ? [] : services.VisualTests.History(profile).Where(r => r.Kind == VisualTestKind.Static).Select(r => new VisualTestHistoryRow(r)).ToArray();
         selectedHistory = history.FirstOrDefault(r => r.Result.Directory == result?.Directory);
     }
     private void Show(VisualTestResult value)
@@ -202,7 +187,7 @@ public sealed class VisualTestPanelViewModel : ObservableObject
         if (all ? !CanRunAll : !CanRun) return;
         var targets = all ? EligibleProfiles.ToArray() : [profile!];
         if (all && !targets.Contains(profile)) profile = targets[0];
-        var requestedModel = model; var requestedVariant = variant.Id; var requestedEffort = effort;
+        var requestedModel = model; var requestedVariant = drawingContent; var requestedEffort = effort;
         runRows = targets.Select(name => new VisualTestBatchRow(name, Show, () => !busy)).ToArray();
         batch = all ? runRows : [];
         elapsed.Start();
@@ -254,7 +239,7 @@ public sealed class VisualTestPanelViewModel : ObservableObject
         Raise(nameof(HasFailedRequest)); Raise(nameof(FailedRequestSafetySummary)); Raise(nameof(FailedRequestSafetyDetails));
         Raise(nameof(ErrorReport));
         RefreshProgress();
-        foreach (var property in new[] { nameof(SelectedProfile), nameof(Steps), nameof(Result), nameof(Summary), nameof(Status), nameof(CanEdit), nameof(IsBusy), nameof(Prompt), nameof(BatchRows), nameof(HasBatchResults), nameof(History), nameof(SelectedHistory), nameof(HistoryHint), nameof(CanSelectHistory), nameof(Model), nameof(Effort), nameof(DiagnosticDirectory), nameof(CanExportDiagnostics), nameof(Variant), nameof(Animated), nameof(Title), nameof(IsPelican), nameof(IsVariation), nameof(RequestDescription), nameof(DurationHint) }) Raise(property);
+        foreach (var property in new[] { nameof(SelectedProfile), nameof(Steps), nameof(Result), nameof(Summary), nameof(Status), nameof(CanEdit), nameof(IsBusy), nameof(Prompt), nameof(BatchRows), nameof(HasBatchResults), nameof(History), nameof(SelectedHistory), nameof(HistoryHint), nameof(CanSelectHistory), nameof(Model), nameof(Effort), nameof(DiagnosticDirectory), nameof(CanExportDiagnostics), nameof(Title), nameof(RequestDescription), nameof(DurationHint) }) Raise(property);
         foreach (var command in new[] { StartCommand, StartAllCommand, CloseCommand, CancelCommand, ShowBatchCommand, OpenGalleryCommand }) command.Refresh();
     }
     public void RefreshTestEligibility() => Refresh();

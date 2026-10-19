@@ -1,4 +1,4 @@
-﻿param([string]$DotnetPath = $env:CHUNSONSPACE_DOTNET, [string]$Configuration = 'Debug')
+param([string]$DotnetPath = $env:CHUNSONSPACE_DOTNET, [string]$Configuration = 'Debug')
 $ErrorActionPreference = 'Stop'
 $windowsRoot = Split-Path -Parent $PSScriptRoot
 $sdk = if ($DotnetPath) { [IO.Path]::GetFullPath($DotnetPath) } else { Join-Path (Split-Path -Parent $windowsRoot) 'runtime/dotnet/dotnet.exe' }

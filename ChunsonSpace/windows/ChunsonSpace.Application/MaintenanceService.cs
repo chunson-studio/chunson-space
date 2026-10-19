@@ -3,36 +3,24 @@ using ChunsonSpace.Windows;
 
 namespace ChunsonSpace.Application;
 
-public sealed record MaintenanceResult(bool Success, string Message, RestoreResult? Restore, IReadOnlyList<string> RecoveryPaths, ProfileSaveResult? Save = null, ProfileLogoutResult? Logout = null, RebuildResult? Rebuild = null, AccountDeleteResult? Delete = null);
+public sealed record MaintenanceResult(bool Success, string Message, IReadOnlyList<string> RecoveryPaths, ProfileSaveResult? Save = null, ProfileLogoutResult? Logout = null, RebuildResult? Rebuild = null, AccountDeleteResult? Delete = null);
 public sealed class MaintenanceService(IRuntimeOperations runtime)
 {
-    public async Task<MaintenanceResult> ResetManagedRuntimeAsync(ManagedCloneStorage storage, CancellationToken cancellationToken = default)
+    public async Task<MaintenanceResult> ResetManagedRuntimeAsync(ManagedCloneStorage storage, CancellationToken cancellationToken = default, bool discard = false)
     {
-        var block = await EnsureSafeAsync(cancellationToken);
-        if (block is not null) return block;
+        using var lease = await runtime.BeginLaunchAsync(cancellationToken);
         try
         {
-            storage.ResetRuntime();
-            return new(true, "受管分身已清理，账号库授权与配置已保留。", null, []);
+            storage.ValidateOwnership();
+            var block = await EnsureSafeAsync(cancellationToken, discard);
+            if (block is not null) return block;
+            if (discard) storage.DiscardRuntime(); else storage.ResetRuntime();
+            return new(true, "分身已重置，保持关闭。账号库、项目和 Codex 本体已保留。", []);
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or StorageException)
         {
-            var detail = error.Message;
-            if (error is StorageException failure && failure.FilePath.Length > 0 && !detail.Contains(failure.FilePath, StringComparison.OrdinalIgnoreCase))
-                detail += " 位置：" + failure.FilePath;
-            return new(false, "受管分身清理未完成，账号库保持保留：" + detail, null, [storage.ClonePaths.RecoveryRoot]);
+            return new(false, "分身重置未完成：运行资料被占用或路径归属未确认（" + error.GetType().Name + "）。账号库已保留。", []);
         }
-    }
-
-    public async Task<MaintenanceResult> RestoreBackupAsync(BackupService backups, string name, CancellationToken cancellationToken = default)
-    {
-        var block = await EnsureSafeAsync(cancellationToken);
-        if (block is not null) return block;
-        var result = backups.Restore(name);
-        var recovery = new List<string>();
-        if (result.PreBackup.Length > 0) recovery.Add(result.PreBackup);
-        if (result.StagingPath is { Length: > 0 } staging) recovery.Add(staging);
-        return new(result.Ok, result.Ok ? "备份已恢复" : "备份恢复未完成，恢复前备份与暂存材料已保留", result, recovery);
     }
 
     public async Task<MaintenanceResult> SaveCurrentAccountAsync(ProfileMaintenance profiles, string name, bool overwrite, bool isolated, bool developer = false, CancellationToken cancellationToken = default)
@@ -40,15 +28,31 @@ public sealed class MaintenanceService(IRuntimeOperations runtime)
         var block = await EnsureSafeAsync(cancellationToken);
         if (block is not null) return block;
         var result = profiles.SaveCurrentAccount(name, overwrite, isolated, developer);
-        return new(result.Success, result.Message, null, result.RecoveryPaths, Save: result);
+        return new(result.Success, result.Message, result.RecoveryPaths, Save: result);
     }
 
-    public async Task<MaintenanceResult> DeleteAccountAsync(ProfileMaintenance profiles, string name, CancellationToken cancellationToken = default)
+    public async Task<MaintenanceResult> DeleteAccountAsync(ProfileMaintenance profiles, string name, CancellationToken cancellationToken = default, ManagedCloneStorage? managed = null)
     {
-        var block = await EnsureSafeAsync(cancellationToken);
-        if (block is not null) return block;
+        name = ProfileRules.Name(name);
+        // No auth reads and no runtime action for an unrelated account.
+        IdentityRef? reference = null;
+        bool unknown = false;
+        if (managed is not null)
+        {
+            try { reference = managed.ReadRuntimeReference(); }
+            catch (Exception error) when (error is StorageException or IOException or UnauthorizedAccessException) { unknown = true; }
+        }
+        using var lease = reference == new IdentityRef(IdentityKind.Account, name) ? await runtime.BeginLaunchAsync(cancellationToken) : null;
+        // Switching uses the same lease. Recheck after acquiring it, before stopping anything.
+        if (reference == new IdentityRef(IdentityKind.Account, name)) reference = managed!.ReadRuntimeReference();
+        if (reference == new IdentityRef(IdentityKind.Account, name))
+        {
+            var block = await EnsureSafeAsync(cancellationToken);
+            if (block is not null) return block;
+            managed!.DiscardRuntime();
+        }
         var result = profiles.DeleteAccount(name);
-        return new(result.Success, result.Message, null, result.Archives, Delete: result);
+        return new(result.Success, result.Message + (unknown ? "；分身归属未知，运行资料保留。" : ""), result.Archives, Delete: result);
     }
 
     public async Task<MaintenanceResult> LogoutAsync(ProfileMaintenance profiles, bool clearDesktopState = false, CancellationToken cancellationToken = default)
@@ -59,7 +63,7 @@ public sealed class MaintenanceService(IRuntimeOperations runtime)
         var message = result.Message;
         try { var timezone = await runtime.RestoreTimezoneAsync(CancellationToken.None); if (!timezone.Success) message += "；" + timezone.Message; }
         catch (Exception error) { message += "；时区恢复未完成：" + error.GetType().Name; }
-        return new(result.Success, message, null, [result.Snapshot], Logout: result);
+        return new(result.Success, message, [result.Snapshot], Logout: result);
     }
 
     public RebuildPlan PreviewRebuild(EnvironmentRebuild rebuild) => rebuild.Preview();
@@ -71,21 +75,19 @@ public sealed class MaintenanceService(IRuntimeOperations runtime)
         var message = result.Message;
         try { var timezone = await runtime.RestoreTimezoneAsync(CancellationToken.None); if (!timezone.Success) message += "；" + timezone.Message; }
         catch (Exception error) { message += "；时区恢复未完成：" + error.GetType().Name; }
-        return new(result.Success, message, null, result.Destination.Length > 0 ? [result.Destination] : [], Rebuild: result);
+        return new(result.Success, message, result.Destination.Length > 0 ? [result.Destination] : [], Rebuild: result);
     }
 
-    private async Task<MaintenanceResult?> EnsureSafeAsync(CancellationToken cancellationToken)
+    private async Task<MaintenanceResult?> EnsureSafeAsync(CancellationToken cancellationToken, bool force = false)
     {
-        DesktopLaunchResult? pending;
-        try { pending = await runtime.CheckPendingAsync(cancellationToken); }
-        catch (OperationCanceledException) { throw; }
-        catch (Exception) { return new(false, "无法确认上次桌面启动，本次操作未执行", null, []); }
-        if (pending is not null) return new(false, "桌面启动仍待确认，本次操作未执行", null, pending.StateDirectory is { } directory ? [directory] : []);
-        var stopped = await runtime.StopAsync(ProcessScope.DesktopAndCli, cancellationToken);
-        if (!stopped.Success) return new(false, stopped.Message, null, []);
+        var prepared = await runtime.PrepareMaintenanceAsync(cancellationToken, force);
+        if (!prepared.Success && !force) return new(false, prepared.Message, []);
+        var stopped = await runtime.StopAsync(ProcessScope.DesktopAndCli, cancellationToken, force);
+        if (!stopped.Success) return new(false, stopped.Message, []);
+        if (!prepared.Success) return new(false, prepared.Message + "运行资料未清理。", []);
         cancellationToken.ThrowIfCancellationRequested();
-        var rechecked = await runtime.ConfirmStoppedAsync(ProcessScope.DesktopAndCli, cancellationToken);
-        if (!rechecked.Success) return new(false, rechecked.Message, null, []);
+        var rechecked = await runtime.ConfirmStoppedAsync(ProcessScope.DesktopAndCli, cancellationToken, force);
+        if (!rechecked.Success) return new(false, rechecked.Message, []);
         return null;
     }
 }

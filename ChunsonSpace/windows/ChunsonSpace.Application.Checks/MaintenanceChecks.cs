@@ -70,12 +70,12 @@ internal static class MaintenanceChecks
             Write(Path.Combine(root, "browser-envs", name, "env.json"), "{}");
             Write(Path.Combine(root, "electron-envs", name, "state"), "fixture");
             var deleted = maintenance.DeleteAccount(name);
-            Check(deleted.Success && deleted.Archives.Count == 3, "delete event groups account/browser/desktop archives " + index);
+            Check(deleted.Success && deleted.Archives.Count == 0 && !Directory.Exists(Path.Combine(root, "profiles", name)), "delete removes local account without archives " + index);
         }
         var rotation = maintenance.RotateAccountArchives();
-        Check(rotation.Kept == 6 && Directory.Exists(unmarked), "account rotation retains six events and unmarked evidence");
+        Check(rotation.Kept == 0 && Directory.Exists(unmarked), "permanent deletion leaves no new archive events and preserves unmarked evidence");
         var archiveMarkers = Directory.GetFiles(trash, ProfileMaintenance.AccountArchiveMarker, SearchOption.AllDirectories);
-        Check(archiveMarkers.Length == 18 && archiveMarkers.All(path => JsonNode.Parse(File.ReadAllText(path))!["kind"]!.GetValue<string>() == "account-archive"), "three-part deletion markers remain compatible after rotation");
+        Check(archiveMarkers.Length == 0, "permanent deletion writes no recovery markers");
         var nested = Path.Combine(unmarked, "nested-marked"); Directory.CreateDirectory(nested); Write(Path.Combine(nested, ProfileMaintenance.AccountArchiveMarker), "{\"kind\":\"account-archive\",\"name\":\"nested\",\"stamp\":\"0000\"}");
         maintenance.RotateAccountArchives();
         Check(Directory.Exists(nested), "rotation never searches or deletes nested marked evidence");

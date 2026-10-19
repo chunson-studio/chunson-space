@@ -1,4 +1,4 @@
-﻿param([Parameter(Mandatory = $true)][string]$Directory)
+param([Parameter(Mandatory = $true)][string]$Directory)
 $ErrorActionPreference = 'Stop'
 foreach ($name in @('packaged-launch.ps1', 'packaged-launch-inner.ps1', 'silent-timezone-setup.ps1', 'silent-timezone-helper.ps1', 'direct-connection-protection.ps1')) {
     $path = Join-Path $Directory $name

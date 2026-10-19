@@ -1,4 +1,4 @@
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using ChunsonSpace.Application;
 using ChunsonSpace.Core;
 using ChunsonSpace.Windows;
@@ -143,17 +143,6 @@ try
     fakeStorage = new FakeStorage(fixtureRoot, []) { Active = original };
     operation = await new SwitchService(fakeStorage, new FakeRuntime([])).SwitchAsync(accountRequest, cancellationToken: cancellation.Token);
     Check(operation.Outcome == OperationOutcome.Failed && fakeStorage.Mutations == 0, "cancelled preflight does not mutate");
-
-    var backupRoot = Path.Combine(fixtureRoot, "catalog"); Directory.CreateDirectory(backupRoot);
-    File.WriteAllText(Path.Combine(backupRoot, "settings.json"), "{\"fixture\":1}");
-    var backups = new BackupService(backupRoot);
-    var backup = backups.Create("fixture");
-    File.WriteAllText(Path.Combine(backupRoot, "settings.json"), "{\"fixture\":2}");
-    fakeRuntime = new FakeRuntime([]) { StopFailsAt = 1 };
-    var maintained = await new MaintenanceService(fakeRuntime).RestoreBackupAsync(backups, backup.Name);
-    Check(!maintained.Success && maintained.Restore is null && File.ReadAllText(Path.Combine(backupRoot, "settings.json")).Contains(":2"), "backup restore stop failure leaves catalog untouched");
-    maintained = await new MaintenanceService(new FakeRuntime([])).RestoreBackupAsync(backups, backup.Name);
-    Check(maintained.Success && maintained.Restore!.PreBackup.Length > 0 && File.ReadAllText(Path.Combine(backupRoot, "settings.json")).Contains(":1"), "backup restore safety boundary executes verified catalog restore");
 
     // Actual storage migration is exercised only in this newly created project fixture tree.
     foreach (var kind in Enum.GetValues<IdentityKind>())

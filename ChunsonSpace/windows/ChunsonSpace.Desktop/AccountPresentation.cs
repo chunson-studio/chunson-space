@@ -162,16 +162,16 @@ public sealed partial class ShellViewModel
                 case AccountAction.Egress:
                     var egress = await Task.Run(() => services.Egress.ProbeAsync(target.Name));
                     success = egress.Ok;
-                    if (egress.Ok) RememberExit(target, egress.Ip, egress.Timezone, string.Join(" · ", new[] { egress.Country, egress.City }.Where(part => !string.IsNullOrWhiteSpace(part))));
-                    details = egress.Ok ? $"出口 IP：{egress.Ip}\n地区：{egress.Country} · {egress.City}\n时区：{egress.Timezone}" : "出口查询未完成，请检查档案代理。"; break;
+                    if (egress.Ok) RememberExit(target, egress.Ip, egress.Timezone, string.Join(" · ", new[] { egress.Country, egress.City }.Where(part => !string.IsNullOrWhiteSpace(part))), egress.Addresses);
+                    details = egress.Addresses.Summary + "\n" + (egress.Ok ? $"主出口：{egress.Ip}\n地区：{egress.Country} · {egress.City}\n时区：{egress.Timezone}" : egress.Message); break;
                 case AccountAction.IpQuality:
                     var quality = await Task.Run(() => workspace!.ProxyServices.NodeTesting!.ProbeAccountExitAsync(services.Repository.Proxy(target.Name), CancellationToken.None));
                     success = quality.Success;
-                    if (quality.HasVerifiedExit) RememberExit(target, quality.Ip, quality.Timezone, string.Join(" · ", new[] { quality.Country, quality.City }.Where(part => !string.IsNullOrWhiteSpace(part))));
+                    if (quality.HasVerifiedExit) RememberExit(target, quality.Ip, quality.Timezone, string.Join(" · ", new[] { quality.Country, quality.City }.Where(part => !string.IsNullOrWhiteSpace(part))), quality.Addresses);
                     details = quality.HasVerifiedExit
                         ? $"实际出口 IP：{QualityValue(quality.Ip)}\n地区：{QualityValue(quality.Country)} · {QualityValue(quality.City)}\n时区：{QualityValue(quality.Timezone)}\n网络公司：{QualityValue(quality.Company)}\nASN：{QualityValue(quality.Asn)}\n数据中心：{BooleanLabel(quality.IsDatacenter)}\n代理标记：{BooleanLabel(quality.IsProxy)} · VPN 标记：{BooleanLabel(quality.IsVpn)}\nTor 标记：{BooleanLabel(quality.IsTor)} · 滥用标记：{BooleanLabel(quality.IsAbuser)}\n读取时间：{quality.FetchedAt.ToLocalTime():yyyy-MM-dd HH:mm}\n来源：{quality.Source}\n{quality.Message}\n标记缺失显示未知；本次结果不作为账号能力、登录成功或 IP 无风险证明。"
                         : quality.Message + "\n未显示未经同出口核对的风险标记。";
-                    details = (quality.Score?.Summary ?? "IP 质量分：未知，不放行") + "\n分组：" + quality.NetworkGroup + "\n" + quality.Admission.Message + "\n\n" + details;
+                    details = quality.Addresses.Summary + "\n" + (quality.Score?.Summary ?? "IP 质量分：未知，不放行") + "\n分组：" + quality.NetworkGroup + "\n" + quality.Admission.Message + "\n\n" + details;
                     break;
                 case AccountAction.SuggestTimezone:
                     var suggestion = await Task.Run(() => services.Egress.SuggestTimezoneAsync(target.Name));

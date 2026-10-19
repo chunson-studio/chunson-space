@@ -519,63 +519,45 @@ public sealed partial class ChromeLoginBrowser(AccountRepository repository, ICh
         }
         finally { if (connection is not null && !retained) await connection.DisposeAsync(); }
     }
-    private async Task<EgressResult> ReadBrowserEgressAsync(ICdpConnection connection, string session, EgressResult expected, string timezone, CancellationToken token)
+    private static async Task<EgressResult> ReadBrowserEgressAsync(ICdpConnection connection, string session, EgressResult expected, string timezone, CancellationToken token)
     {
-        var failures = new List<string>();
-        foreach (var source in EgressSources.Locations)
-        {
-            token.ThrowIfCancellationRequested();
-            var endpoint = EgressSources.Endpoint(source);
-            EgressResult? measured = null;
-            if (source == EgressLocationSource.NetCoffee)
-            {
-                var trace = await ReadBrowserEndpointAsync(connection, session, endpoint, json: false, token);
-                measured = EgressSources.Trace(trace, EgressSources.Name(source));
-                if (!measured.Ok) { failures.Add(measured.Message); continue; }
-                if (!EgressSources.SameIp(measured.Ip, expected.Ip)) return measured with { Ok = false, Message = "浏览器 Net.Coffee 出口与已验证的代理出口不一致" };
-                endpoint = new Uri(NetCoffeeService.LookupEndpoint, Uri.EscapeDataString(measured.Ip));
-            }
-            var text = await ReadBrowserEndpointAsync(connection, session, endpoint, json: true, token);
-            JsonObject? data;
-            try { data = JsonNode.Parse(text) as JsonObject; }
-            catch (System.Text.Json.JsonException) { data = null; }
-            if (data is null) { failures.Add(EgressSources.Name(source) + " 未返回有效 JSON"); continue; }
-            var actual = EgressSources.Parse(source, data, measured);
-            if (measured is not null && EgressSources.LookupConflicts(data, measured)) return actual with { Ok = false };
-            if (EgressSources.ValidIp(actual.Ip) && !EgressSources.SameIp(actual.Ip, expected.Ip))
-                return actual with { Ok = false, Message = "浏览器出口与已验证的代理出口不一致" };
-            if (EgressSources.HasCountry(expected) && EgressSources.HasCountry(actual) && expected.CountryCode != actual.CountryCode)
-                return actual with { Ok = false, Message = "浏览器出口国家与已验证的代理出口不一致" };
-            if (!actual.Ok) { failures.Add(actual.Message); continue; }
-            if (!EgressSources.SameZone(actual.Timezone, timezone)) return actual with { Ok = false, Message = "浏览器出口时区与已验证的代理出口不一致" };
-            return actual;
-        }
-        return new(false, Message: "浏览器主查询与备用查询均未完成：" + string.Join("；", failures));
+        token.ThrowIfCancellationRequested();
+        var v4 = ReadBrowserEndpointAsync(connection, session, IpInfoService.Ipv4Endpoint, IpInfoService.AddressBodyLimit, token);
+        var v6 = ReadBrowserEndpointAsync(connection, session, IpInfoService.Ipv6Endpoint, IpInfoService.AddressBodyLimit, token);
+        await Task.WhenAll(v4, v6);
+        var addresses = new ExitAddresses(IpInfoService.ParseAddress(await v4, System.Net.Sockets.AddressFamily.InterNetwork),
+            IpInfoService.ParseAddress(await v6, System.Net.Sockets.AddressFamily.InterNetworkV6));
+        // Compare the same family as the previously verified primary; distinct
+        // IPv4 and IPv6 exits do not constitute an identity or route conflict.
+        var expectedV4 = System.Net.IPAddress.TryParse(expected.Ip, out var ip) && ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork;
+        var measured = expectedV4 ? addresses.Ipv4 : addresses.Ipv6;
+        if (!measured.Available) return new(false, Message: "浏览器 IPinfo 主出口地址族本次不可用。") { Addresses = addresses };
+        if (!EgressSources.SameIp(measured.Ip, expected.Ip))
+            return new(false, measured.Ip, Message: "浏览器同地址族出口与已验证的代理出口不一致") { Addresses = addresses };
+        var text = await ReadBrowserEndpointAsync(connection, session, IpInfoService.LocationEndpoint(measured.Ip), IpInfoService.LocationBodyLimit, token);
+        JsonObject? data;
+        try { data = JsonNode.Parse(text) as JsonObject; }
+        catch (System.Text.Json.JsonException) { data = null; }
+        if (data is null) return new(false, measured.Ip, Message: "浏览器 IPinfo 地区查询未完成。") { Addresses = addresses };
+        var selected = expectedV4 ? addresses : new ExitAddresses(new(), addresses.Ipv6);
+        var actual = IpInfoService.ParseLocation(data, selected) with { Addresses = addresses };
+        if (!actual.Ok) return actual;
+        if (EgressSources.HasCountry(expected) && expected.CountryCode != actual.CountryCode)
+            return actual with { Ok = false, Message = "浏览器出口国家与已验证的代理出口不一致" };
+        if (!EgressSources.SameZone(actual.Timezone, timezone)) return actual with { Ok = false, Message = "浏览器出口时区与已验证的代理出口不一致" };
+        return actual;
     }
-    private async Task<string> ReadBrowserEndpointAsync(ICdpConnection connection, string session, Uri endpoint, bool json, CancellationToken token)
+    private static async Task<string> ReadBrowserEndpointAsync(ICdpConnection connection, string session, Uri endpoint, int limit, CancellationToken token)
     {
-        // Every fetch/navigation runs inside the same already-bound browser tab.
-        // No host HTTP request or direct route is substituted for a renderer failure.
+        // Single bounded request in this bound renderer. No navigation retry,
+        // alternate provider, host request or direct route on HTTP/CORS failure.
         var url = System.Text.Json.JsonSerializer.Serialize(endpoint.AbsoluteUri);
         var expression = "(async()=>{const c=new AbortController();const t=setTimeout(()=>c.abort(),8000);try{const r=await fetch(" + url
-            + ",{cache:'no-store',credentials:'omit',signal:c.signal});if(!r.ok)return '';const s=await r.text();return s.length<=65536?s:'';}catch{return '';}finally{clearTimeout(t);}})()";
+            + ",{cache:'no-store',credentials:'omit',signal:c.signal});if(!r.ok)return '';const reader=r.body.getReader();let n=0,s='';const d=new TextDecoder();while(true){const x=await reader.read();if(x.done)break;n+=x.value.length;if(n>" + limit
+            + "){await reader.cancel();return '';}s+=d.decode(x.value,{stream:true});}return s+d.decode();}catch{return '';}finally{clearTimeout(t);}})()";
         var response = await connection.CallAsync("Runtime.evaluate", new() { ["expression"] = expression, ["awaitPromise"] = true, ["returnByValue"] = true }, session, token);
         var text = AccountJson.Text(response["result"] as JsonObject, "value");
-        if (text.Length > 0) return text.Length <= 65536 ? text : "";
-        // Same public endpoint as a top-level document covers opaque-origin CORS.
-        var navigation = await connection.CallAsync("Page.navigate", new() { ["url"] = endpoint.AbsoluteUri }, session, token);
-        if (AccountJson.Text(navigation, "errorText").Length > 0 || AccountJson.Text(navigation, "frameId").Length == 0) return "";
-        var read = "location.href === " + url + " && document.readyState === 'complete' && document.contentType === "
-            + (json ? "'application/json'" : "'text/plain'") + " ? document.body.innerText : ''";
-        var deadline = this.clock.UtcNow + TimeSpan.FromSeconds(8);
-        do
-        {
-            var document = await connection.CallAsync("Runtime.evaluate", new() { ["expression"] = read, ["returnByValue"] = true }, session, token);
-            text = AccountJson.Text(document["result"] as JsonObject, "value");
-            if (text.Length > 0) return text.Length <= 65536 ? text : "";
-            await this.clock.DelayAsync(TimeSpan.FromMilliseconds(200), token);
-        } while (this.clock.UtcNow < deadline);
-        return "";
+        return text.Length <= limit ? text : "";
     }
     private async Task KeepTimezone(ICdpConnection connection, string timezone, string profile, bool strict, string userAgent, string primaryTarget, CancellationToken token)
     {

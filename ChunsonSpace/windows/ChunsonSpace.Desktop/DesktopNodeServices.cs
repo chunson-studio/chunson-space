@@ -13,11 +13,11 @@ public sealed class DesktopNodeServices(DesktopWorkspace workspace)
     private ProxyLatencyService? rawLatency;
     private IpScoreCache? scores;
     public NodeProbeHistory History { get; } = new(Path.Combine(workspace.Root, "node-screening-history"));
-    private IpScoreCache Scores => scores ??= new(Path.Combine(workspace.Root, "node-netcoffee-scores.json"), OfflineScoreClock);
+    private IpScoreCache Scores => scores ??= new(Path.Combine(workspace.Root, "node-ippure-scores.json"), OfflineScoreClock);
     public ManagedNodeRoutes Routes { get; private set; } = null!;
     public ManagedNodeRoutes CreateRoutes(IAccountTransport transport)
     {
-        rawQuality = new NetCoffeeService(transport); rawLatency = new(transport); _ = Scores;
+        rawQuality = new IpQualityService(transport); rawLatency = new(transport); _ = Scores;
         return Routes = new(Path.Combine(workspace.Root, "managed-node-routes.json"), binding =>
         {
             var root = workspace.ProxyServices.FlClashRoot;
@@ -35,6 +35,7 @@ public sealed class DesktopNodeServices(DesktopWorkspace workspace)
     public async Task<IpQualityReport> ProbeAccountExitAsync(string proxy, CancellationToken token)
         => (Routes is null ? null : await Routes.ProbeAdmissionAsync(proxy, token)) ?? await ProbeScoredExitAsync(proxy, token);
     public Task<IpQualityReport> ProbeCachedExitAsync(string proxy, CancellationToken token) => ProbeExitAsync(proxy, false, token);
+    public IpQualityReport? ReadCachedExit(string ip) => Scores.Find(ip)?.Report;
     public IpQualityReport CachedLoginExit(string expectedIp, string subscriptionId, NodeCandidate node)
     {
         if (!System.Net.IPAddress.TryParse(expectedIp, out var ip)) throw new InvalidOperationException("请使用检测结果中的实际 IP。");
@@ -43,6 +44,7 @@ public sealed class DesktopNodeServices(DesktopWorkspace workspace)
         var report = cached?.Report ?? (history is { Success: true, DelayOnly: false } && history.Quality?.Ip == ip.ToString() ? history.Quality : null);
         if (report is null) throw new InvalidOperationException("这个 IP 没有已确认的检测结果，请先筛选。");
         report = ApplySelectedAdmission(subscriptionId, node, cached?.Apply(report) ?? report);
+        if (report.Score?.Provider != "IPPure") report = report with { Score = null };
         if (!report.Admission.Allowed) throw new InvalidOperationException(report.Admission.Message);
         return report;
     }
@@ -66,15 +68,15 @@ public sealed class DesktopNodeServices(DesktopWorkspace workspace)
     internal void ResetFixtureScore()
     {
         if (!IsFixture) throw new InvalidOperationException("仅隔离测试可重置评分夹具。");
-        Scores.Forget("192.0.2.10");
+        Scores.Forget("8.8.8.8");
     }
     private async Task<IpQualityReport> ProbeExitAsync(string proxy, bool scoreMissing, CancellationToken token)
     {
         var service = rawQuality ?? throw new InvalidOperationException("出口检测服务尚未连接。");
         var measured = await service.ProbeScreeningExitAsync(proxy, token);
         if (!measured.HasVerifiedExit) return measured;
-        if (Scores.Find(measured.Ip) is { } cached) return cached.Apply(measured);
-        if (!scoreMissing) return measured with { Score = new(null, "当前出口还没有有效评分。请等待后台检测，或使用一键检测；登录不会重复测分。") { Provider = "Net.Coffee" } };
+        if (Scores.Find(measured.Ip) is { Score.Provider: "IPPure" } cached) return cached.Apply(measured);
+        if (!scoreMissing) return measured with { Score = new(null, "当前出口还没有有效评分。请等待后台检测，或使用一键检测；登录不会重复测分。") { Provider = "IPPure" } };
         var report = await service.AddScoreAsync(measured, proxy, token);
         if (report.Score is { Quality: >= 0 and <= 100 } value) { Scores.Put(measured.Ip, value, report); Scores.Save(); }
         return report;
@@ -100,7 +102,7 @@ public sealed class DesktopNodeServices(DesktopWorkspace workspace)
         if (batch is not null) return batch;
         if (workspace.Accounts is null) throw new InvalidOperationException("节点检测服务尚未连接。");
         IMihomoProbeRuntime runtime = OfflineRuntime is { } offline ? offline : new WindowsMihomoProbeRuntime(Path.Combine(AppContext.BaseDirectory, "runtimes", "mihomo", "mihomo.exe"), Path.Combine(workspace.Root, "node-testing-jobs", "session-" + Guid.NewGuid().ToString("N")));
-        return batch = new(runtime, rawQuality ?? throw new InvalidOperationException("Net.Coffee 检测服务尚未连接。"), rawLatency ?? workspace.Accounts.Latency, Scores, History);
+        return batch = new(runtime, rawQuality ?? throw new InvalidOperationException("IPinfo / IPPure 检测服务尚未连接。"), rawLatency ?? workspace.Accounts.Latency, Scores, History);
     }
     internal void ResetFixtureProbeBatch()
     {

@@ -1,9 +1,10 @@
-﻿param(
+param(
     [Parameter(Mandatory=$true)][string]$Output,
     [string]$DotnetPath='dotnet',
     [switch]$Verify,
     [switch]$Package,
-    [string]$DependencyExecutable
+    [string]$DependencyExecutable,
+    [string]$PythonPath='python'
 )
 $ErrorActionPreference='Stop'
 $outputPath=[IO.Path]::GetFullPath($Output)
@@ -63,5 +64,8 @@ $item=@{Name='Full';Project='ChunsonSpace/windows/ChunsonSpace.Desktop/ChunsonSp
             }
         }finally{$zip.Dispose()}
         [pscustomobject]@{passed=$true;files=$manifest.Count;sha256=(Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputPath ($item.Name+'-zip-check.json')) -Encoding utf8
+        $version=[Reflection.AssemblyName]::GetAssemblyName((Join-Path $app 'ChunsonSwitch.dll')).Version.ToString()
+        & $PythonPath (Join-Path $PSScriptRoot 'ChunsonSpace/scripts/New-UpdateManifest.py') --archive $archive --version $version --prefix 'Full/' --zip-check (Join-Path $outputPath 'Full-zip-check.json') --output (Join-Path $outputPath 'Chunson-Update-Windows-x64.json')
+        if($LASTEXITCODE -ne 0){throw 'Incremental update manifest generation failed'}
     }
 Write-Output ('Build output: '+$outputPath)

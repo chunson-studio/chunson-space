@@ -23,14 +23,16 @@ public sealed partial class ShellViewModel
     public IdentityRef? LoginTarget { get; private set; }
     public bool NeedsLogin => LoginTarget is not null;
     public bool TrayAvailable => trayAvailable;
-    public string TrayDescription => trayAvailable ? "关闭窗口后留在托盘。使用托盘菜单或下方按钮退出。" : "当前验证/演示模式不显示系统托盘。";
+    public string TrayDescription => trayAvailable ? "关闭窗口按托盘偏好处理；退出工具会关闭受管分身和时钟。" : "当前验证/演示模式不显示系统托盘。";
     public event EventHandler? ExitRequested;
     public DelegateCommand ExitCommand { get; private set; } = null!;
-    public bool DarkTheme { get => darkTheme; set { if (Set(ref darkTheme, value)) WorkspaceTheme.Apply(value ? "dark" : "light"); } }
+    public DelegateCommand ExitManagerCommand { get; private set; } = null!;
+    public event EventHandler? ExitManagerRequested;
+    public bool DarkTheme { get => darkTheme; set { if (Set(ref darkTheme, value)) { WorkspaceTheme.Apply(value ? "dark" : "light"); SaveSettings(); } } }
     public bool IsPreview => workspace is null;
     public string WorkspaceBadge => workspace is null ? "演示环境" : workspace.IsFixture ? "隔离工作区" : "本地工作区";
     public string WorkspaceModeLabel => workspace is null ? "原生界面 · 演示模式" : workspace.IsFixture ? "真实存储 · 隔离验证" : "真实存储 · 显式目录";
-    public string WorkspaceDescription => workspace is null ? "当前界面为演示模式。它不读取账号凭据，不连接客户端，也不更改系统环境。" : $"账号库：{workspace.AccountRoot}。授权资料、登录配置与备份保存在此目录。";
+    public string WorkspaceDescription => workspace is null ? "当前界面为演示模式。它不读取账号凭据，不连接客户端，也不更改系统环境。" : $"账号库：{workspace.AccountRoot}。授权资料与登录配置保存在此目录。";
     public string ManagedCloneDescription => workspace?.ManagedPaths is { } paths ? $"唯一受管分身：{paths.RuntimeRoot}\n切换时重建分身并载入所选账号，不导入本体 Skills、MCP 或插件。账号和聊天独立。" : workspace is null ? "唯一受管分身 · 演示状态" : "隔离兼容目录；未连接实际客户端。";
     public string ManagedCloneStatus => "受管分身 · " + RunningLabel;
     public string LaunchEgressDescription => workspace?.Switching?.LastEgressEvidence is { } evidence
@@ -42,9 +44,6 @@ public sealed partial class ShellViewModel
     public string SwitchDescription => workspace is null ? "模拟动作只改变界面中的演示状态。" : UsesManagedClone ? "启动所选账号；账号和聊天保持独立，不导入本体 Skills、MCP 或插件。" : workspace.IsFixture ? "实际迁移隔离目录中的文件；进程与时区使用替身。" : "先关闭客户端，再迁移档案与环境。";
     public string LaunchActionLabel => workspace is null ? "⇄   模拟切换并启动" : "⇄   切换并启动";
     public string SwitchActionLabel => workspace is null ? "模拟切换" : "只切换";
-    public string BackupActionLabel => workspace is null ? "模拟创建备份" : "创建备份";
-    public string RestoreActionLabel => workspace is null ? "模拟恢复" : "恢复此备份";
-    public string BackupDescription => workspace is null ? "演示快照仅在本窗口展示；不会读取或写入文件。" : BackupService.BackupNote;
     public string SettingsDescription => workspace is null ? "演示选项，仅在当前窗口内保存。" : UsesManagedClone ? "设置保存在账号库。地区和时区按所选出口设置；退出或失败不自动恢复。" : "设置保存到当前工作区。会话隔离同时管理桌面数据。";
     public string SettingsSaveLabel => workspace is null ? "应用演示设置" : "保存设置";
     public bool AutoSystemTimezone { get => autoSystemTimezone; set => Set(ref autoSystemTimezone, value); }
@@ -58,8 +57,6 @@ public sealed partial class ShellViewModel
     public DelegateCommand EditSelectedCommand { get; private set; } = null!;
     public DelegateCommand RenameSelectedCommand { get; private set; } = null!;
     public DelegateCommand ArchiveSelectedCommand { get; private set; } = null!;
-    public DelegateCommand CreateBackupCommand { get; private set; } = null!;
-    public DelegateCommand RestoreBackupCommand { get; private set; } = null!;
     public DelegateCommand SwitchCommand { get; private set; } = null!;
     public DelegateCommand LaunchCommand { get; private set; } = null!;
     public DelegateCommand LaunchCurrentCommand { get; private set; } = null!;
@@ -78,14 +75,13 @@ public sealed partial class ShellViewModel
         InitializeProxyCommands();
         InitializeVisualTestCommands();
         ExitCommand = new(_ => ExitRequested?.Invoke(this, EventArgs.Empty), _ => !exitDraining);
+        ExitManagerCommand = new(_ => ExitManagerRequested?.Invoke(this, EventArgs.Empty), _ => !exitDraining);
         NewProfileCommand = new(_ => OpenEditor(ProfileEditMode.Create), _ => workspace is not null && !busy && !UsesManagedClone);
         NewAccountLoginCommand = new(_ => OpenAccountOnboarding(), _ => workspace?.Accounts is not null && !busy);
         ImportLocalAccountCommand = new(_ => CurrentOperation = ImportLocalAccountAsync(), _ => workspace?.Accounts is not null && workspace.OriginalHome is not null && !globalBusy && !IsLoggingIn);
         EditSelectedCommand = new(_ => OpenEditor(ProfileEditMode.Edit), _ => workspace is not null && Selected is not null && !busy);
-        RenameSelectedCommand = new(_ => OpenEditor(ProfileEditMode.Rename), _ => workspace is not null && Selected is not null && !SelectedIsActive && !busy);
-        ArchiveSelectedCommand = new(_ => OpenEditor(ProfileEditMode.Archive), _ => workspace is not null && Selected is not null && !SelectedIsActive && !busy);
-        CreateBackupCommand = new(_ => { if (workspace is null) SimulateBackupCommand.Execute(null); else CurrentOperation = CreateBackupAsync(); }, _ => !globalBusy);
-        RestoreBackupCommand = new(p => { if (workspace is null) SimulateRestoreCommand.Execute(null); else if (p is BackupItem item) CurrentOperation = RestoreBackupAsync(item); }, _ => !globalBusy && (workspace is null || workspace.Maintenance is not null));
+        RenameSelectedCommand = new(_ => OpenEditor(ProfileEditMode.Rename), _ => workspace is not null && Selected is not null && !busy);
+        ArchiveSelectedCommand = new(_ => OpenEditor(ProfileEditMode.Archive), _ => workspace is not null && Selected is not null && !busy);
         SwitchCommand = new(_ => { if (workspace is null) SimulateSwitchCommand.Execute(null); else CurrentOperation = SwitchSelectedAsync(false); }, _ => !busy && Selected is not null && (workspace is null || workspace.Switching is not null));
         LaunchCommand = new(_ => { if (workspace is null) SimulateLaunchCommand.Execute(null); else CurrentOperation = SwitchSelectedAsync(true); }, _ => !busy && Selected is not null && (workspace is null || workspace.Switching is not null));
         LaunchCurrentCommand = new(_ => { if (workspace is null) ShowFeedback("模拟启动当前身份", $"演示目标：{ActiveLabel}。没有启动真实客户端。", "Info"); else CurrentOperation = LaunchCurrentAsync(); }, _ => !busy && Active is not null && (workspace is null || workspace.Switching is not null));
@@ -93,25 +89,31 @@ public sealed partial class ShellViewModel
         LogoutCommand = new(_ => OpenEditor(ProfileEditMode.Logout), _ => !globalBusy && workspace?.Maintenance is not null);
         RebuildCommand = new(_ => OpenEditor(ProfileEditMode.Rebuild), _ => !globalBusy && workspace?.Maintenance is not null);
         RebuildOriginalCommand = new(_ => OpenEditor(ProfileEditMode.RebuildOriginal), _ => !globalBusy && workspace?.OriginalMaintenance is not null && workspace.HasOriginalRebuild);
-        RefreshCommand = new(_ => { try { ReloadProfiles(); SyncActive(); RefreshBackups(); ShowFeedback("列表已刷新", "已重新读取档案与活动身份，未发送账号请求。", "Info"); } catch (Exception error) { ShowFeedback("列表未刷新", "读取失败：" + error.GetType().Name, "Error"); } }, _ => !busy && workspace is not null);
+        RefreshCommand = new(_ => { try { ReloadProfiles(); SyncActive(); ShowFeedback("列表已刷新", "已重新读取档案与活动身份，未发送账号请求。", "Info"); } catch (Exception error) { ShowFeedback("列表未刷新", "读取失败：" + error.GetType().Name, "Error"); } }, _ => !busy && workspace is not null);
         InitializeWorkspaceCards();
         InitializeSimpleActions();
         InitializeAccountMarks();
         if (workspace is not null)
         {
             ReloadProfiles();
-            SyncActive();
+            try { SyncActive(); }
+            catch (Exception error) when (error is StorageException or IOException or UnauthorizedAccessException)
+            {
+                // Damaged runtime credentials must not prevent local account maintenance.
+                ShowFeedback("分身状态待确认", "可在设置中重置分身。", "Warning");
+            }
             var settings = workspace.Profiles.ReadSettings();
             isolateSessions = settings.SessionIsolation; autoSystemTimezone = settings.AutoSystemTimezone; quitConfirm = settings.QuitConfirm;
+            closeToTray = settings.CloseToTray;
             darkTheme = settings.WorkspaceTheme == "dark";
-            RefreshBackups();
-            ShowFeedback("工作区已连接", workspace.IsFixture ? "实际读写隔离工作区；客户端进程与系统时区均使用离线替身。" : "账号档案与客户端环境已读取。选择目标后可切换或启动。", "Info");
+            interfaceMode = settings.InterfaceMode; RefreshInterfaceMode();
         }
         WorkspaceTheme.Apply(darkTheme ? "dark" : "light");
     }
     public void OpenEditor(ProfileEditMode mode)
     {
         if (workspace is null || busy) return;
+        if (UsesManagedClone && mode == ProfileEditMode.Rebuild) { ResetManagedCommand.Execute(null); return; }
         if (UsesManagedClone && mode == ProfileEditMode.SaveCurrent) return;
         if (UsesManagedClone && mode == ProfileEditMode.Create) { OpenAccountOnboarding(); return; }
         var kind = IdentityKind.Account;
@@ -152,7 +154,8 @@ public sealed partial class ShellViewModel
         SetBusy(true);
         try
         {
-        SyncActive();
+        var localAccountEdit = input.Mode is ProfileEditMode.Rename or ProfileEditMode.Archive;
+        if (!localAccountEdit) SyncActive();
         var store = workspace.Profiles;
         MaintenanceResult? maintenance = null;
         string extraFeedback = "";
@@ -167,11 +170,9 @@ public sealed partial class ShellViewModel
                 else store.SaveEnvironment(input.Original!.Name, new(input.FollowSystemProxy ? "" : input.Proxy, input.Timezone, input.Locale, FollowSystemProxy: input.FollowSystemProxy));
                 break;
             case ProfileEditMode.Rename:
-                if (input.Original!.Identity == Active?.Identity) throw new InvalidOperationException("请先切换活动身份再重命名。");
-                store.Rename(input.Original.Identity, input.Name); break;
+                store.Rename(input.Original!.Identity, input.Name); break;
             case ProfileEditMode.Archive:
-                if (input.Original!.Identity == Active?.Identity) throw new InvalidOperationException("请先切换活动身份再归档。");
-                maintenance = await Task.Run(() => workspace.Maintenance!.DeleteAccountAsync(workspace.ProfileMaintenance, input.Original.Name));
+                maintenance = await Task.Run(() => workspace.Maintenance!.DeleteAccountAsync(workspace.ProfileMaintenance, input.Original!.Name, managed: workspace.SwitchStorage as ManagedCloneStorage));
                 break;
             case ProfileEditMode.SaveCurrent:
                 maintenance = await Task.Run(() => workspace.Maintenance!.SaveCurrentAccountAsync(workspace.ProfileMaintenance, input.Name, input.Overwrite, IsolateSessions)); break;
@@ -183,11 +184,22 @@ public sealed partial class ShellViewModel
                 maintenance = await Task.Run(() => workspace.OriginalMaintenance!.RebuildAsync(workspace.OriginalRebuild!)); break;
         }
         if (maintenance is { Success: false }) throw new InvalidOperationException(maintenance.Message + (maintenance.RecoveryPaths.Count > 0 ? "。恢复材料：" + string.Join("；", maintenance.RecoveryPaths) : ""));
-        if (maintenance is not null && input.Mode != ProfileEditMode.RebuildOriginal) { runningIdentity = null; runtimeProcessAlive = false; runtimeExited = false; lastOutcome = null; ClearExitObservations(); Raise(nameof(RunningLabel)); Raise(nameof(ManagedCloneStatus)); NotifyHomeDetails(); }
-        var target = input.Mode == ProfileEditMode.Archive ? null : input.Name;
-        CloseEditor(); ReloadProfiles(); SyncActive();
+        if (maintenance is not null && input.Mode != ProfileEditMode.RebuildOriginal && (input.Mode != ProfileEditMode.Archive || input.Original?.Identity == Active?.Identity)) { runningIdentity = null; runtimeProcessAlive = false; runtimeExited = false; lastOutcome = null; if (input.Mode != ProfileEditMode.Archive) ClearExitObservations(); Raise(nameof(RunningLabel)); Raise(nameof(ManagedCloneStatus)); NotifyHomeDetails(); }
+        var target = input.Mode == ProfileEditMode.Archive ? null : input.Mode == ProfileEditMode.Rename ? input.Original!.Name : input.Name;
+        CloseEditor();
+        if (input.Mode == ProfileEditMode.Archive)
+        {
+            // The worker has confirmed deletion. Update the bound list without synchronous disk reads.
+            recentExits.Remove(input.Original!.Identity);
+            identities = identities.Where(i => i.Identity != input.Original.Identity).ToArray();
+            modelTestAccountNames = modelTestAccountNames.Where(name => name != input.Original.Name).ToArray();
+            resultsGallery?.DiscardCachedResults();
+            Selected = null; UpdateItems();
+        }
+        else ReloadProfiles();
+        if (localAccountEdit) RefreshActiveReference(); else SyncActive();
         Selected = FilteredItems.FirstOrDefault(i => i.Name == target && i.Identity.Kind == input.Kind) ?? FilteredItems.FirstOrDefault();
-        ShowFeedback(input.Mode switch { ProfileEditMode.Logout => "分身登录已退出", ProfileEditMode.Rebuild => "受管分身已清理", ProfileEditMode.RebuildOriginal => "Codex 本体已清理", ProfileEditMode.Archive => "档案已归档", _ => "档案已保存" }, maintenance is null ? "已写入当前工作区，并从存储重新读取。" + extraFeedback : maintenance.Message + (maintenance.RecoveryPaths.Count > 0 ? "。恢复材料：" + string.Join("；", maintenance.RecoveryPaths) : ""), "Success");
+        ShowFeedback(input.Mode switch { ProfileEditMode.Logout => "分身登录已退出", ProfileEditMode.Rebuild => "受管分身已清理", ProfileEditMode.RebuildOriginal => "Codex 本体已清理", ProfileEditMode.Archive => "账号已删除", _ => "档案已保存" }, maintenance is null ? "已写入当前工作区，并从存储重新读取。" + extraFeedback : maintenance.Message + (maintenance.RecoveryPaths.Count > 0 ? "。恢复材料：" + string.Join("；", maintenance.RecoveryPaths) : ""), "Success");
         }
         finally { SetBusy(false); }
     }
@@ -195,8 +207,10 @@ public sealed partial class ShellViewModel
     {
         if (workspace is null) return;
         var previous = Selected?.Identity;
-        var accounts = workspace.Profiles.ListAccounts().Select((a, index) => new IdentityItem(a.Name, "Account", a.TestsFrozen ? "已冻结静置 · 不参与模型测试" : a.HasCredentials ? "已保存登录资料" : "待登录", Initial(a.Name), WorkspaceTheme.AvatarColor(index), a.Environment.Proxy, a.Environment.Timezone, a.Environment.Locale, "Codex 默认", a.Environment.FollowSystemProxy, a.TestsFrozen, workspace.Profiles.ReadAccountMarks(a.Name)));
-        identities = accounts.ToArray();
+        var accounts = workspace.Profiles.ListAccounts();
+        if (!accounts.Select(a => a.Name).SequenceEqual(identities.Select(i => i.Name))) resultsGallery?.DiscardCachedResults();
+        modelTestAccountNames = accounts.Where(a => a.HasCredentials).Select(a => a.Name).ToArray();
+        identities = accounts.Select((a, index) => new IdentityItem(a.Name, "Account", a.TestsFrozen ? "已冻结静置 · 不参与模型测试" : a.HasCredentials ? "已保存登录资料" : "待登录", Initial(a.Name), WorkspaceTheme.AvatarColor(index), a.Environment.Proxy, a.Environment.Timezone, a.Environment.Locale, "Codex 默认", a.Environment.FollowSystemProxy, a.TestsFrozen, workspace.Profiles.ReadAccountMarks(a.Name), a.LoggedInAt, a.DisplayName)).ToArray();
         LoadExitObservations();
         Selected = null; UpdateItems(); Selected = FilteredItems.FirstOrDefault(i => i.Identity == previous) ?? FilteredItems.FirstOrDefault();
     }
@@ -207,52 +221,11 @@ public sealed partial class ShellViewModel
         try
         {
             var existing = workspace.Profiles.ReadSettings();
-            workspace.Profiles.SaveSettings(existing with { SessionIsolation = IsolateSessions, AutoSystemTimezone = AutoSystemTimezone, QuitConfirm = QuitConfirm, WorkspaceTheme = DarkTheme ? "dark" : "light" });
-            ShowFeedback("设置已保存", "已写入当前工作区；系统时区未改变。", "Success");
+            workspace.Profiles.SaveSettings(existing with { SessionIsolation = IsolateSessions, AutoSystemTimezone = AutoSystemTimezone, QuitConfirm = QuitConfirm, WorkspaceTheme = DarkTheme ? "dark" : "light", CloseToTray = CloseToTray, InterfaceMode = interfaceMode });
+            ShowFeedback("设置已保存", "", "Success");
             Raise(nameof(EnvironmentSummary));
         }
         catch (Exception error) when (error is StorageException or IOException or UnauthorizedAccessException) { ShowFeedback("设置未保存", error.Message, "Error"); }
-    }
-    private void RefreshBackups()
-    {
-        if (workspace is null) return;
-        var result = workspace.BackupService.List();
-        Backups = result.Items.Select(b => new BackupItem(b.Name, b.Time, $"{b.Count} 个文件 · {b.Bytes:N0} 字节")).ToArray();
-        Raise(nameof(Backups));
-        ResetBackupPage();
-        if (result.Issues.Count > 0) ShowFeedback("部分备份无法读取", string.Join("；", result.Issues.Select(i => i.Message)), "Error");
-    }
-    public async Task CreateBackupAsync()
-    {
-        if (workspace is null || globalBusy) return;
-        SetBusy(true);
-        try
-        {
-            var result = await Task.Run(() => workspace.BackupService.Create("manual"));
-            RefreshBackups();
-            ShowFeedback(result.Ok ? "备份已创建" : "备份未完成", result.Ok ? $"{result.Count} 个文件已保存，{result.Bytes:N0} 字节。" : string.Join("；", result.Failed.Select(f => f.Message)), result.Ok ? "Success" : "Error");
-        }
-        catch (Exception error) when (error is StorageException or IOException or UnauthorizedAccessException) { ShowFeedback("备份未完成", error.Message, "Error"); }
-        finally { SetBusy(false); }
-    }
-    public async Task RestoreBackupAsync(BackupItem item)
-    {
-        if (workspace is null || globalBusy || workspace.Maintenance is null) return;
-        SetBusy(true);
-        try
-        {
-            ShowFeedback("正在准备恢复", "先确认客户端已停止，再校验并恢复备份。", "Info");
-            var result = await Task.Run(() => workspace.Maintenance.RestoreBackupAsync(workspace.BackupService, item.Name));
-            if (result.Restore is null) { ShowFeedback("恢复未开始", result.Message + "。未写入恢复文件。", "Error"); return; }
-            runningIdentity = null; runtimeProcessAlive = false; runtimeExited = false; lastOutcome = null; ClearExitObservations();
-            Raise(nameof(RunningLabel)); Raise(nameof(ManagedCloneStatus)); Raise(nameof(IdentityState)); NotifyHomeDetails();
-            ReloadProfiles(); RefreshBackups(); SyncActive();
-            var restored = result.Restore;
-            var materials = $"恢复前快照：{restored.PreBackup}。" + (restored.StagingPath.Length > 0 ? "恢复暂存目录：" + restored.StagingPath + "。" : "");
-            ShowFeedback(result.Success ? "备份已恢复" : "恢复未完成", result.Success ? $"已恢复 {restored.Restored} 个文件；{materials}" : $"已恢复 {restored.Restored} 个文件。{materials}" + string.Join("；", restored.Failed.Select(f => f.Message)), result.Success ? "Success" : "Error");
-        }
-        catch (Exception error) when (error is StorageException or IOException or UnauthorizedAccessException) { ShowFeedback("恢复未完成", error.Message, "Error"); }
-        finally { SetBusy(false); }
     }
     private void SetBusy(bool value)
     {
@@ -261,6 +234,7 @@ public sealed partial class ShellViewModel
     }
     private void RefreshBusyState()
     {
+        RefreshUpdateCommands(); ExitManagerCommand?.Refresh();
         clearAllTestHistoryCommand?.Refresh();
         TestAllAccountsCommand?.Refresh();
         EditAccountMarksCommand?.Refresh(); SaveAccountMarksCommand?.Refresh();
@@ -275,7 +249,7 @@ public sealed partial class ShellViewModel
         CloseDetailsCommand?.Refresh(); SwitchCardCommand?.Refresh(); UseProxyCandidateCommand?.Refresh();
         OpenVisualTestsCommand?.Refresh(); OpenModelTestCommand?.Refresh(); OpenCialloCommand?.Refresh();
         RefreshModelTestCommands();
-        foreach (var command in new[] { NewAccountLoginCommand, ImportLocalAccountCommand, NewProfileCommand, EditSelectedCommand, RenameSelectedCommand, ArchiveSelectedCommand, CreateBackupCommand, RestoreBackupCommand, SwitchCommand, LaunchCommand, LaunchCurrentCommand, SaveCurrentAccountCommand, LogoutCommand, RebuildCommand, RebuildOriginalCommand, SaveSettingsCommand, ExitCommand, RefreshCommand }) command.Refresh();
+        foreach (var command in new[] { NewAccountLoginCommand, ImportLocalAccountCommand, NewProfileCommand, EditSelectedCommand, RenameSelectedCommand, ArchiveSelectedCommand, SwitchCommand, LaunchCommand, LaunchCurrentCommand, SaveCurrentAccountCommand, LogoutCommand, RebuildCommand, RebuildOriginalCommand, SaveSettingsCommand, ExitCommand, RefreshCommand }) command.Refresh();
     }
     public void SetTrayAvailable(bool value) { trayAvailable = value; Raise(nameof(TrayAvailable)); Raise(nameof(TrayDescription)); }
     public void ReportLifecycleFailure(string title, string message) => ShowFeedback(title, message, "Error");
@@ -337,6 +311,12 @@ public sealed partial class ShellViewModel
         foreach (var command in new[] { EditSelectedCommand, RenameSelectedCommand, ArchiveSelectedCommand, SwitchCommand, LaunchCommand, LaunchCurrentCommand, SaveCurrentAccountCommand }) command?.Refresh();
         RefreshAccountCommands();
     }
+    private void RefreshActiveReference()
+    {
+        var identity = active?.Identity;
+        active = identities.FirstOrDefault(i => i.Identity == identity);
+        Raise(nameof(Active)); Raise(nameof(ActiveLabel)); Raise(nameof(SelectedIsActive)); NotifyHomeDetails();
+    }
     private void SyncActive()
     {
         if (workspace is null) return;
@@ -366,7 +346,7 @@ public sealed partial class ShellViewModel
             LoginTarget = result.LoginTarget; Raise(nameof(LoginTarget)); Raise(nameof(NeedsLogin));
             if (result.NeedsLogin) loginSwitchRequest = request;
             ReloadProfiles(); SyncActive(); Selected = FilteredItems.FirstOrDefault(i => i.Identity == request.Target);
-            if (Selected is { } launchedItem && workspace.Switching.LastEgressEvidence is { } launchEvidence && LaunchEgressRules.Verified(launchEvidence)) RememberExit(launchedItem, launchEvidence.Ip, launchEvidence.Timezone);
+            if (Selected is { } launchedItem && workspace.Switching.LastEgressEvidence is { } launchEvidence && LaunchEgressRules.Verified(launchEvidence)) RememberExit(launchedItem, launchEvidence.Ip, launchEvidence.Timezone, addresses: launchEvidence.Addresses);
             Raise(nameof(RunningLabel)); Raise(nameof(ManagedCloneStatus)); Raise(nameof(LaunchEgressDescription)); Raise(nameof(IdentityState));
             ShowFeedback((workspace.IsFixture ? "隔离验证：" : "") + OutcomeLabel(result.Outcome), result.Message + (result.RecoveryPaths.Count > 0 ? "。恢复材料：" + string.Join("；", result.RecoveryPaths) : "") + (result.Warnings.Count > 0 ? "。提示：" + string.Join("；", result.Warnings) : ""), result.Success ? "Success" : result.PendingLaunch ? "Info" : "Error");
         }
@@ -385,7 +365,7 @@ public sealed partial class ShellViewModel
             var result = await Task.Run(() => workspace.Switching.LaunchCurrentAsync(new(UsesManagedClone ? false : AutoSystemTimezone, workspace.ActiveHome)));
             SetLaunchInProgress(false);
             await ApplyOperationRuntimeAsync(result); SyncActive();
-            if (workspace.Switching.LastEgressEvidence is { } launchEvidence && LaunchEgressRules.Verified(launchEvidence)) RememberExit(target, launchEvidence.Ip, launchEvidence.Timezone);
+            if (workspace.Switching.LastEgressEvidence is { } launchEvidence && LaunchEgressRules.Verified(launchEvidence)) RememberExit(target, launchEvidence.Ip, launchEvidence.Timezone, addresses: launchEvidence.Addresses);
             Raise(nameof(RunningLabel)); Raise(nameof(ManagedCloneStatus)); Raise(nameof(LaunchEgressDescription)); Raise(nameof(IdentityState));
             ShowFeedback((workspace.IsFixture ? "隔离验证：" : "") + OutcomeLabel(result.Outcome), result.Message + (result.RecoveryPaths.Count > 0 ? "。恢复材料：" + string.Join("；", result.RecoveryPaths) : "") + (result.Warnings.Count > 0 ? "。提示：" + string.Join("；", result.Warnings) : ""), result.Success ? "Success" : result.PendingLaunch ? "Info" : "Error");
         }

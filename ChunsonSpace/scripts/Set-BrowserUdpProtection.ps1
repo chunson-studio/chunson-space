@@ -1,4 +1,4 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 param(
     [ValidateSet('Preview','Apply','Restore')][string]$Action='Preview',
     [string[]]$ProgramPaths,

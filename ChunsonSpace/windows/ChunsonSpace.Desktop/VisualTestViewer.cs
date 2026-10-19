@@ -56,6 +56,7 @@ internal static class VisualTestViewer
 
     internal static string PreparePage(VisualTestResult result, int? stepIndex = null)
     {
+        if (result.Kind == VisualTestKind.Animation) throw new IOException("动态旧作文件已保留；可查看原始回复。");
         if (stepIndex is { } selectedIndex && (selectedIndex < 0 || selectedIndex >= result.Steps.Count))
             throw new IOException("这一步没有保存的作品。");
         if (!Path.IsPathFullyQualified(result.Directory) || !Directory.Exists(result.Directory)
@@ -66,7 +67,7 @@ internal static class VisualTestViewer
         string content;
         if (stepIndex is { } selected)
         {
-            var artwork = VisualTestArtifact.Extract(result.Steps[selected].Reply, result.Kind == VisualTestKind.Animation)
+            var artwork = VisualTestArtifact.Extract(result.Steps[selected].Reply, false)
                 ?? throw new IOException("这一步没有有效作品；原始回复仍可在历史记录中查看。");
             content = VisualTestArtifact.Wrap(artwork);
         }

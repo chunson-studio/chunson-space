@@ -30,7 +30,12 @@ public sealed class AccountRepository
         var environment = Profiles.ReadEnvironment(name);
         return environment.FollowSystemProxy ? HttpAccountTransport.ResolveSystemHttpProxy(systemProxyProvider) : HttpAccountTransport.RequireHttpProxy(environment.Proxy);
     }
-    public void WriteProfileAuth(string name, JsonObject auth) => Write(Path.Combine(AccountPath(name), "auth.json"), auth);
+    public void WriteProfileAuth(string name, JsonObject auth)
+    {
+        try { Profiles.SaveAccount(name, auth, overwrite: true); }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or StorageException)
+        { throw new AccountException(AccountError.Storage, "无法保存档案凭据及首次时间；原凭据保留，请检查权限或文件占用。"); }
+    }
     public void WriteQuotaCache(string name, JsonObject quota) => Write(Path.Combine(AccountPath(name), "quota.json"), quota);
     public JsonObject? ReadQuotaCache(string name)
     {
@@ -53,7 +58,7 @@ public sealed class AccountRepository
             if (oldId.Length > 0 && oldId != newId || oldId.Length == 0 && oldEmail.Length > 0 && !oldEmail.Equals(newEmail, StringComparison.OrdinalIgnoreCase))
                 throw new AccountException(AccountError.IdentityMismatch, "登录的是另一个账号，未覆盖既有档案，请使用其他档案名称。");
         }
-        Write(path, auth);
+        WriteProfileAuth(name, auth);
         var warnings = new List<string>();
         var synced = false;
         if (ActiveHome is not null && files.FileExists(Path.Combine(ActiveHome, "auth.json")))
@@ -167,7 +172,7 @@ public sealed class AccountRepository
         try
         {
             if (!preserveEnvironment) Write(environmentPath, environment);
-            Write(authPath, auth);
+            WriteProfileAuth(name, auth);
         }
         catch (Exception error) when (error is AccountException or IOException or UnauthorizedAccessException or StorageException)
         {

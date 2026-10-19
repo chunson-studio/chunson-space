@@ -13,12 +13,18 @@ public sealed class OfflineRuntimeOperations : IRuntimeOperations
     public bool HasPendingLaunch { get; set; }
     public bool DesktopAlive { get; set; }
     public int StopCalls { get; private set; }
+    public int PendingChecks { get; private set; }
+    public int MaintenanceCalls { get; private set; }
+    internal Action? BeforeStop { get; set; }
+    public Task<StopResult> PrepareMaintenanceAsync(CancellationToken token)
+    { token.ThrowIfCancellationRequested(); MaintenanceCalls++; HasPendingLaunch = false; return Task.FromResult(new StopResult(true, false, "隔离取消启动", [])); }
     public DesktopLaunchRequest? LastLaunchRequest { get; private set; }
     public bool LastTimezoneEnabled { get; private set; }
-    public Task<DesktopLaunchResult?> CheckPendingAsync(CancellationToken cancellationToken) => Task.FromResult<DesktopLaunchResult?>(HasPendingLaunch ? new(LaunchStatus.Pending, false, null, "隔离替身", "隔离启动仍待确认") : null);
+    public Task<DesktopLaunchResult?> CheckPendingAsync(CancellationToken cancellationToken) { PendingChecks++; return Task.FromResult<DesktopLaunchResult?>(HasPendingLaunch ? new(LaunchStatus.Pending, false, null, "隔离替身", "隔离启动仍待确认") : null); }
     public Task<StopResult> StopAsync(ProcessScope scope, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested(); StopCalls++;
+        BeforeStop?.Invoke();
         if (StopSucceeds) DesktopAlive = false;
         return Task.FromResult(new StopResult(StopSucceeds, true, StopSucceeds ? "隔离进程替身已停止" : "隔离停止失败，恢复未开始", StopSucceeds ? [] : [999]));
     }

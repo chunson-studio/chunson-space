@@ -8,6 +8,7 @@
     <RootNamespace>ChunsonSpace.Desktop</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="../../scripts/Install-AppUpdate.ps1" LogicalName="ChunsonSpace.Install-AppUpdate.ps1" />
     <Compile Include="../CheckSupport/LinkFixtures.cs" Link="Verification/LinkFixtures.cs" />
     <Compile Include="../CheckSupport/SafetyBufferingFixtures.cs" Link="Verification/SafetyBufferingFixtures.cs" />
     <Using Remove="System.Windows.Forms" />
@@ -16,9 +17,7 @@
     <ProjectReference Include="../ChunsonSpace.Application/ChunsonSpace.Application.csproj" />
     <ProjectReference Include="../ChunsonSpace.Accounts/ChunsonSpace.Accounts.csproj" />
     <ProjectReference Include="../ChunsonSpace.Proxy/ChunsonSpace.Proxy.csproj" />
-    <ProjectReference Include="../ChunsonSpace.Fingerprint/ChunsonSpace.Fingerprint.csproj" />
     <ProjectReference Include="../ChunsonSpace.NodeTesting/ChunsonSpace.NodeTesting.csproj" />
-
     <Resource Include="Assets/Sculpture.png" />
     <Resource Include="Assets/BrandMark.png" />
     <Resource Include="Assets/HomeGarden.svg" />
@@ -27,10 +26,13 @@
     <Content Include="../../scripts/proxy/FlClash-DNS.ps1" Link="scripts/proxy/FlClash-DNS.ps1" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../../scripts/proxy/FlClash-AllSubscriptions.ps1" Link="scripts/proxy/FlClash-AllSubscriptions.ps1" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../../scripts/proxy/lib/FlDns.cs" Link="scripts/proxy/lib/FlDns.cs" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="$(NuGetPackageRoot)yamldotnet/16.3.0/lib/net47/YamlDotNet.dll" Link="scripts/proxy/lib/YamlDotNet.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../../runtime/mihomo/mihomo.exe" Link="runtimes/mihomo/mihomo.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../ThirdParty/Mihomo/**" Link="ThirdParty/Mihomo/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Import Project="../../../taskbar-clock/Clock.targets" />
-  <PropertyGroup><Version>1.5.0</Version></PropertyGroup>
+  <PropertyGroup>
+    <Version>1.6.0</Version>
+  </PropertyGroup>
   <Import Project="../../../FlClashSetup/FlClashSetup.targets" />
 </Project>

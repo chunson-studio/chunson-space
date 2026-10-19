@@ -15,13 +15,13 @@ public sealed partial class AccountService
     // The UI supplies the existing per-account queue shared with the other model-test panels.
     public async Task<AccountHealthBatchResult> TestAccountHealthBatchAsync(IProgress<AccountHealthProgress>? progress = null,
         CancellationToken token = default,
-        Func<string, Func<Task<CialloResult>>, CancellationToken, Task<CialloResult>>? enqueue = null)
+        Func<string, Func<Task<CialloResult>>, CancellationToken, Task<CialloResult>>? enqueue = null, IReadOnlyList<string>? profiles = null)
     {
         if (Interlocked.CompareExchange(ref healthBatchRunning, 1, 0) != 0)
             throw new InvalidOperationException("已有一批账号检测正在执行。");
         try
         {
-            var targets = repository.Profiles.ListAccounts().ToArray();
+            var targets = repository.Profiles.ListAccounts().Where(a => profiles is null || profiles.Contains(a.Name, StringComparer.OrdinalIgnoreCase)).ToArray();
             var frozenAtStart = targets.ToDictionary(a => a.Name, a => repository.Profiles.AreTestsFrozen(a.Name));
             var results = new AccountHealthResult?[targets.Length];
             void Finish(int index, AccountHealthResult row)

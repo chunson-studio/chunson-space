@@ -13,7 +13,70 @@ public sealed partial class FileProfileStore
     }
     public string ProfileDirectory(IdentityRef identity) => Path.Combine(Root, identity.Kind == IdentityKind.Account ? "profiles" : "providers", ProfileRules.Name(identity.Name));
     public IReadOnlyList<AccountProfile> ListAccounts() => files.Directories(Path.Combine(Root, "profiles"))
-        .Select(path => new AccountProfile(Path.GetFileName(path), files.FileExists(Path.Combine(path, "auth.json")), ReadEnvironment(Path.GetFileName(path)), AreTestsFrozen(Path.GetFileName(path)))).ToArray();
+        .Select(path => new AccountProfile(Path.GetFileName(path), files.FileExists(Path.Combine(path, "auth.json")), ReadEnvironment(Path.GetFileName(path)), AreTestsFrozen(Path.GetFileName(path)), ReadLoginTime(Path.GetFileName(path)), ReadDisplayName(Path.GetFileName(path)))).ToArray();
+    public string ReadDisplayName(string name)
+    {
+        var label = JsonFiles.Text(JsonFiles.Read(files, EnvironmentPath(name), true), "display_name").Trim();
+        return label.Length > 0 ? label : name;
+    }
+    // env.json is already the account's editable metadata. The directory key never changes.
+    public void SetDisplayName(string name, string label)
+    {
+        var directory = ProfileDirectory(new(IdentityKind.Account, name));
+        if (!files.DirectoryExists(directory)) throw new StorageException(StorageError.Missing, directory, "账号不存在。");
+        label = label.Trim();
+        if (label.Length is 0 or > 100 || label.Any(char.IsControl)) throw new StorageException(StorageError.InvalidName, "", "名称需为 1–100 个字符。");
+        if (files.Directories(Path.Combine(Root, "profiles")).Select(Path.GetFileName).Any(other =>
+            !string.Equals(other, name, StringComparison.OrdinalIgnoreCase) &&
+            (string.Equals(other, label, StringComparison.OrdinalIgnoreCase) || string.Equals(ReadDisplayName(other!), label, StringComparison.OrdinalIgnoreCase))))
+            throw new StorageException(StorageError.Conflict, "", "名称已被使用。");
+        var path = EnvironmentPath(name);
+        var data = JsonFiles.Read(files, path, true);
+        data["display_name"] = label;
+        JsonFiles.Write(files, path, data);
+    }
+    public DateTimeOffset? ReadLoginTime(string name)
+    {
+        return ReadPreservedLoginTime(name) ?? ReadCredentialLoginTime(name);
+    }
+    private DateTimeOffset? ReadPreservedLoginTime(string name)
+    {
+        try
+        {
+            var value = JsonFiles.Read(files, Path.Combine(ProfileDirectory(new(IdentityKind.Account, name)), "login-metadata.json"), true);
+            return DateTimeOffset.TryParseExact(JsonFiles.Text(value, "firstCredentialAt"), "O", System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out var time) ? time.ToUniversalTime() : null;
+        }
+        catch (Exception error) when (error is StorageException or IOException or UnauthorizedAccessException) { return null; }
+    }
+    private DateTimeOffset? ReadCredentialLoginTime(string name)
+    {
+        try
+        {
+            var auth = JsonFiles.Read(files, Path.Combine(ProfileDirectory(new(IdentityKind.Account, name)), "auth.json"), true);
+            var token = auth["tokens"] is JsonObject tokens ? JsonFiles.Text(tokens, "id_token") : "";
+            var parts = token.Split('.');
+            if (parts.Length != 3) return null;
+            var payload = parts[1].Replace('-', '+').Replace('_', '/');
+            payload = payload.PadRight((payload.Length + 3) / 4 * 4, '=');
+            var claims = JsonNode.Parse(Convert.FromBase64String(payload)) as JsonObject;
+            return claims?["auth_time"] is JsonValue value && value.TryGetValue<long>(out var seconds) && seconds > 0
+                ? DateTimeOffset.FromUnixTimeSeconds(seconds) : null;
+        }
+        catch (Exception error) when (error is StorageException or IOException or UnauthorizedAccessException
+            or FormatException or System.Text.Json.JsonException or ArgumentOutOfRangeException) { return null; }
+    }
+    // Snapshot the existing credential's authentication origin before replacement.
+    // auth_time is session authentication metadata, not proof of the account's lifetime first login.
+    private void PreserveLoginTime(string name)
+    {
+        if (ReadPreservedLoginTime(name) is not null || ReadCredentialLoginTime(name) is not { } time) return;
+        JsonFiles.Write(files, Path.Combine(ProfileDirectory(new(IdentityKind.Account, name)), "login-metadata.json"), new()
+        {
+            ["firstCredentialAt"] = time.ToUniversalTime().ToString("O", System.Globalization.CultureInfo.InvariantCulture),
+            ["source"] = "id_token.auth_time"
+        });
+    }
     public bool AreTestsFrozen(string name)
     {
         var path = Path.Combine(ProfileDirectory(new(IdentityKind.Account, name)), "test-settings.json");
@@ -62,7 +125,9 @@ public sealed partial class FileProfileStore
         var value = JsonFiles.Read(files, Path.Combine(ProfileDirectory(identity), "exit-observation.json"), true);
         var ip = JsonFiles.Text(value, "ip");
         if (!System.Net.IPAddress.TryParse(ip, out _) || !DateTimeOffset.TryParse(JsonFiles.Text(value, "checkedAt"), System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind, out var checkedAt)) return null;
-        return new(JsonFiles.Text(value, "proxy"), JsonFiles.Boolean(value, "followSystemProxy"), ip, JsonFiles.Text(value, "timezone"), JsonFiles.Text(value, "location"), checkedAt);
+        return new(JsonFiles.Text(value, "proxy"), JsonFiles.Boolean(value, "followSystemProxy"), ip, JsonFiles.Text(value, "timezone"), JsonFiles.Text(value, "location"), checkedAt)
+        { Addresses = new(new(JsonFiles.Text(value, "ipv4"), JsonFiles.Text(value, "ipv4Status") is { Length: > 0 } v4 ? v4 : "未查询"),
+            new(JsonFiles.Text(value, "ipv6"), JsonFiles.Text(value, "ipv6Status") is { Length: > 0 } v6 ? v6 : "未查询")) };
     }
     public void SaveExitObservation(IdentityRef identity, ExitObservation observation)
     {
@@ -71,6 +136,8 @@ public sealed partial class FileProfileStore
         {
             ["proxy"] = observation.Proxy, ["followSystemProxy"] = observation.FollowSystemProxy,
             ["ip"] = observation.Ip, ["timezone"] = observation.Timezone, ["location"] = observation.Location,
+            ["ipv4"] = observation.Addresses.Ipv4.Ip, ["ipv6"] = observation.Addresses.Ipv6.Ip,
+            ["ipv4Status"] = observation.Addresses.Ipv4.Message, ["ipv6Status"] = observation.Addresses.Ipv6.Message,
             ["checkedAt"] = observation.CheckedAt.ToString("O", System.Globalization.CultureInfo.InvariantCulture)
         });
     }
@@ -79,7 +146,7 @@ public sealed partial class FileProfileStore
     {
         var value = ReadSettingsDocument();
         var theme = JsonFiles.Text(value, "workspaceTheme");
-        return new(JsonFiles.Boolean(value, "sessionIsolation", true), JsonFiles.Boolean(value, "autoSystemTimezone", true), JsonFiles.Boolean(value, "quitConfirm", true), theme.Length == 0 ? "light" : theme);
+        return new(JsonFiles.Boolean(value, "sessionIsolation", true), JsonFiles.Boolean(value, "autoSystemTimezone", true), JsonFiles.Boolean(value, "quitConfirm", true), theme.Length == 0 ? "light" : theme, JsonFiles.Boolean(value, "closeToTray", true), JsonFiles.Text(value, "interfaceMode") is "single" or "multi" ? JsonFiles.Text(value, "interfaceMode") : "auto");
     }
     public JsonObject ReadSettingsDocument() => JsonFiles.Read(files, Path.Combine(Root, "settings.json"), true);
     public void SaveSettings(AppSettings settings)
@@ -89,7 +156,9 @@ public sealed partial class FileProfileStore
         value["sessionIsolation"] = settings.SessionIsolation;
         value["autoSystemTimezone"] = settings.AutoSystemTimezone;
         value["quitConfirm"] = settings.QuitConfirm;
+        value["closeToTray"] = settings.CloseToTray;
         value["workspaceTheme"] = settings.WorkspaceTheme;
+        value["interfaceMode"] = settings.InterfaceMode;
         JsonFiles.Write(files, Path.Combine(Root, "settings.json"), value);
     }
     public JsonObject ReadAccountCredentials(string name) => JsonFiles.Read(files, Path.Combine(ProfileDirectory(new(IdentityKind.Account, name)), "auth.json"));
@@ -97,6 +166,7 @@ public sealed partial class FileProfileStore
     {
         var path = ProfileDirectory(new(IdentityKind.Account, name));
         if (files.DirectoryExists(path) && !overwrite) throw new StorageException(StorageError.Conflict, path, "账号档案已存在。");
+        PreserveLoginTime(name);
         JsonFiles.Write(files, Path.Combine(path, "auth.json"), credentials);
     }
     public void CreateBoundAccount(string name, EnvironmentSettings environment, bool developer = false)
@@ -219,6 +289,7 @@ public sealed partial class FileProfileStore
     }
     public void Rename(IdentityRef identity, string newName)
     {
+        if (identity.Kind == IdentityKind.Account) { SetDisplayName(identity.Name, newName); return; }
         newName = ProfileRules.Name(newName);
         var oldName = ProfileRules.Name(identity.Name);
         if (new IdentityRef(identity.Kind, oldName) == new IdentityRef(identity.Kind, newName)) throw new StorageException(StorageError.Conflict, "", "名称未变化。");
@@ -230,6 +301,46 @@ public sealed partial class FileProfileStore
         MoveGroup(pairs);
         try { browsers.RenameBinding(oldName, newName, browser); }
         catch { MoveGroup(pairs.Reverse().Select(pair => (pair.Destination, pair.Source))); throw; }
+    }
+    public void DeleteAccountPermanently(string name)
+    {
+        name = ProfileRules.Name(name);
+        var identity = new IdentityRef(IdentityKind.Account, name);
+        var profile = ProfileDirectory(identity);
+        if (!files.DirectoryExists(profile)) throw new StorageException(StorageError.Missing, profile, "账号不存在。");
+        var targets = DirectoriesFor(identity).Where(files.DirectoryExists).ToList();
+        var browser = new AccountBrowserProfiles(Root, files).ReadForDeletion(name);
+        if (browser is not null)
+        {
+            // An owned browser may live only under this account or the provisional pool.
+            var parent = Path.GetDirectoryName(browser)!;
+            var browserRoot = Path.Combine(Root, "browser-envs");
+            if (!parent.Equals(Path.Combine(browserRoot, name), StringComparison.OrdinalIgnoreCase)
+                && !parent.Equals(Path.Combine(browserRoot, AccountBrowserProfiles.PoolName), StringComparison.OrdinalIgnoreCase))
+                throw new StorageException(StorageError.InvalidValue, browser, "浏览器资料不属于此账号目录。");
+        }
+        // Validate every tree before the first deletion, including empty linked directories.
+        // PhysicalFileStorage repeats link checks at deletion; never follow a link or make a copy.
+        foreach (var target in targets) _ = files.Files(target, true);
+        if (browser is not null)
+        {
+            _ = files.Files(browser, true);
+            // Delete browser contents before its owner marker and account binding. A locked cookie
+            // must leave enough identity metadata to retry, without an archive or rollback copy.
+            foreach (var child in files.Directories(browser)) files.DeleteDirectory(child, true);
+            var owner = Path.Combine(browser, "chunson-browser-owner.json");
+            foreach (var file in files.Files(browser, false))
+                if (!file.Equals(owner, StringComparison.OrdinalIgnoreCase)) files.DeleteFile(file);
+            files.DeleteFile(owner);
+            files.DeleteDirectory(browser, false);
+            if (files.DirectoryExists(browser)) throw new IOException("浏览器资料未删除。");
+        }
+        // Keep the profile until its associated environments are gone so an I/O failure can be retried.
+        foreach (var target in targets.OrderBy(target => target.Equals(profile, StringComparison.OrdinalIgnoreCase)))
+        {
+            files.DeleteDirectory(target, true);
+            if (files.DirectoryExists(target)) throw new IOException("账号目录未删除。");
+        }
     }
     public ArchiveResult Archive(IdentityRef identity, IdentityRef? active = null)
     {

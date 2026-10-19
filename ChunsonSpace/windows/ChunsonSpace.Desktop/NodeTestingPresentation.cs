@@ -32,7 +32,7 @@ public sealed class NodeSelectionItem(NodeCandidate node, Action changed, string
     public bool IsAccountCandidate => NodeScreeningRules.IsAccountCandidate(Node);
     public bool IsPreferredSubscription => IsAccountCandidate && NodeScreeningRules.IsPreferredSubscription(Source);
     public bool ScoreExempt => NodeScreeningRules.IsScoreExempt(Node, subscriptionName);
-    public bool CanPrepareLogin => IsAccountCandidate && Eligible;
+    public bool CanPrepareLogin => IsAccountCandidate && Eligible && (Quality?.Score?.Provider == "IPPure" || ScoreExempt);
     public string ScoreStatus => QualityScore is { } score ? $"{score} 分" : ExitIp.Length > 0 ? "评分暂不可用" : State switch { "未检测" => "待检测", "超时" => "连接超时", "已取消" => "检测已取消", _ => "连接未通过" };
     public string ChoiceLabel => QualityScore is { } score ? $"{Country} · {score} 分 · {ExitIp}" + (ScoreExempt ? " · 住宅免检" : score < 85 ? " · 未达85分" : "")
         : $"{Country} · {ScoreStatus} · {(ExitIp.Length > 0 ? ExitIp : Name)}";
@@ -56,7 +56,7 @@ public sealed class NodeSelectionItem(NodeCandidate node, Action changed, string
         var decision = quality?.Admission.Message ?? "IP 质量分未知，尚未取得有效评分。";
         
         result = value.DelayOnly ? delay + "\n" + value.Message + "\n\n使用一键检测查询出口和质量分。"
-            : $"{decision}\n出口 IP：{Text(quality?.Ip)}\n订阅：{Source}\n节点：{Name}\n类型：{NetworkTag}\n国家：{Country}\n城市：{Text(quality?.City)}\n评分来源：{quality?.Score?.Provider ?? "Net.Coffee"}\n{delay}\n"
+            : (quality?.Addresses.Summary ?? ExitAddresses.Unknown.Summary) + $"\n{decision}\n主出口 IP：{Text(quality?.Ip)}\n订阅：{Source}\n节点：{Name}\n类型：{NetworkTag}\n国家：{Country}\n城市：{Text(quality?.City)}\n评分来源：{quality?.Score?.Provider ?? "未知"}\n{delay}\n"
                 + (quality is { HasVerifiedExit: true } ? $"运营商：{Text(quality.Company)}\nASN：{Text(quality.Asn)}\n时区：{Text(quality.Timezone)}\n数据中心：{Flag(quality.IsDatacenter)} · 代理：{Flag(quality.IsProxy)}\nVPN：{Flag(quality.IsVpn)} · Tor：{Flag(quality.IsTor)} · 滥用：{Flag(quality.IsAbuser)}\n来源：{quality.Source} · {quality.FetchedAt.ToLocalTime():HH:mm:ss}\n{quality.Message}" : "IP 体检未完成：" + value.Message)
                 + "\n\n" + (quality?.Score?.Message ?? "未完成风险评分。") + "\nHTTPS 延迟含首次连接与 TLS，不是 ICMP ping。";
         foreach (var name in new[] { nameof(Result), nameof(Quality), nameof(State), nameof(DelayMs), nameof(RiskScore), nameof(QualityScore), nameof(Eligible), nameof(CanPrepareLogin), nameof(NetworkGroup), nameof(NetworkTag), nameof(Summary), nameof(ExitIp), nameof(Country), nameof(ChoiceLabel), nameof(ScoreStatus), nameof(ChoiceExplanation) }) Raise(name);
@@ -117,12 +117,12 @@ public sealed class NodeTestingViewModel : ObservableObject
             return $"≥85 或 IPEqual 住宅 · 相同出口已合并 {Math.Max(0, duplicates)} 条 · 排除不通或未达标 {excluded} 条";
         }
     }
-    public string ModeDescription => "补测新增与失败：读取最新的本地订阅，跳过已完成评分的节点（包括低分），重试新增、变更、超时和未取得分数的节点。先测 Clash 连通性，不通就跳过 IP 与评分查询。重新检测全部：重新确认全部候选线路的连通性与出口。同一 IP 的成功评分长期复用；家宽/机房按 Net.Coffee 属性显示标签。IPEqual 订阅名称下带“住宅”的节点免评分门槛，分数照常显示。历史结果不代表持续在线，登录时仍核对实际出口。";
+    public string ModeDescription => "补测新增与失败：读取最新的本地订阅，跳过已完成评分的节点（包括低分），重试新增、变更、超时和未取得分数的节点。先测 Clash 连通性，不通就跳过 IP 与评分查询。重新检测全部：重新确认全部候选线路的连通性与出口。同一 IP 的成功评分长期复用；家宽/机房按 IPPure 属性显示标签；IPinfo 分别测量 IPv4 / IPv6，时区在需要时单独查询。IPEqual 订阅名称下带“住宅”的节点免评分门槛，分数照常显示。历史结果不代表持续在线，登录时仍核对实际出口。";
     public Task CurrentOperation { get; private set; } = Task.CompletedTask;
     public async Task<NodeSelectionItem> ChooseIndependentAsync(string excludeIp = "", bool random = false)
     {
         if (!initialized && !busy) await LoadAsync(); // Read cached results only; never start a rescan here.
-        var choices = LoginChoices.Where(item => item.CanPrepareLogin && ProfileRules.ValidTimezone(item.Quality?.Timezone ?? "") && item.ExitIp != excludeIp)
+        var choices = LoginChoices.Where(item => item.CanPrepareLogin && item.ExitIp != excludeIp)
             .OrderByDescending(item => item.QualityScore).ThenBy(item => item.DelayMs ?? long.MaxValue).ToArray();
         if (choices.Length == 0) throw new InvalidOperationException(excludeIp.Length > 0
             ? "暂时没有其他已达标的 IP，请先在网络与 IP 中筛选；当前 IP 保留。"
@@ -238,7 +238,7 @@ public sealed class NodeTestingViewModel : ObservableObject
     private async Task ScreenAsync(bool supplement = false)
     {
         var candidates = Items.Where(item => item.IsAccountCandidate).DistinctBy(item => item.Node.Id).ToArray();
-        var selected = candidates.Where(item => !supplement || !NodeProbeHistory.IsComplete(services!.History.Find(item.Node.Id))).OrderByDescending(item => item.ResidentialName).ToArray();
+        var selected = candidates.Where(item => !supplement || !NodeProbeHistory.IsComplete(services!.History.Find(item.Node.Id)) || item.Quality?.Score?.Provider != "IPPure").OrderByDescending(item => item.ResidentialName).ToArray();
         var skipped = candidates.Length - selected.Length;
         var label = supplement ? "补测" : "筛选";
         if (selected.Length == 0) { status = $"无需补测 · 已跳过 {skipped} 个已完成节点。"; Raise(nameof(Status)); return; }

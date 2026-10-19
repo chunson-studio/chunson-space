@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json.Nodes;
 using ChunsonSpace.Core;
 
@@ -109,12 +109,11 @@ try
     Assert(Read("providers/测试供应商/auth.json") == authBefore && Read("providers/测试供应商/provider.json") == providerBefore, "provider pair recovered");
     fault.FailWrite = null;
     Directory.CreateDirectory(Path.Combine(checkRoot, "electron-envs/档案一"));
-    fault.FailMove = path => path.Contains("browser-envs", StringComparison.Ordinal);
-    Expect(StorageError.Io, () => failedStore.Rename(new(IdentityKind.Account, "档案一"), "改名"), "rename failure reports");
-    Assert(Directory.Exists(Path.Combine(checkRoot, "profiles/档案一")) && !Directory.Exists(Path.Combine(checkRoot, "profiles/改名")), "rename rollback");
-    fault.FailMove = null;
+    fault.FailWrite = path => path.EndsWith("env.json", StringComparison.Ordinal);
+    Expect(StorageError.Io, () => failedStore.Rename(new(IdentityKind.Account, "档案一"), "改名"), "rename metadata failure reports");
+    fault.FailWrite = null;
     store.Rename(new(IdentityKind.Account, "档案一"), "改名");
-    Assert(Directory.Exists(Path.Combine(checkRoot, "browser-envs/改名")) && Directory.Exists(Path.Combine(checkRoot, "electron-envs/改名")), "rename associated directories");
+    Assert(store.ReadDisplayName("档案一") == "改名" && Directory.Exists(Path.Combine(checkRoot, "profiles/档案一")) && Directory.Exists(Path.Combine(checkRoot, "electron-envs/档案一")), "rename keeps stable directories");
     var archive = store.Archive(new(IdentityKind.Account, "四"));
     Assert(archive.Moved.Count == 1 && Directory.Exists(archive.Moved[0]) && !Directory.Exists(Path.Combine(checkRoot, "profiles/四")), "archive reversible material");
     foreach (var (input, expected) in new (string, long?)[] { ("{}", null), ("{\"cached_input_tokens\":true}", null), ("{\"cached_input_tokens\":-1}", null), ("{\"cached_input_tokens\":10.0}", null), ("{\"cached_input_tokens\":\"10\"}", null), ("{\"cached_input_tokens\":0}", 0), ("{\"cached_input_tokens\":4096}", 4096), ("{\"cached_input_tokens\":50000}", 50000), ("{\"input_tokens_details\":{\"cached_tokens\":8}}", 8) })
@@ -126,81 +125,11 @@ try
     Assert(System.Text.Json.JsonSerializer.Serialize(TokenUsageReader.Read(new JsonObject { ["cached_input_tokens"] = 8 })) == "{\"CachedInputTokens\":8}", "usage contains only raw count no capability fields");
     Write("browser-envs/改名/Default/Cookies", "fixture browser body");
     Write("unrelated.txt", "untouched");
-    var backups = new BackupService(checkRoot, files);
-    var first = backups.Create("fixture");
-    Assert(first.Ok && first.Count > 0, "backup creates version one");
-    var manifest = JsonNode.Parse(File.ReadAllText(Path.Combine(first.Path, "MANIFEST.json")))!.AsObject();
-    Assert(manifest["version"]!.GetValue<int>() == 1, "v1 manifest compatibility");
-    Assert(!File.Exists(Path.Combine(first.Path, "browser-envs/改名/Default/Cookies")) && !File.Exists(Path.Combine(first.Path, "unrelated.txt")), "backup scope excludes browser body");
-    Assert(backups.List().Items.Any(item => item.Name == first.Name), "list reads manifest");
-    var settingsBefore = Read("settings.json");
-    Write("settings.json", "{\"later\":true}");
-    var restored = backups.Restore(first.Name);
-    Assert(restored.Ok && restored.PreBackup.Length > 0 && Read("settings.json") == settingsBefore, "restore old backup");
-    Assert(File.ReadAllText(Path.Combine(checkRoot, "backups", restored.PreBackup, "settings.json")) == "{\"later\":true}" && Read("unrelated.txt") == "untouched", "restore preserves pre state and unrelated file");
-    var manifestPath = Path.Combine(first.Path, "MANIFEST.json");
-    var originalManifest = File.ReadAllText(manifestPath);
-    manifest["files"]![0]!["sha256"] = new string('0', 64);
-    File.WriteAllText(manifestPath, manifest.ToJsonString());
-    var invalid = backups.Restore(first.Name);
-    Assert(!invalid.Ok && invalid.Restored == 0 && invalid.PreBackup.Length == 0, "hash invalid blocks all writes");
-    File.WriteAllText(manifestPath, originalManifest);
-    var external = checkRoot + "-outside-fixture";
-    Directory.CreateDirectory(external);
-    File.WriteAllText(Path.Combine(external, "auth.json"), "external fixture unchanged");
-    var junction = Path.Combine(checkRoot, "profiles", "联接");
-    var start = new System.Diagnostics.ProcessStartInfo("cmd.exe") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-    foreach (var argument in new[] { "/c", "mklink", "/J", junction, external }) start.ArgumentList.Add(argument);
-    using (var process = System.Diagnostics.Process.Start(start)!)
-    { process.WaitForExit(); Assert(process.ExitCode == 0, "create isolated junction fixture: " + process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd()); }
-    Expect(StorageError.Io, () => store.ReadAccountCredentials("联接"), "linked profile read blocked");
-    Expect(StorageError.Io, () => store.SaveAccount("联接", new(), overwrite: true), "linked profile save blocked");
-    manifest = JsonNode.Parse(originalManifest)!.AsObject();
-    var entryWithLink = manifest["files"]![0]!.AsObject();
-    var existingBackup = Path.Combine(first.Path, entryWithLink["path"]!.GetValue<string>());
-    var linkedBackupTarget = Path.Combine(first.Path, "profiles", "联接", "auth.json");
-    Directory.CreateDirectory(Path.GetDirectoryName(linkedBackupTarget)!);
-    File.Copy(existingBackup, linkedBackupTarget);
-    entryWithLink["path"] = "profiles/联接/auth.json";
-    File.WriteAllText(manifestPath, manifest.ToJsonString());
-    var linked = backups.Restore(first.Name);
-    Assert(!linked.Ok && linked.Restored == 0 && linked.PreBackup.Length == 0 && File.ReadAllText(Path.Combine(external, "auth.json")) == "external fixture unchanged", "linked destination blocks entire restore");
-    Directory.Delete(junction);
-    var sourceLink = Path.Combine(first.Path, "profiles", "来源联接");
-    start.ArgumentList.Clear();
-    foreach (var argument in new[] { "/c", "mklink", "/J", sourceLink, external }) start.ArgumentList.Add(argument);
-    using (var process = System.Diagnostics.Process.Start(start)!)
-    { process.WaitForExit(); Assert(process.ExitCode == 0, "create source junction fixture"); }
-    entryWithLink["path"] = "profiles/来源联接/auth.json";
-    File.WriteAllText(manifestPath, manifest.ToJsonString());
-    var linkedSource = backups.Restore(first.Name);
-    Assert(!linkedSource.Ok && linkedSource.Restored == 0 && linkedSource.PreBackup.Length == 0, "linked backup source blocked before any writes");
-    Directory.Delete(sourceLink);
-    File.WriteAllText(manifestPath, originalManifest);
-    var failedBackups = new BackupService(checkRoot, fault);
-    fault.FailWrite = path => path.Contains("backups", StringComparison.Ordinal) && path.EndsWith("settings.json", StringComparison.Ordinal);
-    var blocked = failedBackups.Restore(first.Name);
-    Assert(!blocked.Ok && blocked.Restored == 0 && blocked.PreBackup.Length > 0, "failed pre backup prevents restore");
-    fault.FailWrite = path => path == Path.Combine(checkRoot, "settings.json");
-    var partial = failedBackups.Restore(first.Name);
-    Assert(!partial.Ok && partial.Restored > 0 && partial.Failed.Count == 1 && Directory.Exists(Path.Combine(checkRoot, "backups", partial.PreBackup)), "partial restore retains recovery backup");
-    fault.FailWrite = null;
-    Write("backups/broken/MANIFEST.json", "{");
-    Assert(backups.List().Issues.Any(issue => issue.Code == StorageError.Corrupt), "corrupt list entry explicit");
-    foreach (var path in new[] { "../settings.json", "D:\\outside.json", "unrelated.txt", "profiles/../settings.json", "browser-envs/改名/Default/Cookies" })
-    {
-        manifest = JsonNode.Parse(originalManifest)!.AsObject();
-        manifest["files"]![0]!["path"] = path;
-        File.WriteAllText(manifestPath, manifest.ToJsonString());
-        Assert(!backups.Restore(first.Name).Ok, "unsafe restore scope " + path);
-    }
-    File.WriteAllText(manifestPath, originalManifest);
     using (var locked = new FileStream(Path.Combine(checkRoot, "settings.json"), FileMode.Open, FileAccess.Read, FileShare.None))
         Expect(StorageError.Io, () => store.SaveSettings(new()), "locked file failure explicit");
     Assert(!Directory.GetFiles(checkRoot, "*.tmp", SearchOption.AllDirectories).Any(), "atomic files clean temporary materials");
     count += SwitchStorageChecks.Run(Path.Combine(checkRoot, "switch"));
     count += ProviderEditingChecks.Run(Path.Combine(checkRoot, "provider-edit"));
-    count += BackupStreamingChecks.Run(Path.Combine(checkRoot, "backup-streaming"));
     count += ManyAccountChecks.Run(Path.Combine(checkRoot, "many-accounts"));
     count += ManagedCloneChecks.Run(Path.Combine(checkRoot, "managed-clone"));
     count += ManagedToolIsolationChecks.Run(Path.Combine(checkRoot, "managed-tools"));

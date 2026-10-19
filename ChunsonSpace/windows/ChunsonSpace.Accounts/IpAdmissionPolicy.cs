@@ -30,11 +30,11 @@ public sealed class IpAdmissionService(Func<string, CancellationToken, Task<IpQu
     {
         var report = await ProbeQualityAsync(proxy, token);
         if (!report.Admission.Allowed) throw new AccountException(AccountError.ExitUnavailable, report.Admission.Message);
-        return new(true, report.Ip, report.Country, report.CountryCode, report.City, report.Timezone);
+        return new(true, report.Ip, report.Country, report.CountryCode, report.City, report.Timezone) { Addresses = report.Addresses };
     }
     public async Task<LaunchEgressEvidence> ProbeAsync(IdentityRef identity, string resolvedProxy, CancellationToken token)
     {
         var report = await ProbeQualityAsync(resolvedProxy, token);
-        return new(report.Admission.Allowed, report.Ip, report.Timezone, report.Admission.Message);
+        return new(report.Admission.Allowed, report.Ip, report.Timezone, report.Admission.Message) { Addresses = report.Addresses };
     }
 }

@@ -123,19 +123,19 @@ internal static class VisualTestVerification
         runtime.ReplyFactory = null; before = runtime.Requests.Count;
         panel.StartCommand.Execute(null); await panel.CurrentOperation; Flush();
         check("variation makes one SVG request and retains saved result", runtime.Requests.Count == before + 1 && panel.Result!.Completed && panel.Result.Steps[0].Artifact!.EndsWith(".svg"));
-        var firstVariant = panel.Variant; panel.Variant = panel.Variants[1]; check("variant cache separates different prompts", panel.Result is null);
-        panel.Variant = firstVariant; check("returning to variant reuses cached result", panel.Result?.Completed == true && runtime.Requests.Count == before + 1);
+        var firstVariant = panel.DrawingContent; panel.DrawingContent = "second fixture"; check("variant cache separates different prompts", panel.Result is null);
+        panel.DrawingContent = firstVariant; check("returning to variant reuses cached result", panel.Result?.Completed == true && runtime.Requests.Count == before + 1);
         capture("visual-variation-minimum"); panel.CloseCommand.Execute(null); Open(VisualTestKind.Static); panel = model.VisualTests!;
         before = runtime.Requests.Count; panel.StartCommand.Execute(null); await panel.CurrentOperation; Flush();
-        check("static pelican uses one SVG request with distinct persisted result", panel.Result!.Completed && panel.Kind == VisualTestKind.Static && !panel.Animated && runtime.Requests.Count == before + 1 && panel.Result.Steps[0].Artifact!.EndsWith(".svg"));
+        check("static pelican uses one SVG request with distinct persisted result", panel.Result!.Completed && panel.Kind == VisualTestKind.Static && runtime.Requests.Count == before + 1 && panel.Result.Steps[0].Artifact!.EndsWith(".svg"));
         check("saved gallery and preview are available without new requests", panel.OpenGalleryCommand.CanExecute(null) && File.ReadAllText(Path.Combine(panel.Result!.Directory, "gallery.html")).Contains("sandbox='allow-scripts'"));
         capture("visual-static-default-minimum");
-        panel.Animated = true;
+        
         check("animation toggle changes prompt and cache without sending request", panel.Kind == VisualTestKind.Animation && panel.Result is null && runtime.Requests.Count == before + 1);
         before = runtime.Requests.Count; panel.StartCommand.Execute(null); await panel.CurrentOperation; Flush();
         check("animation makes one HTML request", runtime.Requests.Count == before + 1 && panel.Result!.Completed && panel.Result.Steps[0].Artifact!.EndsWith(".html"));
         capture("visual-animation-minimum");
-        panel.Animated = false; check("returning to static restores saved SVG without requests", panel.Result?.Kind == VisualTestKind.Static && panel.Result.Completed); panel.Animated = true;
+         check("returning to static restores saved SVG without requests", panel.Result?.Kind == VisualTestKind.Static && panel.Result.Completed); 
         runtime.ReplyFactory = (_, _, _) => Task.FromResult("not an artifact"); panel.StartCommand.Execute(null); await panel.CurrentOperation; Flush();
         check("invalid artwork preserves raw reply and cannot report completion", !panel.Result!.Completed && panel.Result.Steps[0].Reply == "not an artifact" && !panel.Steps[0].OpenCommand.CanExecute(null));
         panel.CloseCommand.Execute(null); Open(VisualTestKind.Revision); panel = model.VisualTests!; runtime.ReplyFactory = null; runtime.FailRender = true;
@@ -190,7 +190,7 @@ internal static class VisualTestVerification
         check("agent CLI uses shared static service and returns saved artwork", await AgentCli.RunAsync(workspace, cliInput, cliOutput) == 0 && runtime.Requests.Count == before + 1 && File.ReadAllText(cliOutput).Contains("Static"));
         File.WriteAllText(cliInput, System.Text.Json.JsonSerializer.Serialize(new { command = "visual-results", profile = "测试甲", testKind = "Static", model = "gpt-6-astra" }));
         check("agent CLI result read does not call model", await AgentCli.RunAsync(workspace, cliInput, Path.Combine(directory, "visual-cli-cached.json")) == 0 && runtime.Requests.Count == before + 1);
-        var high = workspace.Accounts.VisualTests.Load("测试甲", "gpt-6-astra", VisualTestKind.Static, VisualTestCatalog.Variants[0].Id)!;
+        var high = workspace.Accounts.VisualTests.Load("测试甲", "gpt-6-astra", VisualTestKind.Static, "fixture still life")!;
         File.WriteAllText(cliInput, System.Text.Json.JsonSerializer.Serialize(new { command = "visual-test", profile = "测试甲", testKind = "Static", model = "gpt-6-astra", effort = "low" }));
         var beforeRejectedEffort = runtime.Requests.Count;
         check("agent CLI rejects old adjustable effort before model request", await AgentCli.RunAsync(workspace, cliInput, Path.Combine(directory, "visual-cli-low.json")) != 0 && runtime.Requests.Count == beforeRejectedEffort);

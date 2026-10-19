@@ -1,5 +1,3 @@
-using System.Text;
-using System.Text.Json.Nodes;
 using ChunsonSpace.Core;
 using ChunsonSpace.Application;
 
@@ -29,155 +27,33 @@ public static class CountryEnvironmentRules
     public static IReadOnlyList<TimezoneCandidate> Timezones(string country) => SingleZones.TryGetValue(country.Trim(), out var zone) ? [new(zone, "")] : MultipleZones.GetValueOrDefault(country.Trim(), []);
 }
 
-public sealed class EgressService(AccountRepository repository, IAccountTransport transport,
-    Func<string, CancellationToken, Task<IpQualityReport>>? publicProbe = null) : ILaunchEgressProbe
+public sealed class EgressService(AccountRepository repository, IAccountTransport transport) : ILaunchEgressProbe
 {
-    private readonly AccountNetwork network = new(transport);
-    private async Task<EgressResult> PublicExit(string proxy, CancellationToken token)
-    {
-        var report = await publicProbe!(proxy, token);
-        return new(report.HasVerifiedExit && ProfileRules.WindowsTimezoneId(report.Timezone) is not null,
-            report.Ip, report.Country, report.CountryCode, report.City, report.Timezone, report.Message);
-    }
-    public async Task<EgressResult> ProbeAsync(string profileName, CancellationToken token = default)
-    {
-        var proxy = repository.Proxy(profileName);
-        return await ProbeDetailsProxyAsync(proxy, token);
-    }
+    private readonly IpInfoService ipinfo = new(transport);
+    public Task<EgressResult> ProbeAsync(string profileName, CancellationToken token = default)
+        => ProbeProxyAsync(repository.Proxy(profileName), token);
     public async Task<LaunchEgressEvidence> ProbeAsync(IdentityRef identity, string resolvedProxy, CancellationToken token)
     {
         var result = await ProbeProxyAsync(resolvedProxy, token);
-        var evidence = new LaunchEgressEvidence(result.Ok, result.Ip, result.Timezone, result.Message.Length > 0 ? result.Message : result.Ok ? "所选代理出口 IP 与时区已读取。" : "所选代理出口 IP 与时区探测失败。");
+        var evidence = new LaunchEgressEvidence(result.Ok, result.Ip, result.Timezone, result.Message) { Addresses = result.Addresses };
         return evidence with { Success = LaunchEgressRules.Verified(evidence) };
     }
     public async Task<EgressResult> ProbeProxyAsync(string resolvedProxy, CancellationToken token = default)
-        => await ProbeMatchedProxyAsync(resolvedProxy, false, token);
+        => await ipinfo.LocateAsync(await ipinfo.ProbeAsync(resolvedProxy, token), resolvedProxy, token);
     public Task<EgressResult> ProbeCountryProxyAsync(string resolvedProxy, CancellationToken token = default)
-        => ProbeMatchedProxyAsync(resolvedProxy, true, token);
-    private sealed record SourceRead(string Name, EgressResult Value, bool Location, bool Conflicting = false);
-    private Task<EgressResult> ProbeMatchedProxyAsync(string resolvedProxy, bool requireCountry, CancellationToken token)
-        => ProbeSourcesAsync(resolvedProxy, verifyExit: true, requireCountry, secondTimezone: false, token);
-    public Task<EgressResult> ProbeRegionProxyAsync(string resolvedProxy, CancellationToken token = default)
-        => ProbeSourcesAsync(resolvedProxy, verifyExit: true, requireCountry: true, secondTimezone: true, token);
-    private Task<EgressResult> ProbeDetailsProxyAsync(string resolvedProxy, CancellationToken token)
-        => ProbeSourcesAsync(resolvedProxy, verifyExit: false, requireCountry: false, secondTimezone: false, token);
-
-    private async Task<EgressResult> ProbeSourcesAsync(string resolvedProxy, bool verifyExit, bool requireCountry, bool secondTimezone, CancellationToken token)
+        => ProbeRegionProxyAsync(resolvedProxy, token);
+    public async Task<EgressResult> ProbeRegionProxyAsync(string resolvedProxy, CancellationToken token = default)
     {
-        if (publicProbe is not null) return await PublicExit(resolvedProxy, token);
-        var proxy = HttpAccountTransport.RequireHttpProxy(resolvedProxy);
-        token.ThrowIfCancellationRequested();
-        var reads = new List<SourceRead>();
-        var first = ReadLocationAsync(EgressLocationSource.IpWho, proxy, token);
-        if (verifyExit)
-        {
-            var trace = ReadTraceAsync(AccountEndpoints.Trace, "Cloudflare", proxy, token);
-            await Task.WhenAll(first, trace);
-            reads.Add(await first);
-            reads.Add(new("Cloudflare", await trace, false));
-        }
-        else reads.Add(await first);
-        foreach (var source in EgressSources.Locations.Skip(1).Cast<EgressLocationSource?>().Append(null))
-        {
-            var usable = reads.Where(read => EgressSources.ValidIp(read.Value.Ip)).ToArray();
-            var details = reads.FirstOrDefault(read => read.Location && read.Value.Ok && (!requireCountry || EgressSources.HasCountry(read.Value)))?.Value;
-            var partial = details ?? usable.FirstOrDefault()?.Value ?? new EgressResult(false);
-            if (reads.FirstOrDefault(read => read.Conflicting) is { } rejected)
-                return partial with { Ok = false, Message = rejected.Value.Message + " 未使用不一致的数据。" };
-            var conflict = Conflict(usable, requireCountry);
-            if (conflict.Length > 0) return partial with { Ok = false, Message = conflict + " 未使用不一致的数据。" };
-            var witnesses = requireCountry ? usable.Count(read => EgressSources.HasCountry(read.Value)) : usable.Length;
-            var zones = usable.Count(read => read.Location && read.Value.Ok && EgressSources.HasCountry(read.Value));
-            if (details is not null && (!verifyExit || witnesses >= 2) && (!secondTimezone || zones >= 2))
-            {
-                var names = string.Join("、", usable.Select(read => read.Name));
-                var backup = reads.Any(read => !read.Value.Ok) ? "主查询未完成，已使用备用来源。" : "";
-                return details with { Message = backup + names + (secondTimezone ? " 已核对同一出口、国家及两来源具体时区。" : verifyExit ? " 已核对同一出口；具体时区已取得。" : " 已返回出口与具体时区。") };
-            }
-            if (source is null)
-            {
-                var failures = reads.Where(read => !read.Value.Ok || read.Location && requireCountry && !EgressSources.HasCountry(read.Value))
-                    .Select(read => read.Value.Message + (read.Location && requireCountry && !EgressSources.HasCountry(read.Value) ? " " + read.Name + " 未返回可确认的国家。" : ""));
-                return partial with { Ok = false, Message = string.Join(" ", failures) + (secondTimezone ? " 同出口、国家与两来源具体时区尚未完整核对。" : " 尚未完成出口核对。") };
-            }
-            token.ThrowIfCancellationRequested();
-            reads.Add(await ReadLocationAsync(source.Value, proxy, token));
-        }
-        throw new InvalidOperationException("Egress source sequence did not terminate.");
+        var result = await ProbeProxyAsync(resolvedProxy, token);
+        return EgressSources.HasCountry(result) ? result : result with { Ok = false, Message = result.Message + " IPinfo 未返回可确认的国家。" };
     }
-    private static string Conflict(IReadOnlyList<SourceRead> reads, bool requireCountry)
-    {
-        for (var i = 0; i < reads.Count; i++)
-            for (var j = i + 1; j < reads.Count; j++)
-            {
-                var a = reads[i]; var b = reads[j];
-                if (!EgressSources.SameIp(a.Value.Ip, b.Value.Ip)) return $"不同查询返回了不同出口：{a.Name} 为 {a.Value.Ip}，{b.Name} 为 {b.Value.Ip}。";
-                if (requireCountry && EgressSources.HasCountry(a.Value) && EgressSources.HasCountry(b.Value) && a.Value.CountryCode != b.Value.CountryCode)
-                    return $"同一 IP 的国家定位未一致：{a.Name} 为 {a.Value.CountryCode}，{b.Name} 为 {b.Value.CountryCode}。";
-                if (a.Location && b.Location && a.Value.Ok && b.Value.Ok && !EgressSources.SameZone(a.Value.Timezone, b.Value.Timezone))
-                    return $"同一 IP 的时区定位未一致：{a.Name} 为 {a.Value.Timezone}，{b.Name} 为 {b.Value.Timezone}。";
-            }
-        return "";
-    }
-    private async Task<EgressResult> ReadTraceAsync(Uri endpoint, string source, string proxy, CancellationToken token)
-    {
-        try
-        {
-            var response = await network.PayloadAsync(new(HttpMethod.Get, endpoint, proxy, true, new Dictionary<string, string> { ["User-Agent"] = "" }), TimeSpan.FromSeconds(8), 4096, token);
-            return EgressSources.Trace(Encoding.UTF8.GetString(response.Body), source);
-        }
-        catch (AccountException error) when (error.Code is not (AccountError.ExitUnavailable or AccountError.Cancelled))
-        { return new(false, Message: QueryFailure(source, error)); }
-    }
-    private async Task<SourceRead> ReadLocationAsync(EgressLocationSource source, string proxy, CancellationToken token)
-    {
-        var endpoint = EgressSources.Endpoint(source);
-        EgressResult? measured = null;
-        if (source == EgressLocationSource.NetCoffee)
-        {
-            measured = await ReadTraceAsync(endpoint, EgressSources.Name(source), proxy, token);
-            if (!measured.Ok) return new(EgressSources.Name(source), measured, true);
-            endpoint = new Uri(NetCoffeeService.LookupEndpoint, Uri.EscapeDataString(measured.Ip));
-        }
-        try
-        {
-            var data = await network.JsonAsync(new(HttpMethod.Get, endpoint, proxy, true, new Dictionary<string, string> { ["User-Agent"] = "" }), TimeSpan.FromSeconds(8), token);
-            var result = EgressSources.Parse(source, data, measured);
-            if (measured is not null && EgressSources.LookupConflicts(data, measured))
-                return new(EgressSources.Name(source), measured with { Ok = false, Message = result.Message }, true, Conflicting: true);
-            // A query-by-IP report never overwrites its independently measured trace.
-            if (source == EgressLocationSource.NetCoffee && result.Ip.Length == 0)
-                return new(EgressSources.Name(source), measured! with { Ok = false, Message = result.Message }, true);
-            return new(EgressSources.Name(source), result, true);
-        }
-        catch (AccountException error) when (error.Code is not (AccountError.ExitUnavailable or AccountError.Cancelled))
-        { return new(EgressSources.Name(source), (measured ?? new EgressResult(false)) with { Ok = false, Message = QueryFailure(EgressSources.Name(source), error) }, true); }
-    }
-    // Describe only known response metadata, never an upstream error body or account state.
-    private static string QueryFailure(string source, AccountException error) => source + (error.Code switch
-    {
-        AccountError.Http when error.Status == 429 => " 查询额度受限（HTTP 429）。",
-        AccountError.Http when error.Status == 403 => " 拒绝本次查询（HTTP 403）；这不能证明账号异常或代理不可用。",
-        AccountError.Http => $" 查询返回 HTTP {error.Status}，本次未取得有效数据。",
-        AccountError.Timeout => " 查询超时；仅能确认本次查询未完成，不能判断出口已改变。",
-        AccountError.Network => " 连接或响应中断。",
-        AccountError.CorruptResponse => " 返回的数据格式不完整，本次无法核对。",
-        _ => " 查询未完成，本次无法核对。"
-    });
     public async Task<TimezoneSuggestion> SuggestTimezoneAsync(string profileName, CancellationToken token = default)
     {
         var proxy = repository.Proxy(profileName);
         var environment = repository.Profiles.ReadEnvironment(profileName);
         if (environment.Timezone.Length > 0) return new("", [], "", environment.Timezone);
-        if (publicProbe is not null)
-        {
-            var exit = await PublicExit(proxy, token);
-            return new(exit.CountryCode, exit.Ok ? [new(exit.Timezone, exit.City)] : [], exit.Ip);
-        }
-        var trace = await ReadTraceAsync(AccountEndpoints.Trace, "Cloudflare", proxy, token);
-        if (!trace.Ok) trace = await ReadTraceAsync(NetCoffeeService.TraceEndpoint, "Net.Coffee", proxy, token);
-        if (!trace.Ok) throw new AccountException(AccountError.Network, trace.Message);
-        return new(trace.CountryCode, CountryEnvironmentRules.Timezones(trace.CountryCode), trace.Ip);
+        var exit = await ProbeProxyAsync(proxy, token);
+        return new(exit.CountryCode, exit.Ok ? [new(exit.Timezone, exit.City)] : [], exit.Ip);
     }
     public async Task<EnvironmentDefaultsResult> MatchEnvironmentAsync(string profileName, CancellationToken token = default)
     {

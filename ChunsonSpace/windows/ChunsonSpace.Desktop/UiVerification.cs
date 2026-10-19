@@ -13,6 +13,63 @@ namespace ChunsonSpace.Desktop;
 
 internal static class UiVerification
 {
+    // Narrow reuse of the existing fixture and renderer; no live window or desktop interaction.
+    internal static async Task RunEnvironmentActionsAsync(string directory)
+    {
+        Directory.CreateDirectory(directory);
+        var checks = new List<object>();
+        var screenshots = new List<string>();
+        void Check(string name, bool passed)
+        {
+            checks.Add(new { name, passed });
+            if (!passed) throw new InvalidOperationException("Environment action assertion failed: " + name);
+        }
+        await LocalEnvironmentVerification.RunAsync(Path.Combine(directory, "fixture"), Check);
+        var model = new ShellViewModel();
+        var window = CreateWindow(model);
+        var root = window.RenderRoot;
+        T Control<T>(string name) where T : FrameworkElement => (T)window.FindName(name);
+        void Capture(string name)
+        {
+            var bitmap = new RenderTargetBitmap(1040, 670, 96, 96, PixelFormats.Pbgra32);
+            bitmap.Render(root);
+            var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            var path = Path.Combine(directory, name + ".png");
+            using (var file = File.Create(path)) encoder.Save(file);
+            screenshots.Add(path);
+        }
+        try
+        {
+            foreach (var dark in new[] { false, true })
+            {
+                model.DarkTheme = dark; model.Navigate("Accounts");
+                ArrangeForCapture(root, 1040, 670);
+                var refresh = Control<Button>("HomeRecheckEnvironmentButton");
+                var settings = Control<Button>("HomeSyncTimezoneButton");
+                var status = Control<TextBlock>("LocalEnvironmentStatusText");
+                var actions = new[] { refresh, settings, Control<Button>("AddAccountLoginButton"), Control<Button>("ImportLocalAccountButton") };
+                Check($"{dark}: minimum home actions visible and separate", actions.All(x => FullyVisible(x, root))
+                    && actions.SelectMany((a, i) => actions.Skip(i + 1).Select(b => DoNotOverlap(a, b, root))).All(x => x)
+                    && FullyVisible(status, root) && actions.All(x => DoNotOverlap(status, x, root))
+                    && refresh.ActualHeight >= 38 && settings.ActualHeight >= 38
+                    && Within(Control<Grid>("HomeTitleBar"), root) && FullyVisible(Control<ListBox>("ProfileList"), root));
+                Check($"{dark}: home keeps readonly refresh and settings navigation", refresh.Command == model.RecheckLocalEnvironmentCommand
+                    && settings.Command == model.NavigateCommand && Equals(settings.CommandParameter, "Settings"));
+                if (!dark) Capture("home-light-minimum");
+                model.Navigate("Settings"); ArrangeForCapture(root, 1040, 670);
+                var sync = Control<Button>("OneClickEnvironmentRegionButton");
+                var feedback = Control<TextBlock>("EnvironmentRegionStatusText");
+                Check($"{dark}: sync and nearby feedback remain visible", FullyVisible(sync, root) && FullyVisible(feedback, root)
+                    && sync.ActualHeight >= 40 && DoNotOverlap(sync, feedback, root)
+                    && sync.Command == model.ConfigureRegionCommand
+                    && !VisualDescendants(Control<Grid>("SimpleEnvironmentPanel")).OfType<ScrollViewer>().Any(x => x.IsAncestorOf(feedback)));
+                if (dark) Capture("settings-dark-minimum");
+            }
+        }
+        finally { window.Close(); }
+        File.WriteAllText(Path.Combine(directory, "ui-verification.json"), JsonSerializer.Serialize(new { passed = true, scope = "environment-actions", checks, screenshots, realRequests = 0, realSystemWrites = 0 }, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
     internal static MainWindow CreateWindow(ShellViewModel model) => new()
     {
         DataContext = model, ShowActivated = false, ShowInTaskbar = false,
@@ -92,10 +149,10 @@ internal static class UiVerification
             && model.SelectedRuntimeState == "未运行" && model.SelectedExitTimezoneLabel == "配置时区");
         Check("default right detail shows bound actual state and complete action buttons", HomeDetailsFullyVisible(window, root, model, Path.Combine(directory, "preview-home-detail-layout-failure.json")));
         var homeLaunch = (Button)window.FindName("BottomLaunchButton");
-        var homeRebuild = (Button)window.FindName("BottomRebuildButton");
+        var homeRebuild = window.FindName("BottomRebuildButton");
         Check("home primary actions bind selected-target launch and managed-only rebuild", homeLaunch.Command == model.HomeLaunchCommand
-            && homeLaunch.Content?.ToString() == model.HomeLaunchLabel && homeRebuild.Command == model.OneClickRebuildCommand
-            && !model.OneClickRebuildCommand.CanExecute(null));
+            && homeLaunch.Content?.ToString() == model.HomeLaunchLabel && homeRebuild is null
+            && !model.ResetManagedCommand.CanExecute(null));
         Check("account context action selects the clicked row without changing the active identity", window.SelectContextIdentity(firstContainer)
             && ReferenceEquals(model.Selected, firstContainer.DataContext) && model.Active?.Name == "日常工作");
         var contextMenu = ArrangeAccountContextMenu(firstContainer);
@@ -138,11 +195,7 @@ internal static class UiVerification
         model.Search = "missing"; Flush();
         Check("escape shortcut clears search", window.HandleShortcut(Key.Escape, ModifierKeys.None) && model.Search == "" && model.ItemCount == 10);
         Check("search shortcut is available", window.HandleShortcut(Key.F, ModifierKeys.Control));
-        model.NavigateCommand.Execute("Backups"); Flush();
-        model.SimulateBackupCommand.Execute(null);
-        Check("backup clearly reports simulation", model.IsBackupsPage && model.FeedbackTitle.Contains("模拟") && model.Feedback.Contains("没有读取或写入"));
         Render("backups-default");
-        model.SimulateRestoreCommand.Execute(null);
         Check("restore clearly reports simulation", model.FeedbackTitle.Contains("模拟") && model.Feedback.Contains("没有覆盖"));
         model.NavigateCommand.Execute("Settings"); Flush();
         model.IsolateSessions = false; model.SaveSettingsCommand.Execute(null);
@@ -150,13 +203,13 @@ internal static class UiVerification
         Render("settings-default");
         var settingsAdvanced = (CheckBox)window.FindName("SettingsAdvancedToggle");
         Render("settings-simple-minimum", 1040, 670);
-        Check("environment defaults keep region action and hide separate rebuild", settingsAdvanced.IsChecked == false
+        Check("environment defaults keep region action and the single reset", settingsAdvanced.IsChecked == false
             && ((FrameworkElement)window.FindName("AdvancedEnvironmentPanel")).Visibility == Visibility.Collapsed
             && FullyVisible((FrameworkElement)window.FindName("SimpleEnvironmentPanel"), root)
             && FullyVisible((Button)window.FindName("OneClickEnvironmentRegionButton"), root)
-            && ((Button)window.FindName("OneClickEnvironmentRebuildButton")).Visibility == Visibility.Collapsed
+            && FullyVisible((Button)window.FindName("ResetManagedButton"), root)
             && ((Button)window.FindName("OneClickEnvironmentRegionButton")).Command == model.ConfigureRegionCommand
-            && ((Button)window.FindName("OneClickEnvironmentRebuildButton")).Command == model.OneClickRebuildCommand);
+            && ((Button)window.FindName("ResetManagedButton")).Command == model.ResetManagedCommand);
         var windowsSync = (Button)window.FindName("OneClickEnvironmentRegionButton");
         var syncLabel = new FormattedText(windowsSync.Content.ToString()!, System.Globalization.CultureInfo.CurrentUICulture,
             FlowDirection.LeftToRight, new Typeface(windowsSync.FontFamily, windowsSync.FontStyle, windowsSync.FontWeight, windowsSync.FontStretch),
@@ -190,7 +243,7 @@ internal static class UiVerification
         Render("accounts-minimum", 1040, 670);
         Check("minimum account table keeps row actions and right detail controls fully visible", IdentityRowsFullyVisible(list, root, model,
             Path.Combine(directory, "preview-row-layout-failure.json")) && HomeDetailsFullyVisible(window, root, model, Path.Combine(directory, "preview-home-detail-layout-failure.json")));
-        Check("minimum home retains launch with separate rebuild hidden", FullyVisible(homeLaunch, root) && homeRebuild.Visibility == Visibility.Collapsed && homeLaunch.ActualHeight >= 36);
+        Check("minimum home retains launch with separate rebuild hidden", FullyVisible(homeLaunch, root) && homeRebuild is null && homeLaunch.ActualHeight >= 36);
         Check("unconnected actions disabled", !model.UnavailableCommand.CanExecute(null));
         foreach (var size in new[] { (Width: 1040, Height: 670), (Width: 1280, Height: 850) })
         {

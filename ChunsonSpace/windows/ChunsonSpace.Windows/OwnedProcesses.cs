@@ -12,6 +12,8 @@ public interface IOwnedProcessStore
 {
     IReadOnlyList<OwnedProcessRecord> Read();
     bool TryWrite(IReadOnlyList<OwnedProcessRecord> records);
+    bool RecoverVerified(IReadOnlyList<OwnedProcessRecord> records) => false;
+    bool RecoverVerified(IReadOnlyList<OwnedProcessRecord> records, bool preserveDamaged) => RecoverVerified(records);
     OwnedStoreUpdate Update(Func<IReadOnlyList<OwnedProcessRecord>, IReadOnlyList<OwnedProcessRecord>> update)
     { var records = update(Read()); return new(TryWrite(records), records); }
     IDisposable? TryEnterLease() => new EmptyOwnedLease();
@@ -21,6 +23,19 @@ internal sealed class EmptyOwnedLease : IDisposable { public void Dispose() { } 
 
 public sealed class JsonOwnedProcessStore(string path, IFileStorage? storage = null) : IOwnedProcessStore
 {
+    public bool RecoverVerified(IReadOnlyList<OwnedProcessRecord> records) => RecoverVerified(records, true);
+    public bool RecoverVerified(IReadOnlyList<OwnedProcessRecord> records, bool preserveDamaged)
+    {
+        if (records.Count == 0 || records.Any(r => r.Identity.CreationTime <= 0 || r.Identity.Executable.Length == 0)) return false;
+        using var lease = TryEnterLease();
+        if (lease is null) return false;
+        lock (fileGate)
+        {
+            // Preserve damaged records; never erase evidence to assert no processes.
+            if (preserveDamaged && files.FileExists(path)) files.CopyAtomic(path, path + ".recovery-" + Guid.NewGuid().ToString("N"));
+            return WriteUnlocked(records);
+        }
+    }
     private readonly IFileStorage files = storage ?? new PhysicalFileStorage();
     private readonly object fileGate = new();
     private FileStream? heldLease;
@@ -143,15 +158,21 @@ public sealed class OwnedProcessLifecycleService(IProcessSystem system, IWaitClo
     {
         cancellationToken.ThrowIfCancellationRequested();
         var warnings = new List<string>();
+        var stage = "ownership-lease";
         try
         {
             using var fileLease = store.TryEnterLease();
             if (fileLease is null) { lock (recordsGate) return Task.FromResult(Status(false, "其他实例正在启动或更新所有权，保留原记录", [])); }
+            stage = "ownership-read";
             var records = store.Read();
+            stage = "desktop-registration";
             if (system is WindowsProcessSystem native)
                 foreach (var record in records.Where(record => record.Kind == OwnedProcessKind.Desktop && record.Identity.CreationTime > 0 && record.Identity.Executable.Length > 0)) native.RegisterDesktopExecutable(record.Identity.Executable);
+            stage = "system-snapshot";
             var current = system.Snapshot();
+            stage = "clone-scope";
             if (cloneScope is not null) _ = cloneScope.Selected(current);
+            stage = "ownership-merge";
             lock (recordsGate)
             {
                 owned.Clear(); uncertain = false; storeUncertain = false;
@@ -165,14 +186,18 @@ public sealed class OwnedProcessLifecycleService(IProcessSystem system, IWaitClo
                     owned[process.Pid] = record with { Identity = process };
                 }
                 if (!uncertain && records.Any(record => record.Identity.CreationTime > 0 && record.Identity.Executable.Length > 0) && owned.Count == 0) recoveryNeeded = true;
-                if (!storeUncertain && !MergeAndPersist(current)) warnings.Add("进程所有权记录更新失败");
+                if (!storeUncertain && !MergeAndPersist(current))
+                {
+                    uncertain = true; storeUncertain = true;
+                    return Task.FromResult(Status(false, "进程所有权记录更新失败，保留材料", ["阶段=ownership-merge；原因=ownership-update-failed；对象=ownership-record（数据根已隐藏）"]));
+                }
                 return Task.FromResult(Status(!uncertain, "已复核并接续本工具启动的进程", warnings));
             }
         }
         catch (OperationCanceledException) { throw; }
         catch (Exception error)
         {
-            lock (recordsGate) { uncertain = true; storeUncertain = true; return Task.FromResult(Status(false, "进程所有权记录或系统快照无法确认，保留材料", [error.GetType().Name])); }
+            lock (recordsGate) { uncertain = true; storeUncertain = true; return Task.FromResult(Status(false, "进程所有权记录或系统快照无法确认，保留材料", [OwnedProcessDiagnostics.Describe(stage, error)])); }
         }
     }
 
@@ -274,9 +299,22 @@ public sealed class OwnedProcessLifecycleService(IProcessSystem system, IWaitClo
         return stopped with { Message = stopped.Success ? "Chunson Space 启动的桌面端已关闭，外部进程保持运行" : "Chunson Space 启动的桌面端未完全关闭，恢复材料已保留" };
     }
 
+    public Task<StopResult> CloseForExplicitExitAsync(CancellationToken token)
+    {
+        ProcessIdentity[] identities;
+        lock (recordsGate) identities = owned.Values.Select(r => r.Identity).Where(p => p.CreationTime > 0 && p.Executable.Length > 0).ToArray();
+        try
+        {
+            if (cloneScope is not null) identities = identities.Concat(cloneScope.Selected(system.Snapshot())).DistinctBy(p => (p.Pid, p.CreationTime, p.Executable)).ToArray();
+        }
+        catch (Exception) { /* Valid identities held by this instance remain usable. */ }
+        return new CodexProcessService(system, clock).StopIdentitiesAsync(identities, token);
+    }
+
     public async Task<OwnedLifecycleResult> PollAsync(CancellationToken cancellationToken = default)
     {
         await launchRestoreGate.WaitAsync(cancellationToken);
+        var stage = "ownership-lease";
         try
         {
             using var fileLease = store.TryEnterLease();
@@ -288,10 +326,14 @@ public sealed class OwnedProcessLifecycleService(IProcessSystem system, IWaitClo
                 var adopted = await AdoptAsync(cancellationToken);
                 if (!adopted.Success) return adopted;
             }
+            stage = "pending-launch";
             if (launchSystem is not null && await launchSystem.CheckPendingAsync(cancellationToken) is not null)
             { lock (recordsGate) return Status(true, "启动结果待确认，暂不恢复时区", []) with { LaunchPending = true }; }
+            stage = "system-snapshot";
             var current = system.Snapshot();
+            stage = "clone-scope";
             if (cloneScope is not null) _ = cloneScope.Selected(current);
+            stage = "ownership-merge";
             bool hadRecords, hasRecords;
             var warnings = new List<string>();
             lock (recordsGate)
@@ -315,6 +357,7 @@ public sealed class OwnedProcessLifecycleService(IProcessSystem system, IWaitClo
             }
             if (recoveryNeeded && !hasRecords)
             {
+                stage = "timezone-restore";
                 var restored = await timezone.RestoreAsync(cancellationToken);
                 if (!restored.Success) warnings.Add(restored.Message);
                 else recoveryNeeded = false;
@@ -323,7 +366,7 @@ public sealed class OwnedProcessLifecycleService(IProcessSystem system, IWaitClo
         }
         catch (OperationCanceledException) { throw; }
         catch (Exception error)
-        { lock (recordsGate) return Status(false, "生命周期状态无法确认，未恢复系统时区", [error.GetType().Name]); }
+        { lock (recordsGate) return Status(false, "生命周期状态无法确认，未恢复系统时区", [OwnedProcessDiagnostics.Describe(stage, error)]); }
         finally { launchRestoreGate.Release(); }
     }
     public async Task WatchAsync(CancellationToken cancellationToken)

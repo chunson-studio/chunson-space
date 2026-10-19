@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using ChunsonSpace.Accounts;
 using ChunsonSpace.Core;
 
@@ -6,7 +6,7 @@ namespace ChunsonSpace.Desktop;
 
 public static class AccountMarkDisplay
 {
-    public static string Quality(AccountQuality quality) => quality switch { AccountQuality.Normal => "账号正常", AccountQuality.SuspectedDegraded => "账号异常", _ => "未标记" };
+    public static string Quality(AccountQuality quality) => quality switch { AccountQuality.Normal => "账号正常", AccountQuality.SuspectedDegraded => "账号异常", _ => "未判断" };
     public static string Issue(AccountIssue issue) => issue switch
     {
         AccountIssue.LoginExpired => "登录已失效", AccountIssue.LoginMissing => "需要登录",
@@ -35,7 +35,7 @@ public sealed class AccountMarksEditor : ObservableObject
     private bool problem;
     private bool recovered;
     private string error = "";
-    public IReadOnlyList<string> QualityChoices { get; } = ["未标记", "账号正常", "账号异常"];
+    public IReadOnlyList<string> QualityChoices { get; } = ["未判断", "账号正常", "账号异常"];
     public IReadOnlyList<string> ModeChoices { get; } = ["自动", "手动"];
     public string Mode { get => mode; set { if (ModeChoices.Contains(value)) Set(ref mode, value); } }
     public string Quality { get => quality; set { if (QualityChoices.Contains(value) && Set(ref quality, value)) Mode = "手动"; } }
@@ -74,7 +74,7 @@ public sealed partial class ShellViewModel
             { ShowFeedback("标记未打开", "账号资料无法读取，请刷新列表。", "Error"); }
         }, value => workspace is not null && (value as IdentityItem ?? Selected)?.Kind == "Account" && !operationBusy && !exitDraining);
         SaveAccountMarksCommand = new(_ => SaveAccountMarks(), _ => MarksEditor is not null && !operationBusy && !exitDraining);
-        ClearAccountMarksCommand = new(_ => { if (MarksEditor is { } editor) { editor.Quality = "未标记"; editor.Mode = "手动"; editor.Problem = false; editor.Recovered = false; } });
+        ClearAccountMarksCommand = new(_ => { if (MarksEditor is { } editor) { editor.Quality = "未判断"; editor.Mode = "手动"; editor.Problem = false; editor.Recovered = false; } });
         CloseAccountMarksCommand = new(_ => MarksEditor = null);
     }
     private string MarkIdentityStamp(string name)

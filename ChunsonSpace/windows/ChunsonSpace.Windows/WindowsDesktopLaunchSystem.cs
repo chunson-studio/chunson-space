@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
@@ -114,7 +114,12 @@ public sealed partial class WindowsDesktopLaunchSystem(string stateRoot, IProces
             return null;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or InvalidDataException or WaitHandleCannotBeOpenedException or StorageException)
-        { return Pending(stateRoot, "无法读取上次启动握手；保留恢复材料"); }
+        {
+            LastStateReadFailure = new("read-launch-state", ex.GetType().Name, ex.HResult);
+            return Pending(stateRoot, ex is FileNotFoundException or DirectoryNotFoundException
+                ? "启动记录缺失；可刷新、重建或强制清理。"
+                : "启动记录无法确认；可重建或强制清理，详情已保留。");
+        }
     }
 
     public async Task<LaunchReceipt> StartAsync(DesktopTarget target, DesktopLaunchRequest request, CancellationToken cancellationToken)
@@ -325,15 +330,18 @@ public sealed partial class WindowsDesktopLaunchSystem(string stateRoot, IProces
     private State ReadState(string directory, string nonce)
     {
         directory = GuardStateDirectory(directory);
-        var state = JsonSerializer.Deserialize<State>(File.ReadAllText(Path.Combine(directory, "state.json")));
-        return state is not null && state.nonce == nonce ? state : throw new InvalidDataException("启动状态标识不匹配");
+        var path = Path.Combine(directory, "state.json");
+        if (new FileInfo(path).Length > 16384) throw new InvalidDataException("启动记录过大");
+        var state = JsonSerializer.Deserialize<State>(File.ReadAllText(path));
+        if (state is null || state.nonce != nonce || state.status is not ("pending" or "launching" or "started" or "failed" or "cancelled" or "complete"))
+            throw new InvalidDataException("启动记录格式不匹配");
+        return state with { executable = state.executable ?? "", timezone = state.timezone ?? "", expected_ip = state.expected_ip ?? "" };
     }
     private void WriteState(string directory, State state)
     {
         directory = GuardStateDirectory(directory);
         var path = Path.Combine(directory, "state.json");
-        using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read);
-        JsonSerializer.Serialize(stream, state); stream.Flush(true);
+        new PhysicalFileStorage().WriteAtomic(path, JsonSerializer.SerializeToUtf8Bytes(state));
     }
     private void DeleteState(string directory)
     {
