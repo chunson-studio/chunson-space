@@ -16,7 +16,7 @@
     <text x="60" y="144" font-size="62" font-weight="700" letter-spacing="-2" fill="#343c43">Chunson Space</text>
     <text x="64" y="194" font-size="23" fill="#4a7087">账号管理 · 英文浏览器 · 地区与时区同步</text>
     <rect x="64" y="225" width="134" height="32" rx="16" fill="#fff" opacity=".72"/>
-    <text x="131" y="247" text-anchor="middle" font-size="14" fill="#2f4b5c">1.5.0 完整版</text>
+    <text x="131" y="247" text-anchor="middle" font-size="14" fill="#2f4b5c">1.6.0 完整版</text>
     <text x="216" y="247" font-size="14" fill="#5f676e">并发检测 · 统一健康颜色 · 清除测试历史</text>
   </g>
 </svg>
