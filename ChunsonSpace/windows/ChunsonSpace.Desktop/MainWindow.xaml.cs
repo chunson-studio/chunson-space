@@ -31,6 +31,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        ContentRendered += async (_, _) => { if (DataContext is ShellViewModel model) await model.StartLocalEnvironmentAsync(); };
         beijingTimer.Tick += BeijingTick;
         Loaded += (_, _) => { BeijingTick(null, EventArgs.Empty); beijingTimer.Start(); };
         Unloaded += (_, _) => beijingTimer.Stop();
@@ -41,7 +42,7 @@ public partial class MainWindow : Window
         {
             beijingTimer.Stop(); beijingTimer.Tick -= BeijingTick;
             loginHoursTimer.Stop(); loginHoursTimer.Tick -= RefreshLoginHours;
-            if (DataContext is ShellViewModel model) { model.CloseArtwork(); model.DisposeUpdates(); }
+            if (DataContext is ShellViewModel model) { model.StopEnvironmentMonitor(); model.CloseArtwork(); model.DisposeUpdates(); }
         };
         Icon = BrandIcon.CreateImage();
         SelectedExitDetail.RenderTransform = new TranslateTransform();

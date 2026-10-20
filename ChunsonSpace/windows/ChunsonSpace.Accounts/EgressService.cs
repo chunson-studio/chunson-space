@@ -30,6 +30,31 @@ public static class CountryEnvironmentRules
 public sealed class EgressService(AccountRepository repository, IAccountTransport transport) : ILaunchEgressProbe
 {
     private readonly IpInfoService ipinfo = new(transport);
+    private readonly TimeProvider clock = TimeProvider.System;
+    public EgressService(AccountRepository repository, IAccountTransport transport, TimeProvider clock) : this(repository, transport)
+        => this.clock = clock;
+    private EgressResult? recentRegion;
+    private string recentProxy = "";
+    private DateTimeOffset regionFetchedAt;
+    public async Task<bool> IsCurrentPrimaryAsync(string proxy, string ip, CancellationToken token)
+        => EgressSources.SameIp((await ipinfo.ProbePrimaryAsync(proxy, token)).PrimaryIp, ip);
+    public async Task<EgressResult> WatchRegionProxyAsync(string proxy, CancellationToken token = default)
+    {
+        var addresses = await ipinfo.ProbePrimaryAsync(proxy, token);
+        if (recentRegion is { Ok: true } previous && recentProxy == proxy
+            && clock.GetUtcNow() - regionFetchedAt < TimeSpan.FromMinutes(30)
+            && EgressSources.SameIp(addresses.PrimaryIp, previous.Ip))
+            return previous with { Addresses = addresses };
+        recentRegion = null;
+        return Remember(await ipinfo.LocateAsync(addresses, proxy, token), proxy, token);
+    }
+    private EgressResult Remember(EgressResult result, string proxy, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        result = EgressSources.HasCountry(result) ? result : result with { Ok = false, Message = result.Message + " IPinfo 未返回可确认的国家。" };
+        if (result.Ok) { recentRegion = result; recentProxy = proxy; regionFetchedAt = clock.GetUtcNow(); }
+        return result;
+    }
     public Task<EgressResult> ProbeAsync(string profileName, CancellationToken token = default)
         => ProbeProxyAsync(repository.Proxy(profileName), token);
     public async Task<LaunchEgressEvidence> ProbeAsync(IdentityRef identity, string resolvedProxy, CancellationToken token)
@@ -44,8 +69,9 @@ public sealed class EgressService(AccountRepository repository, IAccountTranspor
         => ProbeRegionProxyAsync(resolvedProxy, token);
     public async Task<EgressResult> ProbeRegionProxyAsync(string resolvedProxy, CancellationToken token = default)
     {
+        recentRegion = null;
         var result = await ProbeProxyAsync(resolvedProxy, token);
-        return EgressSources.HasCountry(result) ? result : result with { Ok = false, Message = result.Message + " IPinfo 未返回可确认的国家。" };
+        return Remember(result, resolvedProxy, token);
     }
     public async Task<TimezoneSuggestion> SuggestTimezoneAsync(string profileName, CancellationToken token = default)
     {

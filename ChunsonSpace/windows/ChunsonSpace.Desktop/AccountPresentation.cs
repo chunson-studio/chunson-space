@@ -23,25 +23,58 @@ public sealed partial class ShellViewModel
     public bool IsNewAccountLogin => newAccountLogin;
     public AccountOnboardingViewModel? Onboarding => onboarding;
     public bool IsOnboardingOpen => onboarding is not null;
-    private async Task ImportLocalAccountAsync()
+    private bool startupLocalImportAttempted;
+    private bool importingLocalAccount;
+    public string ImportLocalAccountLabel => importingLocalAccount ? "正在导入…" : "导入本机账号";
+    internal Task ImportLocalAccountAtStartupAsync()
+    {
+        if (workspace?.ImportLocalAccountOnStartup != true || startupLocalImportAttempted) return Task.CompletedTask;
+        startupLocalImportAttempted = true;
+        // An explicit action that got here first owns the UI and its operation task.
+        // Do not queue a second import or dismiss an editor/login started by the user.
+        if (globalBusy || IsLoggingIn || IsEditorOpen || IsOnboardingOpen || IsDetailOpen) return Task.CompletedTask;
+        return CurrentOperation = ImportLocalAccountAsync(automatic: true);
+    }
+    private async Task ImportLocalAccountAsync(bool automatic = false)
     {
         if (workspace?.Accounts is null || workspace.OriginalHome is null || globalBusy || IsLoggingIn) return;
+        startupLocalImportAttempted = true;
+        var single = IsSingleAccountMode;
+        var previousFeedback = (feedbackTitle, feedback);
+        bool CanReport() => !automatic || previousFeedback == (feedbackTitle, feedback);
+        importingLocalAccount = true; Raise(nameof(ImportLocalAccountLabel));
         SetBusy(true);
+        ImportedLogin? imported = null;
         try
         {
             var result = await Task.Run(() => workspace.Accounts.Repository.ImportLocalLogin(workspace.OriginalHome));
-            Search = ""; AccountFilter = "全部账号";
-            Navigate("Accounts"); ReloadProfiles(); SyncActive();
-            Selected = FilteredItems.SingleOrDefault(item => item.Identity == new IdentityRef(IdentityKind.Account, result.Profile));
-            if (Selected is null) throw new InvalidOperationException("授权已保存，请刷新账号列表查看。");
-            ShowFeedback(result.Created ? "本机账号已导入" : "本机账号授权已更新",
-                $"{result.Profile}。可到「模型测试」选择该账号开始测试。" +
-                (result.Created ? "新账号默认跟随本机网络与时区。" : "") + string.Join("；", result.Warnings) +
-                "仅复制本地授权，未登录、切号或发送测试请求。授权是否仍有效，以实际请求结果为准。", "Success");
+            imported = result;
+            // Resolve the initial automatic layout for this session before account count changes.
+            // Importing a second account must not change a single-account home into multi mode.
+            if (interfaceMode == "auto") interfaceMode = single ? "single" : "multi";
+            if (!automatic) { Search = ""; AccountFilter = "全部账号"; }
+            ReloadProfiles(); RefreshActiveReference();
+            if (!automatic)
+            {
+                if (!single) Navigate("Accounts");
+                Selected = identities.SingleOrDefault(item => item.Identity == new IdentityRef(IdentityKind.Account, result.Profile));
+                if (Selected is null) throw new InvalidOperationException("授权已保存，请刷新账号列表查看。");
+            }
+            if (CanReport() && (!automatic || result.Changed))
+                ShowFeedback(result.Created ? "本机账号已导入" : result.Changed ? "本机账号授权已更新" : "本机账号已是最新",
+                    result.Warnings.Any(w => w.Contains("清理")) ? "授权已保存，临时保存材料尚未清理。" : "", "Success");
         }
         catch (Exception error) when (error is AccountException or StorageException or IOException or UnauthorizedAccessException or InvalidOperationException)
-        { ShowFeedback("本机账号未导入", ErrorRedaction.Scrub(error.Message), "Error"); }
-        finally { SetBusy(false); }
+        {
+            if (CanReport())
+            {
+                if (imported is not null) ShowFeedback("本机授权已保存，列表未刷新", "请刷新账号列表。", "Info");
+                else if (automatic) ShowFeedback(error is AccountException { Code: AccountError.MissingCredentials }
+                    ? "未找到可导入的本机账号" : "本机账号未导入", "可点击「导入本机账号」重试。", "Info");
+                else ShowFeedback("本机账号未导入", ErrorRedaction.Scrub(error.Message), "Error");
+            }
+        }
+        finally { importingLocalAccount = false; Raise(nameof(ImportLocalAccountLabel)); SetBusy(false); }
     }
     public void OpenAccountOnboarding()
     {

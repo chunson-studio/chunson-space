@@ -103,6 +103,7 @@ public sealed partial class ShellViewModel
                 ShowFeedback("分身状态待确认", "可在设置中重置分身。", "Warning");
             }
             var settings = workspace.Profiles.ReadSettings();
+            lastSuccessfulEnvironmentSync = workspace.Profiles.ReadLastEnvironmentSync();
             isolateSessions = settings.SessionIsolation; autoSystemTimezone = settings.AutoSystemTimezone; quitConfirm = settings.QuitConfirm;
             closeToTray = settings.CloseToTray;
             darkTheme = settings.WorkspaceTheme == "dark";

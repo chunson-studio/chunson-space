@@ -1,34 +1,41 @@
-<p align="center"><img src="docs/assets/readme-cover.svg" alt="Chunson Space 椿生空间 1.61" width="960"></p>
+<p align="center"><img src="docs/assets/readme-cover.svg" alt="Chunson Space 椿生空间 1.7" width="960"></p>
 
 # Chunson Space · 椿生空间
 
-**在 Windows 上集中管理 Codex 账号、一个独立分身、网络环境和测试历史。** 支持单账号 / 多账号界面、纸质 / 黑夜主题，Codex 本体保持独立。
+**在 Windows 上集中管理 Codex 账号、一个独立分身和网络环境。** 1.7 正常启动时自动导入本机已有登录，检查当前出口并尝试同步 Windows 地区与时区，让账号与环境状态在首页看得清楚。
 
-<p align="center"><a href="https://github.com/chunson-studio/chunson-space/releases/download/v1.61/Chunson-Full-Windows-x64.zip"><img src="docs/assets/download-full.svg" alt="下载 1.61 Windows x64 完整版 ZIP" width="340"></a></p>
+<p align="center"><a href="https://github.com/chunson-studio/chunson-space/releases/download/v1.7/Chunson-Full-Windows-x64.zip"><img src="docs/assets/download-full.svg" alt="下载 1.7 Windows x64 完整版 ZIP" width="340"></a></p>
 
-**[下载 1.61 完整版](https://github.com/chunson-studio/chunson-space/releases/download/v1.61/Chunson-Full-Windows-x64.zip)** · [更新说明与四个附件](https://github.com/chunson-studio/chunson-space/releases/tag/v1.61) · [界面预览](#界面预览) · [源码构建](#源码构建)
+**[下载 1.7 完整版](https://github.com/chunson-studio/chunson-space/releases/download/v1.7/Chunson-Full-Windows-x64.zip)** · [更新说明与四个附件](https://github.com/chunson-studio/chunson-space/releases/tag/v1.7) · [界面预览](#界面预览) · [源码构建](#源码构建)
 
-只维护完整版；已包含 .NET 运行时，无需安装 SDK。版本为 **1.61**，程序集与更新清单采用兼容的 `1.61.0.0`。
+适用于 **Windows 10 / 11 x64**，已包含 .NET 运行时，无需安装 SDK。支持单账号 / 多账号界面和纸质 / 黑夜主题，Codex 本体保持独立。
 
 ## 三步开始
 
-1. 在 **Windows 10 / 11 x64** 下载并完整解压 ZIP，运行 `Full/ChunsonSwitch.exe`。不要在压缩包中运行，也不要只复制 EXE。
-2. 准备本机 Chrome 或 Edge，以及 [FlClash](https://github.com/chen08209/FlClash/releases/latest)。未检测到 FlClash 安装时，工具会提供官方下载入口；检测到安装即可进入界面。联网功能需要你已配置好的订阅、节点及可用 HTTP / mixed 入口。
-3. 导入本机已有授权，或添加账号。按需要选择单账号 / 多账号界面，查看环境后再主动同步地区与时区、打开账号浏览器或启动分身。导入和查看历史不会自动开始模型测试。
+1. **完整解压并启动。** 下载 ZIP，解压后运行 `Full/ChunsonSwitch.exe`，不要在压缩包中运行或只复制 EXE。准备本机 Chrome 或 Edge，以及已配置可用订阅、节点和 HTTP / mixed 入口的 [FlClash](https://github.com/chen08209/FlClash/releases/latest)；未检测到安装时会提供官方下载入口。
+2. **查看自动导入和环境状态。** 正常窗口首次显示后尝试一次导入本机 Codex 已有登录，再检查出口并自动同步地区与时区。没有本机登录时可添加 / 登录；需要重试时，单账号首页或多账号“账号”页都保留“导入本机账号”。重复导入按稳定账号身份合并，无变化时不重写授权，保留登录起算时间、名称、环境、冻结和健康记录。
+3. **选择账号，主动启动分身。** 核对页面状态后选择要使用的账号，再点击启动分身；添加 / 导入与启动分别操作。工具只管理一个分身，不会因为导入成功就自动切号、启动分身或执行模型测试。
 
-**从 1.6.0 升到 1.61，请手动下载完整包。** 1.6.0 的版本解析不接受本次两段 `v1.61`；1.61 已兼容两段和三段版本。本次未验证旧客户端自动升级。先结束测试与授权，再从托盘选择“退出工具”，把新包完整解压到新文件夹运行。账号资料保存在独立的本机数据目录。
+**从旧版升级：建议手动下载一次 1.7 完整包。** 已安装的 1.61 按数字比较可能把 `1.7` 视为旧版，1.6.0 的旧解析器也不接受两段标签；这些旧客户端无法通过本次源码修改得到远程修复。若未提示更新，先结束测试与授权，从托盘选择“退出工具”，把完整包解压到新文件夹运行。账号资料保存在独立的本机数据目录。1.7 已兼容历史版本排序，不会把旧 1.61 当作更新。
+
+## 出口、地区与时区会怎样更新
+
+首页、仪表盘和设置共用当前状态，分别展示**最近检测**和**上次成功同步**。启动时先检查出口，再沿原同步流程尝试写入；只有写入成功且新鲜回读确认国家与时区匹配，才保存成功时间。同一出口已经匹配时不重复写入，也不重置成功时间。失败会显示未完成，历史成功不代表现在仍匹配。
+
+- **本地变化触发 + 5 分钟兜底。** FlClash 已知配置 / 选择文件的变动及系统网络事件会触发检查；事件合并约 2 秒，两次事件探测至少间隔 15 秒。另有每 5 分钟主 IP 检查，不能保证切换节点后瞬时发现。主地址优先 IPv4，失败时尝试 IPv6；同 IP 地区缓存最多 30 分钟，手动完整刷新绕过缓存。
+- **自动与手动都保留。** 自动同步不会弹出 UAC；权限不足、网络失败或资料缺失时显示未完成，可使用页面上的刷新、同步时区和地区 / 时区设置入口手动重试。显示语言、地区格式和输入法不随之改变，退出后不恢复旧时区。
+- **地址查询与质量评分分开。** IPinfo 用于出口地址、地区与时区；IPPure 用于手动质量评分。自动监听不循环评分、切节点、切账号或发送模型请求。关闭到托盘后仍继续监听，实际退出或交接在线更新时释放监听。
 
 ## 日常功能
 
 | 功能 | 当前行为 |
 | --- | --- |
-| 单账号 / 多账号 | 按使用习惯切换界面；首页查看账号、出口、环境与分身状态，减少切页重复读盘。 |
-| 账号管理 | 导入已有授权、添加、重命名、冻结 / 解冻、删除；显示从现存首次凭证起算的登录小时。删除无需先切换账号，确认后删除该账号本地资料，不新建备份。 |
-| 一个受管分身 | Codex 本体独立保留。切换账号复用一个分身；不继承本体 Skills、MCP 或插件。设置中统一“重置分身”，无账号也可操作，重置完成后保持关闭。 |
-| 托盘与关闭 | 默认关闭窗口进入托盘；需要结束工具时从托盘或工具内明确退出。可在设置中调整关闭行为。 |
-| 网络与环境 | IPinfo 提供地址、地区与时区；IPPure 提供质量评分，来源分别展示，支持 IPv6。地区与时区同步需显式点击，不改变显示语言、地区格式或输入法，退出不恢复旧时区。 |
+| 单账号 / 多账号 | 随时切换界面；首页查看账号、出口、环境与分身状态，减少切页重复读盘。 |
+| 账号管理 | 导入、添加、重命名、冻结 / 解冻、删除；显示从现存首次凭证起算的登录小时。删除无需先切换账号，确认后删除该账号本地资料，不新建备份。 |
+| 一个受管分身 | Codex 本体独立保留；切换账号复用一个分身，不继承本体 Skills、MCP 或插件。设置只保留一个“重置分身”，无账号也可操作，完成后保持关闭。 |
+| 托盘与关闭 | 默认点击窗口 X 隐藏到托盘；需要结束工具时明确退出，可在设置中调整关闭行为。 |
 | 账号浏览器 | 账号各自保存浏览器资料，可跟随本机网络或使用已配置的独立线路。 |
-| 历史与作品 | 保留原始题目、回复、作品和耗时；返回的缓存 token 为使用数据，缺失与 0 分开显示。可比较作品、复制脱敏错误信息。 |
+| 历史与作品 | 保留原始题目、回复、作品和耗时；返回的缓存 token 缺失与 0 分开显示，可比较作品和复制脱敏错误。 |
 
 ## 两个测试入口
 
@@ -40,48 +47,40 @@
 
 ### 绘图：两个简单预设，也可自行输入
 
-选择预设只填入可编辑的题目，点击“测试当前账号”才发送。页面导航不会把自定义内容替换为默认题目。两道预设原文如下：
+选择预设只填入可编辑题目，点击“测试当前账号”才发送。页面导航保留自定义内容，两道预设原文如下：
 
 - **鹈鹕骑自行车 · SVG**：`Generate an SVG of a pelican riding a bicycle.`
 - **小猴骑自行车 · HTML 动画**：`Create an HTML file with a 2D SVG animation of a cute monkey riding a bicycle. No testing is required.`
 
-原题直接进入既有请求流程，不附加静态绘图限制；支持保存 SVG 或包含 SVG 的 HTML，并在本机隔离预览中显示动画。作品查看依赖本机 Chromium 浏览器组件；组件不可用时明确退回保存的图片。没有随机题库或动态评分。
+原题直接进入既有请求流程，支持保存 SVG 或包含 SVG 的 HTML，并在本机隔离预览中显示动画。作品查看依赖本机 Chromium 浏览器组件；组件不可用时明确退回保存的图片。没有随机题库或动态评分。
 
 测试结果页可**清除全部测试历史**，包括产品测试记录和作品；保留账号、授权、标记、冻结状态、项目、聊天和外部导出。测试运行时不可清除。
 
 ## 界面预览
 
-以下均为实际 WPF 界面的离线夹具截图，账号、回复和数值是 **SYNTHETIC 合成示例**，不表示真实账号运行结果。首页与单账号图复用已通过的 v2 布局截图，并非重新拍摄的 1.61 界面：其中部分重建 / 维护按钮后来已合并为设置中的“重置分身”，当前行为以本文说明为准。绘图图来自 1.61 的窄专项验证。点击查看原图。
+以下是实际 WPF 控件的离线截图，账号、地址、时间、回复和数值均为 **SYNTHETIC 合成示例**，不表示真实账号或节点测试结果。地区卡片采用本次发布所含环境修复的已验收布局（1280 × 850），绘图图复用功能未变的 1.61 专项截图；没有为发布重跑旧 UI 套件。点击查看原图。
 
-### 多账号首页 · 纸质与黑夜
+### 当前环境与上次成功同步
 
-| 纸质 | 黑夜 |
+| 纸质主题 | 黑夜主题 |
 | --- | --- |
-| [![纸质多账号首页](docs/assets/screenshot-dashboard-paper-1280.png)](docs/assets/screenshot-dashboard-paper-1280.png) | [![黑夜多账号首页](docs/assets/screenshot-dashboard-night-1280.png)](docs/assets/screenshot-dashboard-night-1280.png) |
+| [![纸质环境卡片：最近检测和上次成功同步](docs/assets/screenshot-region-paper.png)](docs/assets/screenshot-region-paper.png) | [![黑夜环境卡片：最近检测和上次成功同步](docs/assets/screenshot-region-night.png)](docs/assets/screenshot-region-night.png) |
 
-[1040 宽纸质首页](docs/assets/screenshot-dashboard-paper-1040.png) · [1040 宽黑夜首页](docs/assets/screenshot-dashboard-night-1040.png)
-
-### 单账号界面 · 更聚焦当前账号
-
-| 纸质 | 黑夜 |
-| --- | --- |
-| [![纸质单账号](docs/assets/screenshot-single-paper-1280.png)](docs/assets/screenshot-single-paper-1280.png) | [![黑夜单账号](docs/assets/screenshot-single-night-1280.png)](docs/assets/screenshot-single-night-1280.png) |
-
-[1040 宽纸质单账号](docs/assets/screenshot-single-paper-1040.png) · [1040 宽黑夜单账号](docs/assets/screenshot-single-night-1040.png)
+单账号首页同样提供手动导入和共享环境状态；多账号界面在“账号”页保留导入入口。
 
 ### 绘图预设与可编辑题目
 
 | HTML 动画题目 · 纸质 | SVG 题目 · 黑夜 |
 | --- | --- |
-| [![小猴动画预设](docs/assets/screenshot-drawing-paper.png)](docs/assets/screenshot-drawing-paper.png) | [![鹈鹕SVG预设](docs/assets/screenshot-drawing-night.png)](docs/assets/screenshot-drawing-night.png) |
+| [![小猴动画预设](docs/assets/screenshot-drawing-paper.png)](docs/assets/screenshot-drawing-paper.png) | [![鹈鹕 SVG 预设](docs/assets/screenshot-drawing-night.png)](docs/assets/screenshot-drawing-night.png) |
 
 ## 在线更新与北京时间
 
 **在线更新**从本仓库正式 Release 检查版本，设置中也可手动检查。匹配更新清单后，只下载完整 ZIP 中变化的文件，未改变的运行库不重复下载；校验后正常退出、替换并重开，保留额外文件和独立时钟。取消或下载失败不替换程序，替换失败沿既有回滚流程处理。不支持范围下载或缺少清单时需查看发布页手动下载。
 
-**BeijingClock** 显示北京时间 UTC+8，不修改系统时区。正常启动优先复用已安装的小组件；关闭到托盘继续显示，在线更新保留独立时钟。源码与包中保留单用户安装工具和图标。
+**BeijingClock** 独立显示北京时间 UTC+8，不修改系统时区。正常启动优先复用已安装的小组件；关闭到托盘继续显示，在线更新保留独立时钟。源码与完整包保留单用户安装工具和图标。
 
-实现和离线验证与真实业务验收分开记录：本次未执行真实账号、健康、绘图、节点请求或公网在线安装，不承诺环境同步、IP 评分或检测一定带来登录成功或模型能力变化。
+本版复用已通过的自动导入和环境离线验证，新增版本顺序、标签与清单兼容检查。发布过程未执行真实账号、模型、节点请求或公网在线安装；环境同步、IP 评分和健康标记不保证登录成功或模型能力变化。
 
 ## 反馈与数据
 
@@ -104,7 +103,7 @@ FlClashSetup/   FlClash 安装检查与引导
 build.ps1      构建与打包入口
 ```
 
-每次正式发布提供 **Full ZIP、MIT 源码 ZIP、SHA256SUMS.txt、Chunson-Update-Windows-x64.json** 四个附件。源码 ZIP 对应发布标签；更新清单描述完整 ZIP 的文件成员。详细变更见 [CHANGELOG](CHANGELOG.md)。
+每次正式发布提供 **Full ZIP、MIT 源码 ZIP、SHA256SUMS.txt、Chunson-Update-Windows-x64.json** 四个附件。版本显示与标签为 **1.7 / v1.7**，程序集与清单为 `1.7.0.0`。源码 ZIP 对应不可变发布标签；更新清单描述完整 ZIP 的文件成员，版本身份、SHA256 和 Range 校验保持严格。详细变更见 [CHANGELOG](CHANGELOG.md)。
 
 ## 支持作者
 

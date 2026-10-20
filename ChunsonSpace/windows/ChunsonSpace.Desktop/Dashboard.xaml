@@ -79,7 +79,7 @@
               <TextBlock Text="{Binding DashboardRegion}" FontSize="24" FontWeight="SemiBold" Margin="0,18,0,8" />
               <TextBlock Text="{Binding DashboardTimezone}" TextWrapping="Wrap" FontSize="12" />
               <TextBlock Text="{Binding DashboardEnvironmentTime}" Foreground="{DynamicResource MutedBrush}" Margin="0,10,0,10" TextWrapping="Wrap" FontSize="12" />
-              <Button Content="同步时区" Command="{Binding SyncLocalTimezoneCommand}" Style="{StaticResource PrimaryButton}" />
+              <Button Content="{Binding EnvironmentSyncLabel}" Command="{Binding SyncLocalTimezoneCommand}" Style="{StaticResource PrimaryButton}" />
             </StackPanel>
           </Border>
           <Border Grid.Column="2" Style="{StaticResource Card}" Padding="20" Margin="7,0,0,0">
@@ -143,6 +143,7 @@
               <WrapPanel>
                 <Button Content="启动分身" Command="{Binding LaunchDisplayedCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,10,8" />
                 <Button Content="检测账号" Command="{Binding TestAllAccountsCommand}" Margin="0,0,10,8" />
+                <Button x:Name="SingleImportLocalAccountButton" Content="{Binding ImportLocalAccountLabel}" Command="{Binding ImportLocalAccountCommand}" Margin="0,0,10,8" ToolTip="导入本机 Codex 已保存的账号" />
                 <Button Content="添加 / 登录" Command="{Binding NewAccountLoginCommand}" Margin="0,0,0,8" />
               </WrapPanel>
             </StackPanel>
@@ -156,7 +157,7 @@
               <TextBlock Text="{Binding DashboardTimezone}" FontSize="17" TextWrapping="Wrap" />
               <TextBlock Text="{Binding DashboardEnvironmentTime}" TextWrapping="Wrap" Margin="0,12,0,20" Foreground="{DynamicResource MutedBrush}" />
               <WrapPanel>
-                <Button Content="同步时区" Command="{Binding SyncLocalTimezoneCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,6" />
+                <Button Content="{Binding EnvironmentSyncLabel}" Command="{Binding SyncLocalTimezoneCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,6" />
                 <Button Content="网络设置 →" Command="{Binding NavigateCommand}" CommandParameter="Settings" Margin="0,0,0,6" />
               </WrapPanel>
             </StackPanel>

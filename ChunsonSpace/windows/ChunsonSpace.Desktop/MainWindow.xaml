@@ -338,7 +338,7 @@
             <TextBlock Text="{Binding HomeSummary}" Foreground="{DynamicResource MutedBrush}" FontSize="12" />
           </StackPanel>
           <StackPanel Grid.Column="1" Orientation="Horizontal" Visibility="{Binding IsAccountsPage,Converter={StaticResource BoolVisibility}}" VerticalAlignment="Center">
-            <Button x:Name="ImportLocalAccountButton" Content="导入本机账号" Command="{Binding ImportLocalAccountCommand}" Height="32" MinHeight="32" FontSize="12" Padding="12,4" Margin="0,0,8,0" ToolTip="复制本机 Codex 已保存的授权，无需重新登录；导入后可选择账号进行模型测试" />
+            <Button x:Name="ImportLocalAccountButton" Content="{Binding ImportLocalAccountLabel}" Command="{Binding ImportLocalAccountCommand}" Height="32" MinHeight="32" FontSize="12" Padding="12,4" Margin="0,0,8,0" ToolTip="导入本机 Codex 已保存的账号" />
             <Button x:Name="AddAccountLoginButton" Content="＋  添加账号" Command="{Binding NewAccountLoginCommand}" Style="{StaticResource PrimaryButton}" Height="32" MinHeight="32" FontSize="12" Padding="12,4" />
           </StackPanel>
           <Border Grid.Row="2" Grid.ColumnSpan="2" Background="{DynamicResource InfoSurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,4,0,0">
@@ -796,7 +796,10 @@
                   </ScrollViewer>
                   <StackPanel Grid.Row="2">
                     <Border Background="{DynamicResource InfoSurfaceBrush}" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="3,0,0,0" Padding="10,8" Margin="0,0,0,10">
-                      <TextBlock x:Name="EnvironmentRegionStatusText" Text="{Binding RegionStatus}" FontSize="13" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+                      <StackPanel>
+                        <TextBlock x:Name="EnvironmentRegionStatusText" Text="{Binding RegionStatus}" FontSize="13" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+                        <TextBlock Text="{Binding DashboardEnvironmentTime}" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}" Margin="0,4,0,0" />
+                      </StackPanel>
                     </Border>
                     <Grid>
                       <Grid.ColumnDefinitions>

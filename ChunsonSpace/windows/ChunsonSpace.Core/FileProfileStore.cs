@@ -149,6 +149,15 @@ public sealed partial class FileProfileStore
         return new(JsonFiles.Boolean(value, "sessionIsolation", true), JsonFiles.Boolean(value, "autoSystemTimezone", true), JsonFiles.Boolean(value, "quitConfirm", true), theme.Length == 0 ? "light" : theme, JsonFiles.Boolean(value, "closeToTray", true), JsonFiles.Text(value, "interfaceMode") is "single" or "multi" ? JsonFiles.Text(value, "interfaceMode") : "auto");
     }
     public JsonObject ReadSettingsDocument() => JsonFiles.Read(files, Path.Combine(Root, "settings.json"), true);
+    public DateTimeOffset? ReadLastEnvironmentSync()
+        => DateTimeOffset.TryParse(JsonFiles.Text(ReadSettingsDocument(), "lastEnvironmentSync"), System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.RoundtripKind, out var time) ? time : null;
+    public void SaveLastEnvironmentSync(DateTimeOffset time)
+    {
+        var value = ReadSettingsDocument();
+        value["lastEnvironmentSync"] = time.ToString("O", System.Globalization.CultureInfo.InvariantCulture);
+        JsonFiles.Write(files, Path.Combine(Root, "settings.json"), value);
+    }
     public void SaveSettings(AppSettings settings)
     {
         if (settings.WorkspaceTheme is not ("light" or "dark")) throw new StorageException(StorageError.InvalidValue, "", "外观只能选择 light 或 dark。");

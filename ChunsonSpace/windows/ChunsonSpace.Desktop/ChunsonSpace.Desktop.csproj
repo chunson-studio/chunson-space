@@ -10,6 +10,7 @@
   <ItemGroup>
     <EmbeddedResource Include="../../scripts/Install-AppUpdate.ps1" LogicalName="ChunsonSpace.Install-AppUpdate.ps1" />
     <Compile Include="../CheckSupport/LinkFixtures.cs" Link="Verification/LinkFixtures.cs" />
+    <Compile Include="../ChunsonSpace.Accounts.Checks/LocalAccountImportChecks.cs" Link="Verification/LocalAccountImportChecks.cs" />
     <Compile Include="../CheckSupport/SafetyBufferingFixtures.cs" Link="Verification/SafetyBufferingFixtures.cs" />
     <Using Remove="System.Windows.Forms" />
     <Using Remove="System.Drawing" />
@@ -32,7 +33,7 @@
   </ItemGroup>
   <Import Project="../../../taskbar-clock/Clock.targets" />
   <PropertyGroup>
-    <Version>1.61</Version>
+    <Version>1.7</Version>
   </PropertyGroup>
   <Import Project="../../../FlClashSetup/FlClashSetup.targets" />
 </Project>

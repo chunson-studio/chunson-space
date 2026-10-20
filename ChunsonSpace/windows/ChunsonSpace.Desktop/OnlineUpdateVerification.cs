@@ -61,6 +61,86 @@ internal static class OnlineUpdateVerification
         }, new JsonSerializerOptions { WriteIndented = true }));
     }
 
+    // Narrow release-number regression: no normal workspace, HTTP transport or installer.
+    internal static async Task RunVersionOrderAsync(string directory)
+    {
+        if (Directory.Exists(directory)) throw new IOException("Use new evidence directory.");
+        Directory.CreateDirectory(directory);
+        var checks = new List<object>();
+        void Check(string name, bool ok) { checks.Add(new { name, passed = ok }); if (!ok) throw new InvalidOperationException(name); }
+        void Reject(string name, Action action) { try { action(); } catch (InvalidDataException) { Check(name, true); return; } Check(name, false); }
+        var current = UpdateRules.ParseVersion("v1.7");
+        var legacy = UpdateRules.ParseVersion("v1.61");
+        Check("assembly and display are exactly 1.7", UpdateRules.CurrentVersion == current && UpdateRules.DisplayVersion(current) == "1.7");
+        Check("two, three and four components normalize identically", current == UpdateRules.ParseVersion("1.7.0") && current == UpdateRules.ParseVersion("1.7.0.0"));
+        Check("legacy identity is unchanged", legacy == new Version(1, 61, 0, 0) && legacy > current);
+        var ordered = new[] { "1.5.0", "1.6.0", "1.6.99", "1.61", "1.7", "1.7.0.1", "1.7.1", "1.8", "1.9.9.9", "1.10", "1.61.0.1", "2.0" };
+        for (var i = 0; i < ordered.Length; i++)
+        {
+            var left = UpdateRules.ParseVersion(ordered[i]);
+            Check("same version " + ordered[i], UpdateRules.CompareVersions(left, left) == 0);
+            for (var j = i + 1; j < ordered.Length; j++)
+            {
+                var right = UpdateRules.ParseVersion(ordered[j]);
+                Check(ordered[i] + " precedes " + ordered[j], UpdateRules.CompareVersions(left, right) < 0 && UpdateRules.CompareVersions(right, left) > 0);
+            }
+        }
+        foreach (var invalid in new[] { "1", "1.7-beta", "v1.7+build", "65536.0", "1.7.0.0.1", "https://example.invalid/1.7" })
+            Reject("reject invalid version " + invalid, () => UpdateRules.ParseVersion(invalid));
+        var handler = new RangeHandler();
+        byte[] Metadata(string tag)
+        {
+            var node = JsonNode.Parse(handler.Metadata())!;
+            node["tag_name"] = tag; node["html_url"] = UpdateRules.Repository + "/releases/tag/" + tag;
+            foreach (var asset in node["assets"]!.AsArray())
+                asset!["browser_download_url"] = UpdateRules.Repository + "/releases/download/" + tag + "/" + asset["name"]!.GetValue<string>();
+            return Encoding.UTF8.GetBytes(node.ToJsonString());
+        }
+        var release = UpdateRules.ParseRelease(Metadata("v1.7"));
+        var manifest = JsonSerializer.Deserialize<UpdateManifest>(handler.ManifestBytes(), UpdateRules.Json)! with { Version = "1.7.0.0" };
+        Check("tag v1.7 accepts exact normalized manifest", UpdateRules.ParseManifest(JsonSerializer.SerializeToUtf8Bytes(manifest, UpdateRules.Json), release).Version == "1.7.0.0");
+        Reject("legacy manifest never aliases 1.7", () => UpdateRules.ParseManifest(JsonSerializer.SerializeToUtf8Bytes(manifest with { Version = "1.61.0.0" }, UpdateRules.Json), release));
+        Reject("future manifest never aliases 1.7", () => UpdateRules.ParseManifest(JsonSerializer.SerializeToUtf8Bytes(manifest with { Version = "1.7.0.1" }, UpdateRules.Json), release));
+        var foreign = JsonNode.Parse(Metadata("v1.7"))!; foreign["assets"]![0]!["browser_download_url"] = UpdateRules.Repository + "/releases/download/v1.61/" + UpdateRules.ArchiveName;
+        Reject("asset URL must match immutable tag", () => UpdateRules.ParseRelease(Encoding.UTF8.GetBytes(foreign.ToJsonString())));
+        Check("independent clock exclusion preserved", UpdateRules.IndependentComponent("Widgets/BeijingClock.exe"));
+        var fixtureRoot = Path.Combine(directory, "fixture");
+        Directory.CreateDirectory(fixtureRoot);
+        File.WriteAllText(Path.Combine(fixtureRoot, "ChunsonSpace-fixture.json"), "{\"fixture\":true}");
+        var workspace = new DesktopWorkspace(fixtureRoot, Path.Combine(fixtureRoot, "active"), Path.Combine(fixtureRoot, "desktop"), fixture: true);
+        var model = new ShellViewModel(workspace);
+        var metadataHandler = new VersionMetadataHandler();
+        model.UseUpdateService(new(metadataHandler));
+        try
+        {
+            foreach (var tag in new[] { "v1.61", "v1.7", "v1.7.0.1", "v1.8" })
+            {
+                metadataHandler.Body = Metadata(tag);
+                await model.CheckForUpdatesAsync(true);
+                var expected = tag is "v1.7.0.1" or "v1.8";
+                Check("actual update presentation " + tag, model.HasUpdate == expected && (expected || model.UpdateStatus.Contains("最新")));
+            }
+        }
+        finally { model.DisposeUpdates(); await workspace.Accounts!.DisposeAsync(); }
+        File.WriteAllText(Path.Combine(directory, "ui-verification.json"), JsonSerializer.Serialize(new
+        {
+            passed = true, checks, fakeMetadataRequests = metadataHandler.Calls, realRequests = 0,
+            actualAccountOperations = false, actualProxyChanges = false, actualSystemTimezoneChanges = false,
+            normalAppStartsOrStops = 0, screenshotCount = 0,
+            scope = "1.7 version ordering, tag/manifest exact identity and actual update presentation only"
+        }, new JsonSerializerOptions { WriteIndented = true }));
+    }
+    private sealed class VersionMetadataHandler : HttpMessageHandler
+    {
+        internal byte[] Body = []; internal int Calls;
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token)
+        {
+            if (request.RequestUri?.AbsoluteUri != UpdateRules.Latest) throw new InvalidOperationException("Only fake release metadata is allowed.");
+            Calls++;
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(Body) });
+        }
+    }
+
     internal static async Task RunAsync(string directory)
     {
         if (Directory.Exists(directory)) throw new IOException("Use new evidence directory.");

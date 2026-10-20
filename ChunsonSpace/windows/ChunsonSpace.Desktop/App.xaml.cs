@@ -13,6 +13,39 @@ public partial class App : System.Windows.Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        if (e.Args.Length == 3 && e.Args[0] == "--verify-ui" && e.Args[2] == "version-order")
+        {
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            try { await OnlineUpdateVerification.RunVersionOrderAsync(Path.GetFullPath(e.Args[1])); Shutdown(0); }
+            catch (Exception error) { Directory.CreateDirectory(e.Args[1]); File.WriteAllText(Path.Combine(e.Args[1], "failure.txt"), error.ToString()); Shutdown(1); }
+            return;
+        }
+        if (e.Args.Length == 3 && e.Args[0] == "--verify-ui" && e.Args[2] == "automatic-environment")
+        {
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            try { await LocalEnvironmentVerification.RunAutomaticAsync(Path.GetFullPath(e.Args[1])); Shutdown(0); }
+            catch (Exception error) { Directory.CreateDirectory(e.Args[1]); File.WriteAllText(Path.Combine(e.Args[1], "failure.txt"), error.ToString()); Shutdown(1); }
+            return;
+        }
+        if (e.Args.Length == 3 && e.Args[0] == "--verify-ui" && e.Args[2] is "local-import" or "local-import-storage")
+        {
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            try
+            {
+                var directory = Path.GetFullPath(e.Args[1]);
+                if (e.Args[2] == "local-import") await LocalAccountImportVerification.RunFocusedAsync(directory);
+                else
+                {
+                    Directory.CreateDirectory(directory);
+                    var checks = LocalAccountImportChecks.Run(Path.Combine(directory, "fixture"));
+                    File.WriteAllText(Path.Combine(directory, "checks.json"), System.Text.Json.JsonSerializer.Serialize(new
+                    { passed = true, checks, scope = "local-import-storage", realRequests = 0, actualAccountOperations = false }));
+                }
+                Shutdown(0);
+            }
+            catch (Exception error) { Directory.CreateDirectory(e.Args[1]); File.WriteAllText(Path.Combine(e.Args[1], "failure.txt"), error.ToString()); Shutdown(1); }
+            return;
+        }
         if (e.Args.Length == 3 && e.Args[0] == "--verify-ui" && e.Args[2] == "drawing-presets")
         {
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
@@ -224,7 +257,6 @@ public partial class App : System.Windows.Application
                 model.ShowClock();
                 _ = model.ProxyPanel.NodeTesting.StartBackgroundAsync();
                 _ = model.ProxyPanel.RefreshDnsStatusAsync();
-                _ = model.RefreshLocalEnvironmentAsync();
             }
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException or ChunsonSpace.Core.StorageException)

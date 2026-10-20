@@ -35,7 +35,10 @@ public sealed class DesktopWorkspace
             if (fixture)
             {
                 Accounts = DesktopAccountServices.CreateFixture(this);
-                if (managedPaths is not null) LocalEnvironment = new(Accounts.ResolveLoginProxyAsync, Accounts.LocalEgress.ProbeRegionProxyAsync, Accounts.Admission);
+                if (managedPaths is not null) LocalEnvironment = new(Accounts.ResolveLoginProxyAsync, Accounts.LocalEgress.ProbeRegionProxyAsync, Accounts.Admission,
+                    () => TimeZoneInfo.FindSystemTimeZoneById(Accounts.OfflineRegion!.State.WindowsTimezone),
+                    () => Accounts.OfflineRegion!.State.GeoId switch { 244 => "US", 122 => "JP", 45 => "CN", _ => "" },
+                    Accounts.LocalEgress.WatchRegionProxyAsync, Accounts.LocalEgress.IsCurrentPrimaryAsync);
             }
             Switching = new(SwitchStorage, Runtime, preparation: Accounts?.Accounts,
                 environments: (IIdentityEnvironmentSource?)LocalEnvironment ?? new FileIdentityEnvironmentSource(Profiles),
@@ -51,6 +54,8 @@ public sealed class DesktopWorkspace
     public string? PackagedDesktopRoot { get; }
     public string? WebDesktopRoot { get; }
     public bool IsFixture { get; }
+    internal bool ImportLocalAccountOnStartup { get; private init; }
+    internal bool AutomaticEnvironmentOnStartup { get; set; }
     public FileProfileStore Profiles { get; }
     public DesktopProxyServices ProxyServices { get; }
     public ISwitchStorage SwitchStorage { get; }
@@ -77,12 +82,13 @@ public sealed class DesktopWorkspace
     // CLI may be hosted by dotnet.exe; protection must target this application,
     // never the shared .NET runtime used by unrelated programs.
     public static string ApplicationExecutable => Path.Combine(AppContext.BaseDirectory, "ChunsonSwitch.exe");
-    public static DesktopWorkspace CreateManagedFixture(string root, SwitchStoragePaths? originalPaths = null)
+    public static DesktopWorkspace CreateManagedFixture(string root, SwitchStoragePaths? originalPaths = null, bool importLocalAccountOnStartup = false)
     {
         var paths = new ManagedClonePaths(root);
         return new(root, paths.CodexHome, paths.DesktopRoot, null, fixture: true, managedPaths: paths)
         {
             OriginalHome = originalPaths?.ActiveHome,
+            ImportLocalAccountOnStartup = importLocalAccountOnStartup,
             OriginalMaintenance = originalPaths is null ? null : new(new OfflineRuntimeOperations()),
             OriginalRebuildFactory = originalPaths is null ? null : () => new(originalPaths)
         };
@@ -106,12 +112,14 @@ public sealed class DesktopWorkspace
         var originalLaunchSystem = new WindowsDesktopLaunchSystem(Path.Combine(paths.AccountRoot, "original-maintenance"), processSystem, commands, clock);
         var originalRuntime = new WindowsRuntimeOperations(new CodexProcessService(processSystem, clock, cloneScope, excludeManagedClone: true), new DesktopLaunchService(originalLaunchSystem, clock), originalLaunchSystem, timezone);
         var workspace = new DesktopWorkspace(paths.DataRoot, paths.CodexHome, paths.DesktopRoot, null, runtime: new WindowsRuntimeOperations(processes, launch, launchSystem, timezone, ownership), managedPaths: paths)
-        { NativeLaunch = launchSystem, NativeTimezone = timezone, NativeProcesses = processes, Ownership = ownership, OriginalHome = originalPaths.ActiveHome,
+        { NativeLaunch = launchSystem, NativeTimezone = timezone, NativeProcesses = processes, Ownership = ownership, OriginalHome = originalPaths.ActiveHome, ImportLocalAccountOnStartup = true,
           OriginalMaintenance = new(originalRuntime), OriginalRebuildFactory = () => new(new(paths.AccountRoot, originalPaths.ActiveHome, originalPaths.PackagedDesktopRoot, originalPaths.WebDesktopRoot), Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)) };
         workspace.Accounts = DesktopAccountServices.CreateNormal(workspace);
         workspace.CodexInstaller = new(new WindowsCodexInstallSystem(commands, Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)));
         workspace.SilentTimezoneChannel = new(new WindowsSilentTimezoneSystem(commands, Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), Environment.UserDomainName + "\\" + Environment.UserName));
-        workspace.LocalEnvironment = new(workspace.Accounts.ResolveLoginProxyAsync, workspace.Accounts.LocalEgress.ProbeRegionProxyAsync, workspace.Accounts.Admission);
+        workspace.AutomaticEnvironmentOnStartup = true;
+        workspace.LocalEnvironment = new(workspace.Accounts.ResolveLoginProxyAsync, workspace.Accounts.LocalEgress.ProbeRegionProxyAsync, workspace.Accounts.Admission,
+            watchProbe: workspace.Accounts.LocalEgress.WatchRegionProxyAsync, primaryMatches: workspace.Accounts.LocalEgress.IsCurrentPrimaryAsync);
         workspace.Switching = new(workspace.SwitchStorage, workspace.Runtime!, workspace.Accounts.Accounts, workspace.LocalEnvironment, workspace.Accounts.ProxyResolver, workspace.LocalEnvironment);
         return workspace;
     }

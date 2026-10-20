@@ -101,7 +101,7 @@ public sealed partial class ShellViewModel : ObservableObject
     public ShellViewModel(DesktopWorkspace? workspace = null)
     {
         selected = PreviewDataSource.Identities[1];
-        NavigateCommand = new(p => Navigate(p?.ToString() ?? "Dashboard"), _ => !operationBusy);
+        NavigateCommand = new(p => Navigate(p?.ToString() ?? "Dashboard"), _ => !operationBusy || importingLocalAccount);
         SimulateSwitchCommand = new(_ => SimulateSwitch(false), _ => Selected is not null);
         SimulateLaunchCommand = new(_ => SimulateSwitch(true), _ => Selected is not null);
         SimulateFailureCommand = new(_ => ShowError());

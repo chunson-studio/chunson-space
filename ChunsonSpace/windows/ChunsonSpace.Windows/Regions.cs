@@ -14,13 +14,20 @@ public interface IRegionSystem
     string? ResolveWindowsTimezone(string iana);
     Task<RegionState> ReadAsync(CancellationToken token);
     Task<bool> SetTimezoneExplicitlyAsync(string windowsId, CancellationToken token);
+    Task<bool> SetTimezoneAutomaticallyAsync(string windowsId, CancellationToken token)
+        => SetTimezoneExplicitlyAsync(windowsId, token);
     bool SetHomeLocation(string countryCode, int geoId);
 }
 
 // Explicit environment configuration or confirmed login choice; never background screening.
 public sealed class SystemRegionService(IRegionSystem system)
 {
-    public async Task<RegionConfigurationResult> ConfigureExplicitlyAsync(string countryCode, string ianaTimezone, CancellationToken token = default,
+    public Task<RegionConfigurationResult> ConfigureExplicitlyAsync(string countryCode, string ianaTimezone, CancellationToken token = default,
+        Func<CancellationToken, Task<TimezoneResult>>? baselinePreflight = null,
+        Func<string, CancellationToken, Task<TimezoneResult>>? commitBaseline = null, bool timezoneOnly = false)
+        => ConfigureExplicitlyAsync(countryCode, ianaTimezone, true, null, token, baselinePreflight, commitBaseline, timezoneOnly);
+    public async Task<RegionConfigurationResult> ConfigureExplicitlyAsync(string countryCode, string ianaTimezone,
+        bool allowElevation, Func<CancellationToken, Task<bool>>? stillCurrent, CancellationToken token = default,
         Func<CancellationToken, Task<TimezoneResult>>? baselinePreflight = null,
         Func<string, CancellationToken, Task<TimezoneResult>>? commitBaseline = null, bool timezoneOnly = false)
     {
@@ -46,23 +53,31 @@ public sealed class SystemRegionService(IRegionSystem system)
             return new(true, false, scope + (commitBaseline is null ? "已经匹配出口，未重复修改系统值。" : "已经匹配出口，已确认新时区基线；未重复修改系统值。"));
         }
         token.ThrowIfCancellationRequested();
+        if (stillCurrent is not null && !await stillCurrent(token))
+            return new(false, false, "出口已变化，未应用过期地区与时区；请等待重新检测。");
         // Once a write is dispatched, finish reread/recovery even if a UI wait is cancelled.
         bool regionAttempted = false;
         try
         {
             if (before.WindowsTimezone != windowsId)
             {
-                _ = await system.SetTimezoneExplicitlyAsync(windowsId, CancellationToken.None);
+                _ = allowElevation ? await system.SetTimezoneExplicitlyAsync(windowsId, CancellationToken.None)
+                    : await system.SetTimezoneAutomaticallyAsync(windowsId, CancellationToken.None);
                 var timeAfter = await system.ReadAsync(CancellationToken.None);
+                token.ThrowIfCancellationRequested();
                 if (!timeAfter.Success) return await RecoverAsync(before, geoId.Value, windowsId, false);
                 if (timeAfter.WindowsTimezone != windowsId)
-                    return new(false, timeAfter.WindowsTimezone != before.WindowsTimezone, "系统时区未确认，国家/地区未修改。若拒绝了 Windows 授权，请重新点击并允许授权。");
+                    return new(false, timeAfter.WindowsTimezone != before.WindowsTimezone, "系统时区未确认，国家/地区未修改。请手动点击同步时区重试。");
                 if (timeAfter.GeoId != before.GeoId) return await RecoverAsync(before, geoId.Value, windowsId, regionAttempted);
             }
+            token.ThrowIfCancellationRequested();
+            if (stillCurrent is not null && !await stillCurrent(token))
+                return new(false, before.WindowsTimezone != windowsId, "出口已变化，保留当前系统值，等待重新检测。");
             if (!timezoneOnly && before.GeoId != geoId) { regionAttempted = true; _ = system.SetHomeLocation(countryCode, geoId.Value); }
             var after = await system.ReadAsync(CancellationToken.None);
             if (after.Success && after.GeoId == geoId && after.WindowsTimezone == windowsId)
             {
+                token.ThrowIfCancellationRequested();
                 if (commitBaseline is not null)
                 {
                     var committed = await commitBaseline(windowsId, CancellationToken.None);
@@ -75,7 +90,11 @@ public sealed class SystemRegionService(IRegionSystem system)
                 return new(true, true, scope + "已匹配出口，并已回读确认。关闭分身或退出工具后仍保留当前设置。");
             }
         }
-        catch (Exception error) when (error is IOException or UnauthorizedAccessException or Win32Exception or InvalidOperationException) { }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or Win32Exception or InvalidOperationException)
+        {
+            var recovered = await RecoverAsync(before, geoId.Value, windowsId, regionAttempted);
+            return recovered with { Message = error.GetType().Name + "：" + error.Message + " " + recovered.Message };
+        }
         return await RecoverAsync(before, geoId.Value, windowsId, regionAttempted);
     }
     private async Task<RegionConfigurationResult> RecoverAsync(RegionState before, int targetGeo, string targetTimezone, bool regionAttempted)
@@ -128,6 +147,8 @@ public sealed class WindowsRegionSystem(ICommandRunner commands) : IRegionSystem
         try { using var process = Process.Start(info); if (process is null) return false; await process.WaitForExitAsync(token); return process.ExitCode == 0; }
         catch (Win32Exception) { return false; }
     }
+    public Task<bool> SetTimezoneAutomaticallyAsync(string windowsId, CancellationToken token)
+        => timezone.SetAsync(windowsId, token); // Background attempts never launch an elevation prompt.
     [DllImport("kernel32.dll")] private static extern int GetUserGeoID(int geoClass);
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)] private static extern int GetUserDefaultGeoName(StringBuilder name, int count);
     [DllImport("kernel32.dll", SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)] private static extern bool SetUserGeoID(int geoId);

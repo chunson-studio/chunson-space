@@ -7,7 +7,7 @@ using ChunsonSpace.Windows;
 
 namespace ChunsonSpace.Desktop;
 
-internal static class LocalEnvironmentVerification
+internal static partial class LocalEnvironmentVerification
 {
     public static async Task RunTimezoneMatchAsync(string directory)
     {

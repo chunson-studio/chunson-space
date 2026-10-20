@@ -13,6 +13,11 @@ public sealed partial class ShellViewModel
     public DelegateCommand SyncLocalTimezoneCommand { get; private set; } = null!;
     public async Task ConfigureRegionAsync()
     {
+        if (workspace?.LocalEnvironment is not null) { await RequestEnvironmentAsync(manual: true); return; }
+        await ConfigureLegacyRegionAsync();
+    }
+    private async Task ConfigureLegacyRegionAsync()
+    {
         if (busy || checkingLocalEnvironment || workspace?.Accounts is null || workspace.LocalEnvironment is null && Selected?.Kind != "Account") return;
         var action = "地区与时区同步";
         var target = Selected; var services = workspace.Accounts;

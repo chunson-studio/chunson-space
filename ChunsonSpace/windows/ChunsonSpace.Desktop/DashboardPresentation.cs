@@ -50,11 +50,13 @@ public sealed partial class ShellViewModel
     public int UnknownAccounts => AccountTotal - NormalAccounts - AbnormalAccounts;
     public string DashboardSummary => $"共 {AccountTotal} 个账号 · {UnknownAccounts} 个未判断";
     public string CurrentAccountDisplay => active?.Label ?? "尚未载入账号";
-    public string DashboardIpv4 => lastVerifiedLocalEnvironment?.Addresses.Ipv4 is { Available: true } v4 ? v4.Ip : "未知";
-    public string DashboardIpv6 => lastVerifiedLocalEnvironment?.Addresses.Ipv6 is { Available: true } v6 ? "IPv6  " + v6.Ip : "IPv6  未知";
-    public string DashboardTimezone => lastVerifiedLocalEnvironment?.ExitTimezone ?? "时区尚未核对";
-    public string DashboardRegion => lastVerifiedLocalEnvironment?.CountryCode ?? "地区未知";
-    public string DashboardEnvironmentTime => lastVerifiedLocalEnvironment is { } report ? $"最近核对 {report.CheckedAt.ToLocalTime():MM-dd HH:mm} · {(report.Matches ? "时区一致" : "时区待同步")}" : "点击刷新查询本机出口";
+    public string DashboardIpv4 => currentLocalEnvironment?.Addresses.Ipv4 is { Available: true } v4 ? v4.Ip : "未知";
+    public string DashboardIpv6 => currentLocalEnvironment?.Addresses.Ipv6 is { Available: true } v6 ? "IPv6  " + v6.Ip : "IPv6  未知";
+    public string DashboardTimezone => currentLocalEnvironment is { Verified: true } report ? report.ExitTimezone : "时区尚未确认";
+    public string DashboardRegion => currentLocalEnvironment is { Verified: true } report ? report.CountryCode : "地区未知";
+    public string DashboardEnvironmentTime => environmentSyncState
+        + (currentLocalEnvironment is { } report ? $" · 最近检测 {report.CheckedAt.ToLocalTime():MM-dd HH:mm}" : "")
+        + "\n" + LastEnvironmentSyncLabel;
     private string dashboardScore = "尚无评分摘要";
     private string? loadingScoreIp;
     private Task dashboardScoreLoad = Task.CompletedTask;

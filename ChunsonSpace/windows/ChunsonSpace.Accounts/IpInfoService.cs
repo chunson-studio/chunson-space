@@ -17,6 +17,18 @@ public sealed class IpInfoService(IAccountTransport transport)
     private readonly AccountNetwork network = new(transport);
     public static Uri LocationEndpoint(string ip) => new("https://ipinfo.io/" + Uri.EscapeDataString(ip) + "/json");
 
+    // Watchdog: one primary-address request, with IPv6 only when IPv4 is unavailable.
+    // The unmeasured family is explicitly unknown, never a claimed fresh dual-stack result.
+    public async Task<ExitAddresses> ProbePrimaryAsync(string resolvedProxy, CancellationToken token = default)
+    {
+        var proxy = HttpAccountTransport.RequireHttpProxy(resolvedProxy);
+        var v4 = await ReadAsync(Ipv4Endpoint, AddressFamily.InterNetwork, proxy, token);
+        var v6 = v4.Available ? new ExitAddress(Message: "后台本轮未检测 IPv6")
+            : await ReadAsync(Ipv6Endpoint, AddressFamily.InterNetworkV6, proxy, token);
+        token.ThrowIfCancellationRequested();
+        return new(v4, v6);
+    }
+
     public async Task<ExitAddresses> ProbeAsync(string resolvedProxy, CancellationToken token = default)
     {
         var proxy = HttpAccountTransport.RequireHttpProxy(resolvedProxy);

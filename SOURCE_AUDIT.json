@@ -1,7 +1,7 @@
 {
   "passed": true,
   "license": "MIT",
-  "files": 369,
+  "files": 374,
   "sanitizedFiles": [
     "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/DefaultLoginBrowserChecks.cs",
     "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/LocalAccountImportChecks.cs",
@@ -44,8 +44,8 @@
     },
     {
       "file": "CHANGELOG.md",
-      "sha256": "1ed65b1d3cc6e6464cd9bb9bd62e42541c0dd3cc1bc77fbed06793fdc107947c",
-      "bytes": 1693
+      "sha256": "d62d5dc8b09657628adb1ffc719044321e4c2035a8edb6b42988e92ec40cf3cd",
+      "bytes": 2879
     },
     {
       "file": "ChunsonSpace/scripts/Install-AppUpdate.ps1",
@@ -119,8 +119,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/AccountRepository.cs",
-      "sha256": "b80ba02ec62835a804f56bae592db887ab7b789cb81c3ed1331d4cad64977352",
-      "bytes": 16053
+      "sha256": "80dba9fad0526766b7a2ac5e9666098c98adcf72f48cd17f9e0b9e93fb7be28d",
+      "bytes": 16251
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/AccountService.cs",
@@ -184,8 +184,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/EgressService.cs",
-      "sha256": "bc23c4db19c8d40a8aab33ad036c342eda35cd42e619d3b0e87308f4d1b93ca7",
-      "bytes": 8484
+      "sha256": "5ae174aa47b3c855d6ee96d42db6b5b0c32c9084273aeb390c81cb79a748010c",
+      "bytes": 10014
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/EgressSources.cs",
@@ -204,8 +204,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/IpInfoService.cs",
-      "sha256": "814fda2b14d9ad1dbd8ae1f55adef0a8f6bed5abdffc6a2fb3deb141682d9cf0",
-      "bytes": 6634
+      "sha256": "b9d511de7ade44fdc17f94a8edb77ceddaa2bd74b87e0be7d8358b9e8864b9c5",
+      "bytes": 7365
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Accounts/IpQualityService.cs",
@@ -324,8 +324,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/LocalAccountImportChecks.cs",
-      "sha256": "48a5c5d0db6d7cf12f35db3e94777b98e494553b89270f0eaa6b3fdd0d10686b",
-      "bytes": 4663
+      "sha256": "3284b29bc55c4ead4434af9a2dca5e9c2aef73f0c2cc42c68fd4ef4d2167a490",
+      "bytes": 7139
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Accounts.Checks/LoginCompletionChecks.cs",
@@ -479,8 +479,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Core/FileProfileStore.cs",
-      "sha256": "9d0a7909c1dece4a3c4fa43e9062581f6310ae06ae55abb8ae5a11f7269fe8b0",
-      "bytes": 27217
+      "sha256": "aa3187f6db1c89b7e364ecab913e492972a63ce68578998522fc396250855417",
+      "bytes": 27823
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Core/FileStorage.cs",
@@ -649,8 +649,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountPresentation.cs",
-      "sha256": "f03d33e9d7f3cb991bdee8f1aaf269ee6ee4159b251320dc43cbedbfbaec6e6b",
-      "bytes": 28319
+      "sha256": "f120ad2f186f4e960f4819785a8343e2160e676032e8d712699f5c3e66803ef9",
+      "bytes": 30380
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AccountTestQueue.cs",
@@ -674,8 +674,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/App.xaml.cs",
-      "sha256": "4ba0d3069b538eb38ef7e247cc706d2bc9663ff8f3385d322803e6c35590e659",
-      "bytes": 17696
+      "sha256": "968ed74fba1d8b303736ccba9b26e2f9db0a2bac7acadfca3bbcb5df30d0857c",
+      "bytes": 19738
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AppUpdateInstaller.cs",
@@ -758,6 +758,16 @@
       "bytes": 1322349
     },
     {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AutomaticEnvironmentPresentation.cs",
+      "sha256": "d6062746f155735eb2e19236c74a2dc87bc3a678cd0d487e5231be09d2864338",
+      "bytes": 10027
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AutomaticEnvironmentVerification.cs",
+      "sha256": "8ddfd4f9c9c5d7ead932d71511820e87ebea95335684a21d98e7c620c2aadefa",
+      "bytes": 24732
+    },
+    {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/AutomaticLoginProxy.cs",
       "sha256": "70783bfe16e517cffb1195cc334072122b585a492011397a53059463dbbdb3f5",
       "bytes": 5243
@@ -789,8 +799,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ChunsonSpace.Desktop.csproj",
-      "sha256": "b8c464b4e4040658306c865a28e2bd88096d2d2a4646ffc9f58f48b20d625631",
-      "bytes": 2988
+      "sha256": "f666994309ff5d272c5b38e41d3e5e45183724059e5eeda095aeed9977c2d0b3",
+      "bytes": 3122
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/CialloCancellationVerification.cs",
@@ -814,8 +824,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Dashboard.xaml",
-      "sha256": "a0130db230687fb66f4a787c92871db0d7dae14f8f4171b8633eba8e7feec578",
-      "bytes": 14988
+      "sha256": "60e6745e129985ff95ac3c04e5e66fecec7a12eac5f5fb51016c641f0759beb9",
+      "bytes": 15248
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Dashboard.xaml.cs",
@@ -824,8 +834,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/DashboardPresentation.cs",
-      "sha256": "655922de31c6795fa1ce2e07b59898bf02367b7913d41e4dd532b16394dc06f4",
-      "bytes": 6343
+      "sha256": "4b1e45eb62e11fd778f5ee73ce72649c0195c401f67485f844477bf62bd66ed1",
+      "bytes": 6382
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/DeleteOverlayVerification.cs",
@@ -854,8 +864,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/DesktopWorkspace.cs",
-      "sha256": "f2a7a15b0665e9f9cb9d07f43442a735f633001d521933ab3267641cef8a5a19",
-      "bytes": 11985
+      "sha256": "28030093e5530620a004a6f28906b09db81cdbaf87f08e3162115368cdbb47c2",
+      "bytes": 12815
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/EditorAccessibilityVerification.cs",
@@ -869,13 +879,13 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ExitTasksPresentation.cs",
-      "sha256": "caf7fe9983f0d1baa7355e20fb79f65f091867a02a1ce4393667b8e1fbfc523a",
-      "bytes": 2838
+      "sha256": "eb0d47507501ba65e9825e1d0940c7ce1787e48f0c6715892e4a9b0b00b6f2a4",
+      "bytes": 2909
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/GitHubUpdateService.cs",
-      "sha256": "dcfaf98ecf71ff0eb0187b0a37e2648a2839673ba0d4fd8b693e5a610ca94b38",
-      "bytes": 17203
+      "sha256": "0fbf5b9cdb2f09e670b33a85d6727d8b2c916dbff585708ab32f030baaf19089",
+      "bytes": 17800
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/HomeMotionVerification.cs",
@@ -889,8 +899,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/IpSeparationVerification.cs",
-      "sha256": "9cff893fb41976b2e629fa10a7656d3194508e358e85565a26bc9fa564ba91df",
-      "bytes": 22115
+      "sha256": "b4ba1d3ab36e4ef7ef4b75e9b89f120d7d8b562f5293a55dc36c9b61c6c95e98",
+      "bytes": 22116
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/KeyboardRoutingVerification.cs",
@@ -899,18 +909,23 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/LocalAccountImportVerification.cs",
-      "sha256": "2f3d5a0202b738a69bc0d78d2a6cef979b403d7dfb82c950a43a756d1130a96c",
-      "bytes": 2598
+      "sha256": "84395ef6f4c282d706ffc4d2c08d234f9936d6b2802772aa5ec38ba8f50082ec",
+      "bytes": 18505
+    },
+    {
+      "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/LocalEnvironmentMonitor.cs",
+      "sha256": "87c6f04ff08b1ab25a76538e0b06febc2fa23705129e032c737acb411089537b",
+      "bytes": 3737
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/LocalEnvironmentService.cs",
-      "sha256": "90a19583f5f1964767682d4da548714c8d0e55846a6a8cc4ce238d3faafb82a3",
-      "bytes": 10929
+      "sha256": "d15498dec6d9fadbe7c086c8ffb90b6c5f0dec45913b7954ab2342a0139b5dad",
+      "bytes": 11380
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/LocalEnvironmentVerification.cs",
-      "sha256": "97eb7c7bcd25409cb383d35b9e5afe81129a39a710ab0fa76e770230ff0b2c6d",
-      "bytes": 21464
+      "sha256": "29ff011b9a31d5d842e7725eddc4ab1ea05c63f0afa3d9840fd216ff35440b62",
+      "bytes": 21472
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/LoginStartVerification.cs",
@@ -924,13 +939,13 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/MainWindow.xaml",
-      "sha256": "812a7a6dec008d8c19d01e009128f19289d59695d09bdee2c8af63391d4540c5",
-      "bytes": 164096
+      "sha256": "1ea25b2c3524be04da744e0c7258635f73a170c1d860c1e364ba44f741f9235c",
+      "bytes": 164294
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/MainWindow.xaml.cs",
-      "sha256": "5eed3939914666eef6e7f1c04a8f1c73e04bbfe2c43e166220a4a2b1b0179b6f",
-      "bytes": 14019
+      "sha256": "216bb870cec0ed5798f072e09c7d8f1eb45eca263ac9c5958cfca752d131da52",
+      "bytes": 14183
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ManagedRouteTransport.cs",
@@ -969,8 +984,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/OfflineRegionSystem.cs",
-      "sha256": "2d3ac182cd37f70b75c5cb73926a6ce1397570050886a6846e581d2d34db1d43",
-      "bytes": 1198
+      "sha256": "3624987db494ee313c58cf9ac2b494eaf7e175387fef22a6f9e4b583b227ce2a",
+      "bytes": 1504
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/OfflineRuntimeOperations.cs",
@@ -984,13 +999,13 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/OnlineUpdateVerification.cs",
-      "sha256": "33d88856a3b3476eb189d72a2a8772985bf72d4ed7f8774a8779a72f7e16413e",
-      "bytes": 21178
+      "sha256": "eb319e251a4b2662d69c23a6157cb46fa33c1b2d6032388488066570193760b2",
+      "bytes": 27170
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/Presentation.cs",
-      "sha256": "7a4c29675f385dc0e0dc167dd71acd2fc3e606fd75db7eb9d017090ce30a9dd4",
-      "bytes": 16312
+      "sha256": "825aeae941b70ad41d25dcff35901324946828c574e91faefd167914750fe295",
+      "bytes": 16337
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ProfileEditorNetwork.cs",
@@ -1014,8 +1029,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/RegionPresentation.cs",
-      "sha256": "6cceafce4354307be1e4e00d384aa4f89a19f587f8dc36c68afeba38db2bc273",
-      "bytes": 4000
+      "sha256": "03c4e048457621bec0cd86469bda1ef968f159d50094b34d6a6c2084a3340ad5",
+      "bytes": 4223
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/ResidentialExemptionVerification.cs",
@@ -1064,8 +1079,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/StoragePresentation.cs",
-      "sha256": "f94c4af3cde63ae5bf0a23349b7ff00e98ab814db5a7fb380f8129bb1febf6a8",
-      "bytes": 31199
+      "sha256": "438deaaf120b2ae476b32c45beb48e0d302903e4c43cbc819bd6a1e89958a0aa",
+      "bytes": 31290
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/StorageUiVerification.cs",
@@ -1114,8 +1129,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/UpdatePresentation.cs",
-      "sha256": "e78682e00d4b902b34d434e91c1c03488a4746d2dc6b01bfa5360b4b952b2304",
-      "bytes": 6575
+      "sha256": "4dc7ba73fbcf4549c46d151e5a7b0fb60fa104ccc7d4d36005520070a542dfb1",
+      "bytes": 6607
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Desktop/VisualRuntimeVerification.cs",
@@ -1449,8 +1464,8 @@
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Windows/Regions.cs",
-      "sha256": "f2468956aeb6490096faeb6a363a1170e12703e890dd7ceac7bbe548e6a374ed",
-      "bytes": 8287
+      "sha256": "c902fd340148a3eac2dddcbd361d58e0c159c15ad3477d50f410dc8a7c0e7bfc",
+      "bytes": 10080
     },
     {
       "file": "ChunsonSpace/windows/ChunsonSpace.Windows/SilentTimezoneChannel.cs",
@@ -1674,13 +1689,13 @@
     },
     {
       "file": "docs/assets/download-full.svg",
-      "sha256": "ad8304624c6e98a5ce35641eb93a609132e621136684410c1d23c63eebdcb907",
-      "bytes": 766
+      "sha256": "4558d0eec0c3662e8b59c3ac6698326f37f76f3aca6139ec752be1e4a1b9e87b",
+      "bytes": 761
     },
     {
       "file": "docs/assets/readme-cover.svg",
-      "sha256": "1179db2190afa20bad699647e0693d5b775ecba703c9017347fe1e937d1a5e72",
-      "bytes": 2582
+      "sha256": "c58b02d55492016b80a93e66fac5f4c1a650ffb21db1cd50b060da4b51147cdf",
+      "bytes": 2567
     },
     {
       "file": "docs/assets/screenshot-account-freeze.png",
@@ -1736,6 +1751,16 @@
       "file": "docs/assets/screenshot-network.png",
       "sha256": "03f20648db197f900031c9cd1f3dd30b42be79fd6ef08ef39fa62089b1b3a490",
       "bytes": 110339
+    },
+    {
+      "file": "docs/assets/screenshot-region-night.png",
+      "sha256": "7c94296775cd57c5b7ee4534ed84ba936f7e5c5fd4433935bbcb0946e8045199",
+      "bytes": 112143
+    },
+    {
+      "file": "docs/assets/screenshot-region-paper.png",
+      "sha256": "21c422b1bbaadf8ef70e1af4127a4d2bea54ed02be3f42e7c7f8461c3fc3c2f7",
+      "bytes": 112065
     },
     {
       "file": "docs/assets/screenshot-single-night-1040.png",
@@ -1814,8 +1839,8 @@
     },
     {
       "file": "README.md",
-      "sha256": "3b2044dc6752c568472f16296d780e2abc816cbcf022685413c023cd571e5d17",
-      "bytes": 10590
+      "sha256": "500c13e7e092198ed18f0c4fbaf4e5e9d3ad1c93f96b413013f725f083aa5268",
+      "bytes": 11924
     },
     {
       "file": "taskbar-clock/Assets/BeijingClock.ico",

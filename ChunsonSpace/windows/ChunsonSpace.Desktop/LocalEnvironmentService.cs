@@ -17,8 +17,12 @@ public sealed record LocalEnvironmentReport(bool Verified, bool Matches, string 
 // Main-client networking is independent from every account's browser route.
 public sealed class LocalEnvironmentService(Func<CancellationToken, Task<LoginProxySelection>> resolve,
     Func<string, CancellationToken, Task<EgressResult>> probe,
-    ILaunchEgressProbe admission, Func<TimeZoneInfo>? readTimezone = null, Func<string>? readCountry = null) : IIdentityEnvironmentSource, ILaunchEgressProbe
+    ILaunchEgressProbe admission, Func<TimeZoneInfo>? readTimezone = null, Func<string>? readCountry = null,
+    Func<string, CancellationToken, Task<EgressResult>>? watchProbe = null,
+    Func<string, string, CancellationToken, Task<bool>>? primaryMatches = null,
+    Func<DateTimeOffset>? utcNow = null) : IIdentityEnvironmentSource, ILaunchEgressProbe
 {
+    private DateTimeOffset Now() => (utcNow ?? (() => DateTimeOffset.UtcNow))();
     private TimeZoneInfo ReadZone() { if (readTimezone is not null) return readTimezone(); TimeZoneInfo.ClearCachedData(); return TimeZoneInfo.Local; }
     private string ReadCountry() => (readCountry ?? WindowsRegionSystem.ReadHomeCountryCode)();
     private static bool CountryMatches(string current, string target)
@@ -44,7 +48,15 @@ public sealed class LocalEnvironmentService(Func<CancellationToken, Task<LoginPr
             && (windows.Equals(system.Id, StringComparison.OrdinalIgnoreCase)
                 || TimeZoneInfo.TryConvertIanaIdToWindowsId(system.Id, out var own) && windows.Equals(own, StringComparison.OrdinalIgnoreCase));
     }
-    public async Task<LocalEnvironmentReport> CheckAsync(CancellationToken token = default)
+    public async Task<bool> StillCurrentAsync(LocalEnvironmentReport report, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if ((await resolve(token)).Proxy != report.Proxy) return false;
+        var matches = primaryMatches is null || await primaryMatches(report.Proxy, report.Ip, token);
+        token.ThrowIfCancellationRequested();
+        return matches && (await resolve(token)).Proxy == report.Proxy;
+    }
+    public async Task<LocalEnvironmentReport> CheckAsync(CancellationToken token = default, bool lightweight = false)
     {
         var zone = ReadZone();
         var proxy = "";
@@ -52,15 +64,16 @@ public sealed class LocalEnvironmentService(Func<CancellationToken, Task<LoginPr
         {
             var route = await resolve(token);
             proxy = route.Proxy;
-            var exit = await probe(route.Proxy, token); // Fresh public region evidence; no scoring or account request.
+            var exit = await (lightweight ? watchProbe ?? probe : probe)(route.Proxy, token);
+            token.ThrowIfCancellationRequested();
             zone = ReadZone();
             if ((await resolve(token)).Proxy != route.Proxy)
-                return new(false, false, route.Proxy, "", "", Iana(zone), "", "核对期间本机默认代理已变化，请重新检查。");
+                return new(false, false, route.Proxy, "", "", Iana(zone), "", "核对期间本机默认代理已变化，请重新检查。") { CheckedAt = Now() };
             var verified = LaunchEgressRules.Verified(new(exit.Ok, exit.Ip, exit.Timezone, exit.Message));
             var country = ReadCountry();
             var matches = verified && Matches(zone, exit.Timezone) && CountryMatches(country, exit.CountryCode);
             return new(verified, matches, route.Proxy, exit.Ip, exit.Timezone, Iana(zone), exit.CountryCode,
-                !verified ? (exit.Message.Length > 0 ? exit.Message : "默认代理出口未确认，请检查本机代理。") : MatchMessage(matches)) { SystemCountryCode = country, Addresses = exit.Addresses };
+                !verified ? (exit.Message.Length > 0 ? exit.Message : "默认代理出口未确认，请检查本机代理。") : MatchMessage(matches)) { SystemCountryCode = country, Addresses = exit.Addresses, CheckedAt = Now() };
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested) { throw; }
         catch (Exception error)
@@ -68,7 +81,7 @@ public sealed class LocalEnvironmentService(Func<CancellationToken, Task<LoginPr
             var step = proxy.Length == 0 ? "读取 FlClash 当前代理" : "查询本机出口、地区与时区";
             var reason = error is AccountException accountError && accountError.Code == AccountError.ExitUnavailable
                 ? "请先确认 FlClash 已启动且当前配置可用。" : "请稍后重新核对。";
-            return new(false, false, proxy, "", "", Iana(zone), "", step + "未完成（" + error.GetType().Name + "）。" + reason);
+            return new(false, false, proxy, "", "", Iana(zone), "", step + "未完成（" + error.GetType().Name + "）。" + reason) { CheckedAt = Now() };
         }
     }
     public LocalEnvironmentReport RereadSystemEnvironment(LocalEnvironmentReport report)
@@ -112,24 +125,17 @@ public sealed partial class ShellViewModel
     public string LocalEnvironmentCheckLabel => checkingLocalEnvironment ? "刷新中…" : "刷新首页状态";
     public string LocalEnvironmentStatus => localEnvironmentStatus;
     public string LocalEnvironmentDetail => localEnvironmentDetail;
-    public async Task RefreshLocalEnvironmentAsync()
-    {
-        if (workspace?.LocalEnvironment is null || checkingLocalEnvironment || busy) return;
-        checkingLocalEnvironment = true;
-        localEnvironmentStatus = "正在刷新本机出口、地区与时区…";
-        localEnvironmentDetail = "正在通过 FlClash 当前网络查询出口国家/地区和时区，不测分、不修改配置。";
-        RefreshLocalEnvironmentCommands();
-        try { ApplyLocalEnvironmentReport(await workspace.LocalEnvironment.CheckAsync()); }
-        finally { checkingLocalEnvironment = false; RefreshLocalEnvironmentCommands(); }
-    }
+    public Task RefreshLocalEnvironmentAsync() => RequestEnvironmentAsync(full: true);
     private void RefreshLocalEnvironmentCommands()
     {
         RefreshDashboard();
         Raise(nameof(LocalEnvironmentStatus)); Raise(nameof(LocalEnvironmentDetail)); Raise(nameof(LocalEnvironmentCheckLabel));
+        Raise(nameof(LastEnvironmentSyncLabel)); Raise(nameof(EnvironmentSyncLabel));
         RecheckLocalEnvironmentCommand?.Refresh(); SyncLocalTimezoneCommand?.Refresh(); ConfigureRegionCommand?.Refresh();
     }
     private void ApplyLocalEnvironmentReport(LocalEnvironmentReport result)
     {
+        currentLocalEnvironment = result;
         var checkedAt = result.CheckedAt.ToLocalTime();
         localEnvironmentStatus = (result.Verified ? (result.Matches ? "已刷新 · 已核对" : "已刷新 · 地区或时区不一致") + $" · {result.Ip} · {result.SystemTimezone}" : "刷新未完成 · 本次未确认") + $" · {checkedAt:HH:mm:ss}";
         localEnvironmentStatus += "\nIPv4：" + (result.Addresses.Ipv4.Available ? result.Addresses.Ipv4.Ip : "不可用") + " · IPv6：" + (result.Addresses.Ipv6.Available ? result.Addresses.Ipv6.Ip : "不可用");
@@ -143,5 +149,6 @@ public sealed partial class ShellViewModel
             localEnvironmentDetail += $"\n上次核对：{previous.CheckedAt.ToLocalTime():yyyy-MM-dd HH:mm:ss} · {previous.Ip} · {previous.ExitTimezone}（仅历史，不代表当前出口）。";
         localEnvironmentDetail += "\n仅核对出口、国家/地区与时区，不代表账号授权或模型可用。";
         Raise(nameof(LocalEnvironmentStatus)); Raise(nameof(LocalEnvironmentDetail));
+        RefreshDashboard();
     }
 }

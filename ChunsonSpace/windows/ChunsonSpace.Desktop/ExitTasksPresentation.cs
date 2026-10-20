@@ -20,6 +20,7 @@ public sealed partial class ShellViewModel
             return false;
         }
         exitDraining = true; accountTests.Accepting = false; RefreshBusyState();
+        StopEnvironmentMonitor();
         updateDownload?.Cancel();
         ShowFeedback("正在退出", "正在取消授权和测试，等待浏览器与独立端口释放…", "Info");
         var tasks = visualPanels.Where(panel => panel.IsBusy).Select(panel => panel.CurrentOperation)
@@ -44,5 +45,6 @@ public sealed partial class ShellViewModel
     internal void ResumeAfterExitFailure()
     {
         exitDraining = false; accountTests.Accepting = true; ProxyPanel.NodeTesting.ResumeAfterStop(); RefreshBusyState();
+        StartEnvironmentMonitor();
     }
 }

@@ -226,7 +226,7 @@ internal static class IpSeparationVerification
     private sealed class RejectAdmission : ILaunchEgressProbe
     { public Task<LaunchEgressEvidence> ProbeAsync(IdentityRef identity, string proxy, CancellationToken token) => throw new InvalidOperationException("timezone-only invoked scoring"); }
 
-    private sealed class FakeTransport : IAccountTransport
+    internal sealed class FakeTransport : IAccountTransport
     {
         public ConcurrentQueue<AccountHttpRequest> Requests { get; } = new();
         public Func<AccountHttpRequest, CancellationToken, Task<AccountHttpResponse>>? Handle { get; set; }

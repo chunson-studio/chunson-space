@@ -53,7 +53,7 @@ public sealed partial class ShellViewModel
         try
         {
             var release = await (updates ??= new()).CheckAsync(updateLifetime.Token);
-            if (release.Version > UpdateRules.CurrentVersion)
+            if (UpdateRules.CompareVersions(release.Version, UpdateRules.CurrentVersion) > 0)
             {
                 availableUpdate = release;
                 SetUpdateStatus(CanDownloadUpdate ? "可在线更新：只下载变化文件，完成后重开椿生空间。" : "此版本没有增量更新清单，请查看发布页。");

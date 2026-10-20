@@ -31,6 +31,17 @@ internal static class UpdateRules
         if (new[] { v.Major, v.Minor, v.Build, Math.Max(0, v.Revision) }.Any(x => x > 65535)) throw new InvalidDataException("版本超出范围。");
         return new(v.Major, v.Minor, Math.Max(0, v.Build), Math.Max(0, v.Revision));
     }
+    // Only the published 1.61 (assembly 1.61.0.0) used the legacy numbering.
+    // Order it after the 1.6 line and before 1.7; keep parsed identities intact
+    // for manifest/asset/installer validation. All other versions stay numeric.
+    public static int CompareVersions(Version left, Version right)
+    {
+        var legacy = new Version(1, 61, 0, 0);
+        if (left == right) return 0;
+        if (left == legacy) return right >= new Version(1, 7, 0, 0) ? -1 : 1;
+        if (right == legacy) return left >= new Version(1, 7, 0, 0) ? 1 : -1;
+        return left.CompareTo(right);
+    }
     public static bool HashValid(string? hash) => hash is not null && Regex.IsMatch(hash, "^[a-f0-9]{64}$", RegexOptions.CultureInvariant);
     // Bundled for fresh installs, but independently running and versioned during manager updates.
     // Keep the ZIP manifest complete; never download, stage, replace or roll back this component here.

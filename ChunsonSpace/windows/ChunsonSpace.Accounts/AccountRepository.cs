@@ -4,7 +4,7 @@ using ChunsonSpace.Core;
 
 namespace ChunsonSpace.Accounts;
 
-public sealed record ImportedLogin(string Profile, bool Created, IReadOnlyList<string> Warnings);
+public sealed record ImportedLogin(string Profile, bool Created, IReadOnlyList<string> Warnings, bool Changed = true);
 
 public sealed class AccountRepository
 {
@@ -105,6 +105,8 @@ public sealed class AccountRepository
             }
             if (matches.Count == 1)
             {
+                if (preserveExistingEnvironment && JsonNode.DeepEquals(ReadAuth(matches[0]), auth))
+                    return new(matches[0], false, warnings, Changed: false);
                 UpdateImportedLogin(matches[0], auth, proxy, followSystemProxy, warnings, preserveExistingEnvironment);
                 warnings.Add(preserveExistingEnvironment ? "已更新同账号授权，原有 IP、时区和浏览器配置保持不变。" : "已更新同账号凭据与本次授权所选出口；其余环境设置保持不变。");
                 return new(matches[0], false, warnings); // Deliberately bypass ActiveHome synchronization.
