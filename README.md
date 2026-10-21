@@ -2,21 +2,19 @@
 
 # Chunson Space · 椿生空间
 
-**在 Windows 上集中管理 Codex 账号、一个独立分身和网络环境。** 1.7 正常启动时自动导入本机已有登录，检查当前出口并尝试同步 Windows 地区与时区，让账号与环境状态在首页看得清楚。
+**在 Windows 上集中管理 Codex 账号、一个独立分身和网络环境。** 2026-10-21 更新的 1.7 安装版提供账号工作台、逐行检测和单模型健康检测。正常启动时自动导入本机已有登录，检查当前出口并尝试同步 Windows 地区与时区。
 
-<p align="center"><a href="https://github.com/chunson-studio/chunson-space/releases/download/v1.7/Chunson-Full-Windows-x64.zip"><img src="docs/assets/download-full.svg" alt="下载 1.7 Windows x64 完整版 ZIP" width="340"></a></p>
+**[下载 1.7 Windows x64 安装版](https://github.com/chunson-studio/chunson-space/releases/download/v1.7/ChunsonSpace-1.7-Setup-x64.exe)** · [更新说明与附件](https://github.com/chunson-studio/chunson-space/releases/tag/v1.7) · [界面预览（历史）](#界面预览) · [历史公开源码构建](#历史公开源码构建)
 
-**[下载 1.7 完整版](https://github.com/chunson-studio/chunson-space/releases/download/v1.7/Chunson-Full-Windows-x64.zip)** · [更新说明与四个附件](https://github.com/chunson-studio/chunson-space/releases/tag/v1.7) · [界面预览](#界面预览) · [源码构建](#源码构建)
-
-适用于 **Windows 10 / 11 x64**，已包含 .NET 运行时，无需安装 SDK。支持单账号 / 多账号界面和纸质 / 黑夜主题，Codex 本体保持独立。
+适用于 **Windows 10 / 11 x64**，无需安装 SDK。安装器检测兼容的 **x64 .NET 10 Windows Desktop Runtime**：已有则跳过下载，缺失则从 Microsoft 官方下载、校验并引导安装，完成后复检。应用包不捆绑运行库。支持单账号 / 多账号界面及自动 / 纸质 / 黑夜主题，Codex 本体保持独立。
 
 ## 三步开始
 
-1. **完整解压并启动。** 下载 ZIP，解压后运行 `Full/ChunsonSwitch.exe`，不要在压缩包中运行或只复制 EXE。准备本机 Chrome 或 Edge，以及已配置可用订阅、节点和 HTTP / mixed 入口的 [FlClash](https://github.com/chen08209/FlClash/releases/latest)；未检测到安装时会提供官方下载入口。
-2. **查看自动导入和环境状态。** 正常窗口首次显示后尝试一次导入本机 Codex 已有登录，再检查出口并自动同步地区与时区。没有本机登录时可添加 / 登录；需要重试时，单账号首页或多账号“账号”页都保留“导入本机账号”。重复导入按稳定账号身份合并，无变化时不重写授权，保留登录起算时间、名称、环境、冻结和健康记录。
+1. **安装后启动。** 下载并运行 `ChunsonSpace-1.7-Setup-x64.exe`，按提示完成安装，再从桌面或开始菜单启动；安装器不会自动启动管理器。缺少运行库时按提示完成 Microsoft 官方运行库安装。准备本机 Chrome 或 Edge，以及已配置可用订阅、节点和 HTTP / mixed 入口的 [FlClash](https://github.com/chen08209/FlClash/releases/latest)；未检测到安装时会提供官方下载入口。
+2. **查看账号工作台和环境状态。** 正常窗口首次显示后尝试一次导入本机 Codex 已有登录，再检查出口并自动同步地区与时区。没有本机登录时可添加 / 登录；需要重试时，单账号首页和多账号工作台都保留手动导入。重复导入按稳定账号身份合并，无变化时不重写授权，保留登录起算时间、名称、环境、冻结和健康记录。
 3. **选择账号，主动启动分身。** 核对页面状态后选择要使用的账号，再点击启动分身；添加 / 导入与启动分别操作。工具只管理一个分身，不会因为导入成功就自动切号、启动分身或执行模型测试。
 
-**从旧版升级：建议手动下载一次 1.7 完整包。** 已安装的 1.61 按数字比较可能把 `1.7` 视为旧版，1.6.0 的旧解析器也不接受两段标签；这些旧客户端无法通过本次源码修改得到远程修复。若未提示更新，先结束测试与授权，从托盘选择“退出工具”，把完整包解压到新文件夹运行。账号资料保存在独立的本机数据目录。1.7 已兼容历史版本排序，不会把旧 1.61 当作更新。
+**从旧版升级：请手动下载安装版一次。** 本次仍为 **1.7 / 1.7.0.0**，已经使用旧 1.7 的客户端不会因版本号相同而自动提示这次更新。旧 1.61 的数字比较和 1.6.0 的标签解析也可能阻止提示。请先结束测试与授权，从托盘选择“退出工具”，再运行安装器，完成后手动启动。账号资料保存在独立的本机数据目录。历史 Full ZIP 与本次安装版使用不同更新清单，不要交叉套用。
 
 ## 出口、地区与时区会怎样更新
 
@@ -30,24 +28,25 @@
 
 | 功能 | 当前行为 |
 | --- | --- |
-| 单账号 / 多账号 | 随时切换界面；首页查看账号、出口、环境与分身状态，减少切页重复读盘。 |
+| 单账号 / 多账号 | 账号工作台分开显示正在运行的身份与准备启动的选择，提供分页、状态计数、登录小时和健康检测时间；单账号模式隐藏批量入口。 |
 | 账号管理 | 导入、添加、重命名、冻结 / 解冻、删除；显示从现存首次凭证起算的登录小时。删除无需先切换账号，确认后删除该账号本地资料，不新建备份。 |
-| 一个受管分身 | Codex 本体独立保留；切换账号复用一个分身，不继承本体 Skills、MCP 或插件。设置只保留一个“重置分身”，无账号也可操作，完成后保持关闭。 |
+| 一个受管分身 | Codex 本体独立保留；切换账号复用一个分身，不继承本体 Skills、MCP 或插件。关闭分身期间仍可导航、选择账号及查看管理详情，维护状态持续显示。 |
 | 托盘与关闭 | 默认点击窗口 X 隐藏到托盘；需要结束工具时明确退出，可在设置中调整关闭行为。 |
 | 账号浏览器 | 账号各自保存浏览器资料，可跟随本机网络或使用已配置的独立线路。 |
-| 历史与作品 | 保留原始题目、回复、作品和耗时；返回的缓存 token 缺失与 0 分开显示，可比较作品和复制脱敏错误。 |
+| 历史与作品 | 按全部 / 账号检测 / 绘图测试筛选；文本结果为紧凑行，作品显示缩略图并可比较。保留原始题目、回复、耗时及脱敏错误，缓存 token 缺失与 0 分开显示。 |
+| 设置与主题 | 环境、外观和网络集中展示，诊断信息可展开。自动主题按北京时间 07:00（含）至 19:00（不含）显示纸质，其余时间显示黑夜，也可手动选择。 |
 
-## 两个测试入口
+## 账号检测与绘图
 
 ### 账号健康检测
 
-保留固定 Ciallo 题目与既有健康规则，默认 GPT-6.1 Sol / GPT-6 Astra、high。可一键检测未冻结账号，不同账号最多 16 个并发，同账号内两模型顺序执行，支持后台进度和取消。请求会消耗所选账号额度。
+在账号工作台逐行检测，或批量检测未冻结账号。保留固定 Ciallo 题目与既有健康规则，健康检测统一使用 **GPT-6.1 Sol（`gpt-6.1-sol`）/ high**，每个符合条件的账号只请求一次，不自动追加 Astra、回退模型或重试。不同账号最多 16 个并发，支持后台进度和取消；排队 / 准备、发送、读取和完成分别显示。请求会消耗所选账号额度。
 
-正常 / 异常用绿色 / 红色文字；未判断成功时保留原标记和原文。冻结阻止单独和批量测试，解冻不会自动发请求。健康标记及模型返回信息不证明实际后端型号或整体能力。
+正常 / 异常用绿色 / 红色文字；未判断成功时保留原标记和原文。冻结阻止单独和批量测试，解冻不会自动发请求；历史双模型结果仍按原文保留。健康标记及模型返回信息不证明实际后端型号或整体能力。
 
 ### 绘图：两个简单预设，也可自行输入
 
-选择预设只填入可编辑题目，点击“测试当前账号”才发送。页面导航保留自定义内容，两道预设原文如下：
+从首页或账号详情打开绘图面板。通用 / 绘图模型选择仍保留 GPT-6 Astra。选择预设只填入可编辑题目，点击“测试当前账号”才发送。页面导航保留自定义内容，两道预设原文如下：
 
 - **鹈鹕骑自行车 · SVG**：`Generate an SVG of a pelican riding a bicycle.`
 - **小猴骑自行车 · HTML 动画**：`Create an HTML file with a 2D SVG animation of a cute monkey riding a bicycle. No testing is required.`
@@ -58,37 +57,39 @@
 
 ## 界面预览
 
-以下是实际 WPF 控件的离线截图，账号、地址、时间、回复和数值均为 **SYNTHETIC 合成示例**，不表示真实账号或节点测试结果。地区卡片采用本次发布所含环境修复的已验收布局（1280 × 850），绘图图复用功能未变的 1.61 专项截图；没有为发布重跑旧 UI 套件。点击查看原图。
+以下保留的是**历史界面的离线合成截图**，并非本次安装版的当前布局。账号、地址、时间、回复和数值均为 **SYNTHETIC 合成示例**，不表示真实账号或节点测试结果。地区卡片来自较早的 1.7 环境验证（1280 × 850），绘图图来自 1.61；当前账号工作台、结果和设置布局已调整。本次未生成新截图。点击查看原图。
 
-### 当前环境与上次成功同步
+### 历史截图：环境与上次成功同步
 
-| 纸质主题 | 黑夜主题 |
+| 历史合成示例 · 纸质 | 历史合成示例 · 黑夜 |
 | --- | --- |
 | [![纸质环境卡片：最近检测和上次成功同步](docs/assets/screenshot-region-paper.png)](docs/assets/screenshot-region-paper.png) | [![黑夜环境卡片：最近检测和上次成功同步](docs/assets/screenshot-region-night.png)](docs/assets/screenshot-region-night.png) |
 
-单账号首页同样提供手动导入和共享环境状态；多账号界面在“账号”页保留导入入口。
+当前单账号首页和多账号工作台均保留手动导入与共享环境状态，具体布局与历史截图不同。
 
-### 绘图预设与可编辑题目
+### 历史截图：绘图预设与可编辑题目
 
-| HTML 动画题目 · 纸质 | SVG 题目 · 黑夜 |
+| 历史合成示例 · HTML 动画 · 纸质 | 历史合成示例 · SVG · 黑夜 |
 | --- | --- |
 | [![小猴动画预设](docs/assets/screenshot-drawing-paper.png)](docs/assets/screenshot-drawing-paper.png) | [![鹈鹕 SVG 预设](docs/assets/screenshot-drawing-night.png)](docs/assets/screenshot-drawing-night.png) |
 
 ## 在线更新与北京时间
 
-**在线更新**从本仓库正式 Release 检查版本，设置中也可手动检查。匹配更新清单后，只下载完整 ZIP 中变化的文件，未改变的运行库不重复下载；校验后正常退出、替换并重开，保留额外文件和独立时钟。取消或下载失败不替换程序，替换失败沿既有回滚流程处理。不支持范围下载或缺少清单时需查看发布页手动下载。
+**在线更新**从本仓库正式 Release 检查版本，设置中也可手动检查。安装版使用 [App ZIP](https://github.com/chunson-studio/chunson-space/releases/download/v1.7/Chunson-App-Windows-x64.zip) 与 [App 更新清单](https://github.com/chunson-studio/chunson-space/releases/download/v1.7/Chunson-App-Update-Windows-x64.json)（FDD / schema 2）；旧自包含 Full 版继续使用历史 schema 1，二者不能混用。匹配更新清单后只下载 ZIP 中变化的文件；校验后正常退出、替换并重开，保留额外文件和独立时钟。取消或下载失败不替换程序，替换失败沿既有回滚流程处理。缺少匹配清单、不支持范围下载或运行库要求变化时，需手动下载安装版。**本次同版本更新仍需手动安装一次。** 新附件校验值见 [SHA256SUMS-App.txt](https://github.com/chunson-studio/chunson-space/releases/download/v1.7/SHA256SUMS-App.txt)。
 
-**BeijingClock** 独立显示北京时间 UTC+8，不修改系统时区。正常启动优先复用已安装的小组件；关闭到托盘继续显示，在线更新保留独立时钟。源码与完整包保留单用户安装工具和图标。
+**BeijingClock** 独立显示北京时间 UTC+8，不修改系统时区。正常启动优先复用已安装的小组件；关闭到托盘继续显示，在线更新保留独立时钟。
 
-本版复用已通过的自动导入和环境离线验证，新增版本顺序、标签与清单兼容检查。发布过程未执行真实账号、模型、节点请求或公网在线安装；环境同步、IP 评分和健康标记不保证登录成功或模型能力变化。
+单模型健康检测已通过同一组 **24 项离线合成检查**，开发与最终分发载荷分别验证，不累加数量；本次文档准备未重跑产品测试。该结果不代表真实账号业务、安装器运行或公网在线更新已验收；环境同步、IP 评分和健康标记不保证登录成功或模型能力变化。
 
 ## 反馈与数据
 
 遇到错误可使用“复制错误信息”，检查脱敏内容后提交到 [Issues](https://github.com/chunson-studio/chunson-space/issues)。历史失败记录可直接复制，无需重新请求；工具不会自动上传。账号授权、浏览器资料、订阅与个人设置仅在本机用户数据目录，不包含在公开源码或发布包中。时钟位置保存在 `%LOCALAPPDATA%/ChunsonWidgets`。
 
-## 源码构建
+## 历史公开源码构建
 
-需要 Windows x64、.NET 10 SDK、Windows PowerShell；生成更新清单还需要 Python 3。在公开仓库根目录运行：
+本仓库已有 MIT 源码、原 `v1.7` 标签及源码 ZIP 保留为历史快照，**不对应 2026-10-21 安装版的当前二进制源码**。本次仅更新 README 与 Release 附件 / 说明，当前应用源码未随安装版公开，原标签不移动。
+
+以下命令仅用于构建已有的历史公开源码。需要 Windows x64、.NET 10 SDK、Windows PowerShell；生成历史更新清单还需要 Python 3。在公开仓库根目录运行：
 
 ```powershell
 ./build.ps1 -Package -PythonPath python -Output ./out/release
@@ -103,7 +104,7 @@ FlClashSetup/   FlClash 安装检查与引导
 build.ps1      构建与打包入口
 ```
 
-每次正式发布提供 **Full ZIP、MIT 源码 ZIP、SHA256SUMS.txt、Chunson-Update-Windows-x64.json** 四个附件。版本显示与标签为 **1.7 / v1.7**，程序集与清单为 `1.7.0.0`。源码 ZIP 对应不可变发布标签；更新清单描述完整 ZIP 的文件成员，版本身份、SHA256 和 Range 校验保持严格。详细变更见 [CHANGELOG](CHANGELOG.md)。
+原有 **Full ZIP、MIT 源码 ZIP、SHA256SUMS.txt、Chunson-Update-Windows-x64.json** 四个历史附件继续保留，不删除或替换。本次新增安装 EXE、App ZIP、App 更新清单与 `SHA256SUMS-App.txt`，不新增源码包。版本显示与标签仍为 **1.7 / v1.7**，程序集与清单仍为 `1.7.0.0`。历史源码变更见 [CHANGELOG](CHANGELOG.md)，当前安装版说明见 [Release](https://github.com/chunson-studio/chunson-space/releases/tag/v1.7)。
 
 ## 支持作者
 
@@ -115,7 +116,7 @@ build.ps1      构建与打包入口
 
 ### 作者自用服务
 
-项目免费开源。下面是椿生自用的第三方服务，也是支持项目维护的收入来源；通过这些推广链接产生的订单可能为作者带来收益，使用本项目无需购买。
+本仓库保留已有开源源码与许可。下面是椿生自用的第三方服务，也是支持项目维护的收入来源；通过这些推广链接产生的订单可能为作者带来收益，使用本项目无需购买。
 
 - **[纯净 IP · IPEqual](https://www.ipequal.com/?ref=a61b79b103)**：椿生自己在用的 IP 服务。
 - **[会员订阅 · 自助服务](https://chunson.aidijia.cc/)**：查看可选订阅及服务说明。
@@ -124,9 +125,9 @@ build.ps1      构建与打包入口
 
 ## 许可
 
-原创部分采用 **[MIT License](LICENSE)**，允许使用、修改、分发及商用，须保留版权声明和许可文本。
+本仓库已公开源码的原创部分采用 **[MIT License](LICENSE)**，允许使用、修改、分发及商用，须保留版权声明和许可文本。已有许可与授权保持不变。
 
-第三方组件遵循各自许可证。Mihomo 作为独立外部进程使用，适用 GPL-3.0，详情见 [Mihomo 声明](ChunsonSpace/windows/ThirdParty/Mihomo)。YamlDotNet、GeoTimeZone、ModelTrace 及字体的声明保留在对应 `ThirdParty` 目录；本项目的 MIT 许可不替代它们的许可证。
+第三方组件遵循各自许可证。Mihomo 作为独立外部进程使用，适用 GPL-3.0，详情见 [Mihomo 声明](ChunsonSpace/windows/ThirdParty/Mihomo)。YamlDotNet、GeoTimeZone、ModelTrace 及字体的声明保留在对应 `ThirdParty` 目录；本项目的 MIT 许可不替代它们的许可证。.NET Windows Desktop 的开源地址为 [dotnet/windowsdesktop](https://github.com/dotnet/windowsdesktop)，安装包保留相关第三方声明。
 
 ---
 
@@ -135,3 +136,4 @@ build.ps1      构建与打包入口
   <a href="https://github.com/chunson-studio/chunson-space/releases/latest">下载软件</a> ·
   <a href="https://github.com/chunson-studio/chunson-space/issues">反馈问题</a>
 </p>
+
