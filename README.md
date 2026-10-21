@@ -1,20 +1,30 @@
-<p align="center"><img src="docs/assets/readme-cover.svg" alt="Chunson Space 椿生空间 1.7" width="960"></p>
+<p align="center"><img src="docs/assets/readme-cover.svg" alt="Chunson Space 椿生空间 1.8" width="960"></p>
 
 # Chunson Space · 椿生空间
 
-**在 Windows 上集中管理 Codex 账号、一个独立分身和网络环境。** 2026-10-21 更新的 1.7 安装版提供账号工作台、逐行检测和单模型健康检测。正常启动时自动导入本机已有登录，检查当前出口并尝试同步 Windows 地区与时区。
+**在 Windows 上集中管理 Codex 账号、一个独立分身和网络环境。** 1.8 新增设置中的“重建 Codex 本体”，先确认范围并验证 Skills 备份，再执行重建；继续提供账号工作台、逐行检测和单模型健康检测。正常启动时自动导入本机已有登录，检查当前出口并尝试同步 Windows 地区与时区。
 
-**[下载 1.7 Windows x64 安装版](https://github.com/chunson-studio/chunson-space/releases/download/v1.7/ChunsonSpace-1.7-Setup-x64.exe)** · [更新说明与附件](https://github.com/chunson-studio/chunson-space/releases/tag/v1.7) · [界面预览（历史）](#界面预览) · [历史公开源码构建](#历史公开源码构建)
+**[下载 1.8 Windows x64 安装版](https://github.com/chunson-studio/chunson-space/releases/download/v1.8/ChunsonSpace-1.8-Setup-x64.exe)** · [更新说明与附件](https://github.com/chunson-studio/chunson-space/releases/tag/v1.8) · [界面预览（历史）](#界面预览) · [历史公开源码构建](#历史公开源码构建)
 
 适用于 **Windows 10 / 11 x64**，无需安装 SDK。安装器检测兼容的 **x64 .NET 10 Windows Desktop Runtime**：已有则跳过下载，缺失则从 Microsoft 官方下载、校验并引导安装，完成后复检。应用包不捆绑运行库。支持单账号 / 多账号界面及自动 / 纸质 / 黑夜主题，Codex 本体保持独立。
 
 ## 三步开始
 
-1. **安装后启动。** 下载并运行 `ChunsonSpace-1.7-Setup-x64.exe`，按提示完成安装，再从桌面或开始菜单启动；安装器不会自动启动管理器。缺少运行库时按提示完成 Microsoft 官方运行库安装。准备本机 Chrome 或 Edge，以及已配置可用订阅、节点和 HTTP / mixed 入口的 [FlClash](https://github.com/chen08209/FlClash/releases/latest)；未检测到安装时会提供官方下载入口。
+1. **安装后启动。** 下载并运行 `ChunsonSpace-1.8-Setup-x64.exe`，按提示完成安装，再从桌面或开始菜单启动；安装器不会自动启动管理器。缺少运行库时按提示完成 Microsoft 官方运行库安装。准备本机 Chrome 或 Edge，以及已配置可用订阅、节点和 HTTP / mixed 入口的 [FlClash](https://github.com/chen08209/FlClash/releases/latest)；未检测到安装时会提供官方下载入口。
 2. **查看账号工作台和环境状态。** 正常窗口首次显示后尝试一次导入本机 Codex 已有登录，再检查出口并自动同步地区与时区。没有本机登录时可添加 / 登录；需要重试时，单账号首页和多账号工作台都保留手动导入。重复导入按稳定账号身份合并，无变化时不重写授权，保留登录起算时间、名称、环境、冻结和健康记录。
 3. **选择账号，主动启动分身。** 核对页面状态后选择要使用的账号，再点击启动分身；添加 / 导入与启动分别操作。工具只管理一个分身，不会因为导入成功就自动切号、启动分身或执行模型测试。
 
-**从旧版升级：请手动下载安装版一次。** 本次仍为 **1.7 / 1.7.0.0**，已经使用旧 1.7 的客户端不会因版本号相同而自动提示这次更新。旧 1.61 的数字比较和 1.6.0 的标签解析也可能阻止提示。请先结束测试与授权，从托盘选择“退出工具”，再运行安装器，完成后手动启动。账号资料保存在独立的本机数据目录。历史 Full ZIP 与本次安装版使用不同更新清单，不要交叉套用。
+**从旧版升级：** 当前版本为 **1.8 / 1.8.0.0**。已安装的 **1.7 FDD 安装版**在版本检查正常、Release 附件匹配且运行库要求兼容时，可识别更高的 1.8；这不代表公网下载、替换与重启已实机验收。旧 **Full 自包含版**、缺少或不匹配更新清单，以及无法识别标签的旧版，需要手动下载安装器。手工升级前请结束测试与授权，从托盘选择“退出工具”，再运行安装器，完成后手动启动。账号资料保存在独立的本机数据目录，Full 与 FDD 更新清单不能混用。
+
+## 1.8：重建 Codex 本体
+
+在设置中点击 **“重建 Codex 本体”**，先查看只读范围预览，再点击 **“确认并重建”**。打开页面或正常启动不会自动执行重建。这项操作针对当前用户支持的官方 Codex 安装，会清除所列原版登录与本地运行数据，并重新安装；请先保存工作，按预览提示关闭共用原版数据目录的其他 CLI。
+
+- **先验证安装包与 Skills 备份。** 停止、卸载和清理之前，必须完成官方包校验，并把原版 `CODEX_HOME/skills` 及支持文件备份到清理范围之外，回读 ZIP、清单、文件数量和 SHA256；备份失败会阻断后续破坏性步骤。界面显示准确备份路径，并提供“打开文件夹”。已有备份保留，不自动恢复 Skills，不备份授权凭据或历史会话；链接目标不穿透，外部与共享 Skills 保留。
+- **清理有明确范围。** 保留用户项目、Git 仓库 / worktree、工具账号库、分身资料和共享运行库。遇到无法确定的安装、进程归属、危险目录或与受保护项目冲突的范围，会停止并提示，不把范围不明当成可清理。
+- **安装失败可重试。** 仅重试同一已验证安装包，执行前再次校验，不重复清理、不覆盖原备份，也不自动恢复 Skills。重建完成不自动注入工具账号。
+
+本次最终 1.8 载荷执行了 **75 项原版重建隔离检查**，使用注入的系统、网络、进程、凭据和安装边界。真实官方包下载、签名信任链、停止 / 卸载 / 清理 / 安装及原版退出登录窗口验收 **未运行**；隔离通过不能保证真实机器的生命周期操作成功。
 
 ## 出口、地区与时区会怎样更新
 
@@ -75,11 +85,11 @@
 
 ## 在线更新与北京时间
 
-**在线更新**从本仓库正式 Release 检查版本，设置中也可手动检查。安装版使用 [App ZIP](https://github.com/chunson-studio/chunson-space/releases/download/v1.7/Chunson-App-Windows-x64.zip) 与 [App 更新清单](https://github.com/chunson-studio/chunson-space/releases/download/v1.7/Chunson-App-Update-Windows-x64.json)（FDD / schema 2）；旧自包含 Full 版继续使用历史 schema 1，二者不能混用。匹配更新清单后只下载 ZIP 中变化的文件；校验后正常退出、替换并重开，保留额外文件和独立时钟。取消或下载失败不替换程序，替换失败沿既有回滚流程处理。缺少匹配清单、不支持范围下载或运行库要求变化时，需手动下载安装版。**本次同版本更新仍需手动安装一次。** 新附件校验值见 [SHA256SUMS-App.txt](https://github.com/chunson-studio/chunson-space/releases/download/v1.7/SHA256SUMS-App.txt)。
+**在线更新**从本仓库正式 Release 检查版本，设置中也可手动检查。安装版使用 [App ZIP](https://github.com/chunson-studio/chunson-space/releases/download/v1.8/Chunson-App-Windows-x64.zip) 与 [App 更新清单](https://github.com/chunson-studio/chunson-space/releases/download/v1.8/Chunson-App-Update-Windows-x64.json)（FDD / schema 2）；旧自包含 Full 版继续使用历史 schema 1，二者不能混用。匹配更新清单后只下载 ZIP 中变化的文件；校验后正常退出、替换并重开，保留额外文件和独立时钟。取消或下载失败不替换程序，替换失败沿既有回滚流程处理。缺少匹配清单、不支持范围下载或运行库要求变化时，需手动下载安装版。**1.7 FDD 在检查正常且附件匹配时可发现 1.8；旧 Full 或不匹配清单请使用安装器。公网在线更新实际成功尚未验收。** 新附件校验值见 [SHA256SUMS-App.txt](https://github.com/chunson-studio/chunson-space/releases/download/v1.8/SHA256SUMS-App.txt)。
 
 **BeijingClock** 独立显示北京时间 UTC+8，不修改系统时区。正常启动优先复用已安装的小组件；关闭到托盘继续显示，在线更新保留独立时钟。
 
-单模型健康检测已通过同一组 **24 项离线合成检查**，开发与最终分发载荷分别验证，不累加数量；本次文档准备未重跑产品测试。该结果不代表真实账号业务、安装器运行或公网在线更新已验收；环境同步、IP 评分和健康标记不保证登录成功或模型能力变化。
+本轮对最终 1.8 载荷执行原版重建、版本排序和 FDD 更新边界的隔离验证。此前单模型健康检测的 24 项离线记录属于历史证据，本轮未重跑、未累加。安装器未执行，真实账号业务与公网更新未验收；环境同步、IP 评分和健康标记不保证登录成功或模型能力变化。
 
 ## 反馈与数据
 
@@ -87,7 +97,7 @@
 
 ## 历史公开源码构建
 
-本仓库已有 MIT 源码、原 `v1.7` 标签及源码 ZIP 保留为历史快照，**不对应 2026-10-21 安装版的当前二进制源码**。本次仅更新 README 与 Release 附件 / 说明，当前应用源码未随安装版公开，原标签不移动。
+本仓库已有 MIT 源码、原 `v1.7` 标签及源码 ZIP 保留为历史快照，**不对应 1.8 安装版的当前二进制源码**。本次仅更新 README、封面、CHANGELOG 与 Release 附件 / 说明，当前应用源码未随安装版公开，原标签不移动。
 
 以下命令仅用于构建已有的历史公开源码。需要 Windows x64、.NET 10 SDK、Windows PowerShell；生成历史更新清单还需要 Python 3。在公开仓库根目录运行：
 
@@ -104,7 +114,7 @@ FlClashSetup/   FlClash 安装检查与引导
 build.ps1      构建与打包入口
 ```
 
-原有 **Full ZIP、MIT 源码 ZIP、SHA256SUMS.txt、Chunson-Update-Windows-x64.json** 四个历史附件继续保留，不删除或替换。本次新增安装 EXE、App ZIP、App 更新清单与 `SHA256SUMS-App.txt`，不新增源码包。版本显示与标签仍为 **1.7 / v1.7**，程序集与清单仍为 `1.7.0.0`。历史源码变更见 [CHANGELOG](CHANGELOG.md)，当前安装版说明见 [Release](https://github.com/chunson-studio/chunson-space/releases/tag/v1.7)。
+原有 **Full ZIP、MIT 源码 ZIP、SHA256SUMS.txt、Chunson-Update-Windows-x64.json** 四个历史附件继续保留，不删除或替换。1.8 Release 仅提供安装 EXE、App ZIP、App 更新清单与 `SHA256SUMS-App.txt`，不新增源码包。版本显示与标签为 **1.8 / v1.8**，产品程序集与清单为 `1.8.0.0`。历史源码变更见 [CHANGELOG](CHANGELOG.md)，当前安装版说明见 [Release](https://github.com/chunson-studio/chunson-space/releases/tag/v1.8)。
 
 ## 支持作者
 
